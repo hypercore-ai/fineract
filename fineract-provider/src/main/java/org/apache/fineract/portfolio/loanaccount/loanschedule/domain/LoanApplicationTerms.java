@@ -1419,6 +1419,14 @@ public final class LoanApplicationTerms {
         return this.calculatedRepaymentsStartingFromDate;
     }
 
+    public LocalDate getExpectedFirstPeriodLocalDate() {
+        if (this.calculatedRepaymentsStartingFromDate.isBefore(this.expectedDisbursementDate)) {
+            return this.calculatedRepaymentsStartingFromDate;
+        }
+
+        return this.expectedDisbursementDate;
+    }
+
     public Money getPrincipal() {
         return this.principal;
     }

@@ -53,7 +53,6 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.MultiDisbursementEmiAmountException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.MultiDisbursementOutstandingAmoutException;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.ScheduleDateException;
 
 public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGenerator {
 
@@ -91,10 +90,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         LoanScheduleParams scheduleParams = null;
         if (loanScheduleParams == null) {
             scheduleParams = LoanScheduleParams.createLoanScheduleParams(currency, Money.of(currency, chargesDueAtTimeOfDisbursement),
-                    loanApplicationTerms.getExpectedDisbursementDate(), getPrincipalToBeScheduled(loanApplicationTerms));
+                    loanApplicationTerms.getExpectedFirstPeriodLocalDate(), getPrincipalToBeScheduled(loanApplicationTerms));
         } else if (!loanScheduleParams.isPartialUpdate()) {
             scheduleParams = LoanScheduleParams.createLoanScheduleParams(currency, Money.of(currency, chargesDueAtTimeOfDisbursement),
-                    loanApplicationTerms.getExpectedDisbursementDate(), getPrincipalToBeScheduled(loanApplicationTerms),
+                    loanApplicationTerms.getExpectedFirstPeriodLocalDate(), getPrincipalToBeScheduled(loanApplicationTerms),
                     loanScheduleParams);
         } else {
             scheduleParams = loanScheduleParams;
@@ -215,7 +214,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             }
 
             if (scheduleParams.getPeriodStartDate().isAfter(scheduledDueDate)) {
-                throw new ScheduleDateException("Due date can't be before period start date", scheduledDueDate);
+                // throw new ScheduleDateException("Due date can't be before period start date", scheduledDueDate);
             }
 
             if (extendTermForDailyRepayments) {
@@ -250,8 +249,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             ScheduleCurrentPeriodParams currentPeriodParams = new ScheduleCurrentPeriodParams(currency,
                     interestCalculationGraceOnRepaymentPeriodFraction);
             if (loanApplicationTerms.isMultiDisburseLoan()) {
-                boolean isBalanceChangedByDisbursement = updateBalanceBasedOnDisbursement(loanApplicationTerms, chargesDueAtTimeOfDisbursement, scheduleParams, periods,
-                        scheduledDueDate);
+                boolean isBalanceChangedByDisbursement = updateBalanceBasedOnDisbursement(loanApplicationTerms,
+                        chargesDueAtTimeOfDisbursement, scheduleParams, periods, scheduledDueDate);
 
                 updateEMIorPrincipalPaymentForMultiDisbursement(mc, loanApplicationTerms, scheduleParams, isBalanceChangedByDisbursement);
             }
@@ -447,7 +446,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 totalOutstanding);
     }
 
-    private void updateEMIorPrincipalPaymentForMultiDisbursement(MathContext mc, LoanApplicationTerms loanApplicationTerms, LoanScheduleParams scheduleParams, boolean isBalanceChangedByDisbursement) {
+    private void updateEMIorPrincipalPaymentForMultiDisbursement(MathContext mc, LoanApplicationTerms loanApplicationTerms,
+            LoanScheduleParams scheduleParams, boolean isBalanceChangedByDisbursement) {
         Money totalCumulativePrincipal = scheduleParams.getTotalCumulativePrincipal();
         int periodNumber = scheduleParams.getPeriodNumber();
         Money principal = loanApplicationTerms.getPrincipal();

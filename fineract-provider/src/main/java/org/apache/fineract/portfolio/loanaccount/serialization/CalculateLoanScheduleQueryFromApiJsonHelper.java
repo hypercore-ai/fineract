@@ -173,7 +173,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
                         "validation.msg.loan.expectedDisbursementDate.cannot.be.after.first.repayment.date",
                         "The parameter expectedDisbursementDate has a date which falls after the date for repaymentsStartingFromDate.",
                         "expectedDisbursementDate", expectedDisbursementDate, repaymentsStartingFromDate);
-                dataValidationErrors.add(error);
+                // dataValidationErrors.add(error);
             }
         }
     }

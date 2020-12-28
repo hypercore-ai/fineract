@@ -776,8 +776,9 @@ public class Loan extends AbstractPersistableCustom {
         if (loanCharge.isSpecifiedDueDate()
                 && !loanCharge.isDueForCollectionFromAndUpToAndIncluding(disbursementDate, lastRepaymentPeriodDueDate)) {
             final String defaultUserMessage = "This charge with specified due date cannot be added as the it is not in schedule range.";
-            throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range", defaultUserMessage,
-                    getDisbursementDate(), lastRepaymentPeriodDueDate, loanCharge.name());
+            // throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range",
+            // defaultUserMessage,
+            // getDisbursementDate(), lastRepaymentPeriodDueDate, loanCharge.name());
         }
     }
 
@@ -2823,10 +2824,11 @@ public class Loan extends AbstractPersistableCustom {
                         || disbursedOn.isAfter(getExpectedFirstRepaymentOnDate()))
                 && Date.from(disbursedOn.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())
                         .compareTo(this.actualDisbursementDate) == 0 ? Boolean.TRUE : Boolean.FALSE) {
-            final String errorMessage = "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate: "
+            final String errorMessage = "disbursalDate cannot be after the loans expectedFirstRepaymentOnDate: "
                     + getExpectedFirstRepaymentOnDate().toString();
-            throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.expected.first.repayment.date", errorMessage,
-                    disbursedOn, getExpectedFirstRepaymentOnDate());
+            // throw new InvalidLoanStateTransitionException("disbursal",
+            // "cannot.be.after.expected.first.repayment.date", errorMessage,
+            // disbursedOn, getExpectedFirstRepaymentOnDate());
         }
 
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_DISBURSED, disbursedOn);
