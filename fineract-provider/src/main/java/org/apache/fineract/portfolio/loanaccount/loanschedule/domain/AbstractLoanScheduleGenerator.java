@@ -88,13 +88,19 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         final MonetaryCurrency currency = loanApplicationTerms.getCurrency();
         final int numberOfRepayments = loanApplicationTerms.fetchNumberOfRepaymentsAfterExceptions();
         LoanScheduleParams scheduleParams = null;
+        LocalDate periodStartDate = null;
+        if (loanApplicationTerms.isActivatedOnApproval()) {
+            periodStartDate = loanApplicationTerms.getSeedDate();
+        } else {
+            periodStartDate = loanApplicationTerms.getExpectedDisbursementDate();
+        }
+
         if (loanScheduleParams == null) {
             scheduleParams = LoanScheduleParams.createLoanScheduleParams(currency, Money.of(currency, chargesDueAtTimeOfDisbursement),
-                    loanApplicationTerms.getExpectedFirstPeriodLocalDate(), getPrincipalToBeScheduled(loanApplicationTerms));
+                    periodStartDate, getPrincipalToBeScheduled(loanApplicationTerms));
         } else if (!loanScheduleParams.isPartialUpdate()) {
             scheduleParams = LoanScheduleParams.createLoanScheduleParams(currency, Money.of(currency, chargesDueAtTimeOfDisbursement),
-                    loanApplicationTerms.getExpectedFirstPeriodLocalDate(), getPrincipalToBeScheduled(loanApplicationTerms),
-                    loanScheduleParams);
+                    periodStartDate, getPrincipalToBeScheduled(loanApplicationTerms), loanScheduleParams);
         } else {
             scheduleParams = loanScheduleParams;
         }
@@ -455,7 +461,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             loanApplicationTerms.updateFixedPrincipalAmount(mc, periodNumber, principal.minus(totalCumulativePrincipal));
         } else if (loanApplicationTerms.getActualFixedEmiAmount() == null && isBalanceChangedByDisbursement) {
             loanApplicationTerms.setFixedEmiAmount(null);
-            updateFixedInstallmentAmount(mc, loanApplicationTerms, periodNumber, principal);
+            updateFixedInstallmentAmount(mc, loanApplicationTerms, periodNumber, principal.minus(totalCumulativePrincipal));
         }
     }
 
