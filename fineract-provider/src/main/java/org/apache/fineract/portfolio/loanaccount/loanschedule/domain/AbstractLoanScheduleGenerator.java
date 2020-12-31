@@ -90,7 +90,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         final int numberOfRepayments = loanApplicationTerms.fetchNumberOfRepaymentsAfterExceptions();
         LoanScheduleParams scheduleParams = null;
         LocalDate periodStartDate = null;
-        if (loanApplicationTerms.isActivatedOnApproval()) {
+        if (loanApplicationTerms.isActivatedOnApproval()
+                && loanApplicationTerms.getSeedDate().compareTo(loanApplicationTerms.getExpectedDisbursementDate()) < 0) {
             periodStartDate = loanApplicationTerms.getSeedDate();
         } else {
             periodStartDate = loanApplicationTerms.getExpectedDisbursementDate();
@@ -460,7 +461,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         Money principal = loanApplicationTerms.getPrincipal();
         if (loanApplicationTerms.getAmortizationMethod().isEqualPrincipal() && isBalanceChangedByDisbursement) {
             loanApplicationTerms.updateFixedPrincipalAmount(mc, periodNumber, principal.minus(totalCumulativePrincipal));
-        } else if (loanApplicationTerms.getActualFixedEmiAmount() == null && isBalanceChangedByDisbursement) {
+        } else if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment()
+                && loanApplicationTerms.getActualFixedEmiAmount() == null && isBalanceChangedByDisbursement) {
             loanApplicationTerms.setFixedEmiAmount(null);
             updateFixedInstallmentAmount(mc, loanApplicationTerms, periodNumber, principal.minus(totalCumulativePrincipal));
         }
