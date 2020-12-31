@@ -53,6 +53,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.MultiDisbursementEmiAmountException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.MultiDisbursementOutstandingAmoutException;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.ScheduleDateException;
 
 public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGenerator {
 
@@ -219,8 +220,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 continue;
             }
 
-            if (scheduleParams.getPeriodStartDate().isAfter(scheduledDueDate)) {
-                // throw new ScheduleDateException("Due date can't be before period start date", scheduledDueDate);
+            if (!loanApplicationTerms.isActivatedOnApproval() && scheduleParams.getPeriodStartDate().isAfter(scheduledDueDate)) {
+                throw new ScheduleDateException("Due date can't be before period start date", scheduledDueDate);
             }
 
             if (extendTermForDailyRepayments) {

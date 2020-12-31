@@ -628,7 +628,7 @@ public class Loan extends AbstractPersistableCustom {
                     getId(), loanCharge.name());
         }
 
-        validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate(false));
+        validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getLoanStartingDate(), getLastRepaymentPeriodDueDate(false));
 
         loanCharge.update(this);
 
@@ -786,9 +786,8 @@ public class Loan extends AbstractPersistableCustom {
         if (loanCharge.isSpecifiedDueDate()
                 && !loanCharge.isDueForCollectionFromAndUpToAndIncluding(disbursementDate, lastRepaymentPeriodDueDate)) {
             final String defaultUserMessage = "This charge with specified due date cannot be added as the it is not in schedule range.";
-            // throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range",
-            // defaultUserMessage,
-            // getDisbursementDate(), lastRepaymentPeriodDueDate, loanCharge.name());
+            throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range", defaultUserMessage,
+                    getDisbursementDate(), lastRepaymentPeriodDueDate, loanCharge.name());
         }
     }
 
@@ -1700,7 +1699,7 @@ public class Loan extends AbstractPersistableCustom {
         }
         if (loanCharge.isActive()) {
             loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, fetchNumberOfInstallmensAfterExceptions(), totalChargeAmt);
-            validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate(false));
+            validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getLoanStartingDate(), getLastRepaymentPeriodDueDate(false));
         }
 
     }
@@ -2828,7 +2827,7 @@ public class Loan extends AbstractPersistableCustom {
                     getApprovedOnDate());
         }
 
-        if (getExpectedFirstRepaymentOnDate() != null
+        if ((this.activateOnApproval == null || !this.activateOnApproval) && getExpectedFirstRepaymentOnDate() != null
                 && (disbursedOn.isAfter(this.fetchRepaymentScheduleInstallment(1).getDueDate())
                         || disbursedOn.isAfter(getExpectedFirstRepaymentOnDate()))
                 && Date.from(disbursedOn.atStartOfDay(ZoneId.systemDefault()).toInstant()).compareTo(this.actualDisbursementDate) == 0
@@ -2836,9 +2835,8 @@ public class Loan extends AbstractPersistableCustom {
                         : Boolean.FALSE) {
             final String errorMessage = "disbursalDate cannot be after the loans  expectedFirstRepaymentOnDate: "
                     + getExpectedFirstRepaymentOnDate().toString();
-            // throw new InvalidLoanStateTransitionException("disbursal",
-            // "cannot.be.after.expected.first.repayment.date", errorMessage,
-            // disbursedOn, getExpectedFirstRepaymentOnDate());
+            throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.expected.first.repayment.date", errorMessage,
+                    disbursedOn, getExpectedFirstRepaymentOnDate());
         }
 
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_DISBURSED, disbursedOn);
@@ -4003,6 +4001,22 @@ public class Loan extends AbstractPersistableCustom {
             disbursementDate = LocalDate.ofInstant(this.actualDisbursementDate.toInstant(), ZoneId.systemDefault());
         }
         return disbursementDate;
+    }
+
+    public LocalDate getLoanStartingDate() {
+        LocalDate date;
+        if (this.activateOnApproval == null || !this.activateOnApproval) {
+            return getDisbursementDate();
+        }
+        if (this.approvedOnDate != null) {
+            date = LocalDate.ofInstant(this.approvedOnDate.toInstant(), ZoneId.systemDefault());
+        } else if (this.expectedFirstRepaymentOnDate != null) {
+            date = LocalDate.ofInstant(this.expectedFirstRepaymentOnDate.toInstant(), ZoneId.systemDefault());
+        } else {
+            date = getDisbursementDate();
+        }
+
+        return date;
     }
 
     public void setActualDisbursementDate(Date actualDisbursementDate) {

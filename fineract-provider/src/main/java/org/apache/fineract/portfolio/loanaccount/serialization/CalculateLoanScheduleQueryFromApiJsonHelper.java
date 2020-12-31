@@ -124,8 +124,13 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed(repaymentsStartingFromDateParameterName, element);
         }
 
-        validateRepaymentsStartingFromDateIsAfterDisbursementDate(dataValidationErrors, expectedDisbursementDate,
-                repaymentsStartingFromDate);
+        final String activateOnApprovalParameterName = "activateOnApproval";
+        final Boolean activateOnApproval = this.fromApiJsonHelper.extractBooleanNamed(activateOnApprovalParameterName, element);
+
+        if (activateOnApproval == null || !activateOnApproval) {
+            validateRepaymentsStartingFromDateIsAfterDisbursementDate(dataValidationErrors, expectedDisbursementDate,
+                    repaymentsStartingFromDate);
+        }
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
@@ -173,7 +178,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
                         "validation.msg.loan.expectedDisbursementDate.cannot.be.after.first.repayment.date",
                         "The parameter expectedDisbursementDate has a date which falls after the date for repaymentsStartingFromDate.",
                         "expectedDisbursementDate", expectedDisbursementDate, repaymentsStartingFromDate);
-                // dataValidationErrors.add(error);
+                dataValidationErrors.add(error);
             }
         }
     }
