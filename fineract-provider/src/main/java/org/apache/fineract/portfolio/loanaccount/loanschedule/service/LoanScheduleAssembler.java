@@ -235,7 +235,9 @@ public class LoanScheduleAssembler {
 
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
         final LocalDate repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed("repaymentsStartingFromDate", element);
-        final Boolean activateOnApproval = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.activateOnApproval, element);
+        Boolean activateOnApproval = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.activateOnApproval, element);
+        activateOnApproval = (activateOnApproval != null && activateOnApproval)
+                || (activateOnApproval == null && loanProduct.shouldActivateOnApproval());
         LocalDate calculatedRepaymentsStartingFromDate = repaymentsStartingFromDate;
 
         final Boolean synchDisbursement = this.fromApiJsonHelper.extractBooleanNamed("syncDisbursementWithMeeting", element);
@@ -305,7 +307,8 @@ public class LoanScheduleAssembler {
                 validateDisbursementDateWithMeetingDates(expectedDisbursementDate, calendar, isSkipMeetingOnFirstDay, numberOfDays);
             }
         }
-        if (activateOnApproval == null || !activateOnApproval) {
+        if ((activateOnApproval == null && !loanProduct.shouldActivateOnApproval())
+                || (activateOnApproval != null && !activateOnApproval)) {
             validateMinimumDaysBetweenDisbursalAndFirstRepayment(expectedDisbursementDate, calculatedRepaymentsStartingFromDate,
                     loanProduct.getMinimumDaysBetweenDisbursalAndFirstRepayment());
         }
