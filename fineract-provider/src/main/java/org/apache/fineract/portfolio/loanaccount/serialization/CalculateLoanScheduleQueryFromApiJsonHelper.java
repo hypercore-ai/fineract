@@ -128,8 +128,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         final String activateOnApprovalParameterName = "activateOnApproval";
         final Boolean activateOnApproval = this.fromApiJsonHelper.extractBooleanNamed(activateOnApprovalParameterName, element);
 
-        if ((activateOnApproval == null && !loanProduct.shouldActivateOnApproval())
-                || (activateOnApproval != null && !activateOnApproval)) {
+        if (activateOnApproval != null ? !activateOnApproval : !loanProduct.shouldActivateOnApproval()) {
             validateRepaymentsStartingFromDateIsAfterDisbursementDate(dataValidationErrors, expectedDisbursementDate,
                     repaymentsStartingFromDate);
         }

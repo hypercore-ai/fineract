@@ -321,8 +321,8 @@ public final class LoanApplicationTerms {
         final boolean isInterestRecalculationEnabled = loanProductRelatedDetail.isInterestRecalculationEnabled();
         final boolean isInterestChargedFromDateSameAsDisbursalDateEnabled = false;
         final boolean isEqualAmortization = loanProductRelatedDetail.isEqualAmortization();
-        final boolean finalActivateOnApproval = (activateOnApproval != null && activateOnApproval)
-                || (activateOnApproval == null && loanProductRelatedDetail.shouldActivateOnApproval());
+        final boolean finalActivateOnApproval = activateOnApproval != null ? activateOnApproval
+                : loanProductRelatedDetail.shouldActivateOnApproval();
         return new LoanApplicationTerms(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, ((nthDay != null) ? nthDay.getValue() : null), dayOfWeek, amortizationMethod,
                 interestMethod, interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate,
