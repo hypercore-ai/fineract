@@ -196,11 +196,11 @@ public class LoanRescheduleRequestDataValidator {
 
         }
 
-        if (loan.isMultiDisburmentLoan()) {
-            dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
-                    RescheduleLoansApiConstants.resheduleForMultiDisbursementNotSupportedErrorCode,
-                    "Loan rescheduling is not supported for multidisbursement loans");
-        }
+        // if (loan.isMultiDisburmentLoan()) {
+        // dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
+        // RescheduleLoansApiConstants.resheduleForMultiDisbursementNotSupportedErrorCode,
+        // "Loan rescheduling is not supported for multidisbursement loans");
+        // }
 
         validateForOverdueCharges(dataValidatorBuilder, loan, installment);
         if (!dataValidationErrors.isEmpty()) {
