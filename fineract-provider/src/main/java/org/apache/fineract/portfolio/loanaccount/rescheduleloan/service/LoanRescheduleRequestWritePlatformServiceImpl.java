@@ -274,7 +274,6 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             // update reschedule request to term variations mapping
             List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings = new ArrayList<>();
             final Boolean isActive = false;
-            // TOMER
             final boolean isSpecificToInstallment = jsonCommand
                     .booleanPrimitiveValueOfParameterNamed(RescheduleLoansApiConstants.isSpecificToInstallmentParamName);
             BigDecimal decimalValue = null;

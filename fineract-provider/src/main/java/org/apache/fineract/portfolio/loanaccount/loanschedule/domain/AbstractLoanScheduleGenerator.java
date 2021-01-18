@@ -2290,7 +2290,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             int instalmentNumber = 1;
             LocalDate lastInstallmentDate = actualRepaymentDate;
 
-            // TOMER
             LocalDate periodStartDate = null;
             if (loanApplicationTerms.isActivatedOnApproval()
                     && loanApplicationTerms.getSeedDate().compareTo(loanApplicationTerms.getExpectedDisbursementDate()) < 0) {
@@ -2521,7 +2520,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         BigDecimal rescheuleInterestPortionTobeAppropriated = rescheuleInterestPortionTotal.subtract(rescheuleInterestPortionTobeRetained);
         loanApplicationTerms.setInterestTobeApproppriated(Money.of(loan.getCurrency(), rescheuleInterestPortionTobeAppropriated));
 
-        // TOMER
         loanScheduleParams = null;
         periods.clear();
         retainedInstallments.clear();
