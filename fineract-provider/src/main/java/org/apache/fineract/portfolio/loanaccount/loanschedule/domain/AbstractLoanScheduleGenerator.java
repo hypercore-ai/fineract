@@ -173,7 +173,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         final Collection<LoanTermVariationsData> interestRates = loanApplicationTerms.getLoanTermVariations().getInterestRateChanges();
         final Collection<LoanTermVariationsData> interestRatesForInstallments = loanApplicationTerms.getLoanTermVariations()
                 .getInterestRateFromInstallment();
-        final BigDecimal firstAnnualNominalInterestRate = loanApplicationTerms.getAnnualNominalInterestRate();
 
         // this block is to start the schedule generation from specified date
         if (scheduleParams.isPartialUpdate()) {
@@ -186,6 +185,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             isFirstRepayment = false;
         }
+
+        boolean lastTermVariationWasSpecificToInstallment = false;
 
         while (!scheduleParams.getOutstandingBalance().isZero() || !scheduleParams.getDisburseDetailMap().isEmpty()) {
             LocalDate previousRepaymentDate = scheduleParams.getActualRepaymentDate();
@@ -205,8 +206,15 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // Loan Schedule Exceptions that need to be applied for Loan Account
             LoanTermVariationParams termVariationParams = applyLoanTermVariations(loanApplicationTerms, scheduleParams,
-                    previousRepaymentDate, scheduledDueDate, firstAnnualNominalInterestRate, interestRates, interestRatesForInstallments,
-                    this.paymentPeriodsInOneYearCalculator, mc);
+                    previousRepaymentDate, scheduledDueDate, interestRates, interestRatesForInstallments,
+                    this.paymentPeriodsInOneYearCalculator, mc, lastTermVariationWasSpecificToInstallment);
+
+            if (termVariationParams.variationsData.size() > 0) {
+                lastTermVariationWasSpecificToInstallment = termVariationParams.variationsData
+                        .get(termVariationParams.variationsData.size() - 1).isSpecificToInstallment();
+            } else {
+                lastTermVariationWasSpecificToInstallment = false;
+            }
 
             scheduledDueDate = termVariationParams.getScheduledDueDate();
             if (!loanApplicationTerms.isFirstRepaymentDateAllowedOnHoliday()) {
@@ -1070,12 +1078,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
      */
     private LoanTermVariationParams applyLoanTermVariations(final LoanApplicationTerms loanApplicationTerms,
             final LoanScheduleParams scheduleParams, final LocalDate previousRepaymentDate, final LocalDate scheduledDueDate,
-            final BigDecimal firstAnnualNominalInterestRate, Collection<LoanTermVariationsData> interestsRate,
-            Collection<LoanTermVariationsData> interestRatesForInstallments, PaymentPeriodsInOneYearCalculator calculator, MathContext mc) {
+            Collection<LoanTermVariationsData> interestsRate, Collection<LoanTermVariationsData> interestRatesForInstallments,
+            PaymentPeriodsInOneYearCalculator calculator, MathContext mc, final boolean lastTermVariationWasSpecificToInstallment) {
         boolean skipPeriod = false;
         boolean recalculateAmounts = false;
         LocalDate modifiedScheduledDueDate = scheduledDueDate;
-        ArrayList<LoanTermVariationsData> variationsData = null;
+        ArrayList<LoanTermVariationsData> variationsData = new ArrayList<>();
 
         // due date changes should be applied only for that dueDate
         if (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(scheduledDueDate)) {
@@ -1089,11 +1097,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             }
         }
 
-        // TOMER
-
-        if (firstAnnualNominalInterestRate != null
-                && loanApplicationTerms.getAnnualNominalInterestRate().compareTo(firstAnnualNominalInterestRate) != 0) {
-            loanApplicationTerms.updateAnnualNominalInterestRate(firstAnnualNominalInterestRate);
+        if (lastTermVariationWasSpecificToInstallment && loanApplicationTerms.getBasicInterestRate() != null
+                && loanApplicationTerms.getAnnualNominalInterestRate().compareTo(loanApplicationTerms.getBasicInterestRate()) != 0) {
+            loanApplicationTerms.updateAnnualNominalInterestRate(loanApplicationTerms.getBasicInterestRate());
             if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
                 if (loanApplicationTerms.getActualFixedEmiAmount() == null) {
                     loanApplicationTerms.setFixedEmiAmount(null);
@@ -1114,6 +1120,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             if (variation.isApplicable(modifiedScheduledDueDate) && variation.getDecimalValue() != null
                     && (loanApplicationTerms.getAnnualNominalInterestRate() == null
                             || loanApplicationTerms.getAnnualNominalInterestRate().compareTo(variation.getDecimalValue()) != 0)) {
+                if (!variation.isSpecificToInstallment()) {
+                    loanApplicationTerms.updateBasicInterestRate(variation.getDecimalValue());
+                }
                 loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
                 if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
                     if (loanApplicationTerms.getActualFixedEmiAmount() == null) {
@@ -1135,6 +1144,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         for (LoanTermVariationsData variation : interestRatesForInstallments) {
             if (variation.isSpecificToInstallment() ? variation.getTermApplicableFrom().isEqual(modifiedScheduledDueDate)
                     : variation.isApplicable(modifiedScheduledDueDate) && variation.getDecimalValue() != null && !variation.isProcessed()) {
+                if (!variation.isSpecificToInstallment()) {
+                    loanApplicationTerms.updateBasicInterestRate(variation.getDecimalValue());
+                }
                 loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
                 if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
                     if (loanApplicationTerms.getActualFixedEmiAmount() == null) {
@@ -1150,6 +1162,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     loanApplicationTerms.updateExcludePeriodsForCalculation(scheduleParams.getPeriodNumber() - 1);
 
                 }
+                variationsData.add(variation);
                 variation.setProcessed(true);
             }
         }
@@ -1365,7 +1378,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         }
 
         // Applies interest rate changes for installments
-        // TOMER
         for (LoanTermVariationsData variation : interestRatesForInstallments) {
             if (variation.getTermVariationType().isInterestRateFromInstallment() && variation.isSpecificToInstallment()
                     ? variation.getTermApplicableFrom().isEqual(scheduleParams.getPeriodStartDate())
@@ -2318,6 +2330,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             // before reschedule from date
             // This will create the recalculation details by applying the
             // transactions
+
             for (LoanRepaymentScheduleInstallment installment : processInstallmentsInstallments) {
                 // this will generate the next schedule due date and allows to
                 // process the installment only if recalculate from date is
@@ -2511,6 +2524,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         // TOMER
         loanScheduleParams = null;
         periods.clear();
+        retainedInstallments.clear();
 
         LoanScheduleModel loanScheduleModel = generate(mc, loanApplicationTerms, loan.charges(), holidayDetailDTO, loanScheduleParams);
 
