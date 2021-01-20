@@ -1096,19 +1096,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         if (lastTermVariationWasSpecificToInstallment && loanApplicationTerms.getBasicInterestRate() != null
                 && loanApplicationTerms.getAnnualNominalInterestRate().compareTo(loanApplicationTerms.getBasicInterestRate()) != 0) {
             loanApplicationTerms.updateAnnualNominalInterestRate(loanApplicationTerms.getBasicInterestRate());
-            if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
-                if (loanApplicationTerms.getActualFixedEmiAmount() == null) {
-                    loanApplicationTerms.setFixedEmiAmount(null);
-                }
-            } else {
-                Money totalInterestDueForLoan = Money.zero(loanApplicationTerms.getCurrency());
-                loanApplicationTerms.setTotalPrincipalAccounted(scheduleParams.getTotalCumulativePrincipal());
-                totalInterestDueForLoan = loanApplicationTerms.calculateTotalInterestCharged(calculator, mc);
-                totalInterestDueForLoan = totalInterestDueForLoan.plus(scheduleParams.getTotalCumulativeInterest());
-                loanApplicationTerms.updateTotalInterestDue(totalInterestDueForLoan);
-                // exclude till last period in calculations
-                loanApplicationTerms.updateExcludePeriodsForCalculation(scheduleParams.getPeriodNumber() - 1);
-            }
+            postLoanVariationAppliance(loanApplicationTerms, scheduleParams, calculator, mc);
         }
 
         for (LoanTermVariationsData variation : interestsRate) {
@@ -1119,20 +1107,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     loanApplicationTerms.updateBasicInterestRate(variation.getDecimalValue());
                 }
                 loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
-                if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
-                    if (loanApplicationTerms.getActualFixedEmiAmount() == null) {
-                        loanApplicationTerms.setFixedEmiAmount(null);
-                    }
-                } else {
-                    Money totalInterestDueForLoan = Money.zero(loanApplicationTerms.getCurrency());
-                    loanApplicationTerms.setTotalPrincipalAccounted(scheduleParams.getTotalCumulativePrincipal());
-                    totalInterestDueForLoan = loanApplicationTerms.calculateTotalInterestCharged(calculator, mc);
-                    totalInterestDueForLoan = totalInterestDueForLoan.plus(scheduleParams.getTotalCumulativeInterest());
-                    loanApplicationTerms.updateTotalInterestDue(totalInterestDueForLoan);
-                    // exclude till last period in calculations
-                    loanApplicationTerms.updateExcludePeriodsForCalculation(scheduleParams.getPeriodNumber() - 1);
-
-                }
+                postLoanVariationAppliance(loanApplicationTerms, scheduleParams, calculator, mc);
             }
         }
 
@@ -1144,20 +1119,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     loanApplicationTerms.updateBasicInterestRate(variation.getDecimalValue());
                 }
                 loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
-                if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
-                    if (loanApplicationTerms.getActualFixedEmiAmount() == null) {
-                        loanApplicationTerms.setFixedEmiAmount(null);
-                    }
-                } else {
-                    Money totalInterestDueForLoan = Money.zero(loanApplicationTerms.getCurrency());
-                    loanApplicationTerms.setTotalPrincipalAccounted(scheduleParams.getTotalCumulativePrincipal());
-                    totalInterestDueForLoan = loanApplicationTerms.calculateTotalInterestCharged(calculator, mc);
-                    totalInterestDueForLoan = totalInterestDueForLoan.plus(scheduleParams.getTotalCumulativeInterest());
-                    loanApplicationTerms.updateTotalInterestDue(totalInterestDueForLoan);
-                    // exclude till last period in calculations
-                    loanApplicationTerms.updateExcludePeriodsForCalculation(scheduleParams.getPeriodNumber() - 1);
-
-                }
+                postLoanVariationAppliance(loanApplicationTerms, scheduleParams, calculator, mc);
                 variationsData.add(variation);
                 variation.setProcessed(true);
             }
@@ -1245,6 +1207,24 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         LoanTermVariationParams termVariationParams = new LoanTermVariationParams(skipPeriod, recalculateAmounts, modifiedScheduledDueDate,
                 variationsData);
         return termVariationParams;
+    }
+
+    private void postLoanVariationAppliance(final LoanApplicationTerms loanApplicationTerms, final LoanScheduleParams scheduleParams,
+            PaymentPeriodsInOneYearCalculator calculator, MathContext mc) {
+        if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
+            if (loanApplicationTerms.getActualFixedEmiAmount() == null) {
+                loanApplicationTerms.setFixedEmiAmount(null);
+            }
+        } else {
+            Money totalInterestDueForLoan = Money.zero(loanApplicationTerms.getCurrency());
+            loanApplicationTerms.setTotalPrincipalAccounted(scheduleParams.getTotalCumulativePrincipal());
+            totalInterestDueForLoan = loanApplicationTerms.calculateTotalInterestCharged(calculator, mc);
+            totalInterestDueForLoan = totalInterestDueForLoan.plus(scheduleParams.getTotalCumulativeInterest());
+            loanApplicationTerms.updateTotalInterestDue(totalInterestDueForLoan);
+            // exclude till last period in calculations
+            loanApplicationTerms.updateExcludePeriodsForCalculation(scheduleParams.getPeriodNumber() - 1);
+
+        }
     }
 
     /**
