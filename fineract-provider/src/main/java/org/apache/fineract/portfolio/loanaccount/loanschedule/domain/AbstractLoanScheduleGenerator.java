@@ -209,12 +209,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     previousRepaymentDate, scheduledDueDate, interestRates, interestRatesForInstallments,
                     this.paymentPeriodsInOneYearCalculator, mc, lastTermVariationWasSpecificToInstallment);
 
-            if (termVariationParams.variationsData.size() > 0) {
-                lastTermVariationWasSpecificToInstallment = termVariationParams.variationsData
-                        .get(termVariationParams.variationsData.size() - 1).isSpecificToInstallment();
-            } else {
-                lastTermVariationWasSpecificToInstallment = false;
-            }
+            lastTermVariationWasSpecificToInstallment = termVariationParams.variationsData.size() > 0
+                    && termVariationParams.variationsData.get(termVariationParams.variationsData.size() - 1).isSpecificToInstallment();
 
             scheduledDueDate = termVariationParams.getScheduledDueDate();
             if (!loanApplicationTerms.isFirstRepaymentDateAllowedOnHoliday()) {
@@ -1112,7 +1108,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 loanApplicationTerms.updateTotalInterestDue(totalInterestDueForLoan);
                 // exclude till last period in calculations
                 loanApplicationTerms.updateExcludePeriodsForCalculation(scheduleParams.getPeriodNumber() - 1);
-
             }
         }
 
@@ -1142,8 +1137,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         }
 
         for (LoanTermVariationsData variation : interestRatesForInstallments) {
-            if (variation.isSpecificToInstallment() ? variation.getTermApplicableFrom().isEqual(modifiedScheduledDueDate)
-                    : variation.isApplicable(modifiedScheduledDueDate) && variation.getDecimalValue() != null && !variation.isProcessed()) {
+            if (((variation.isSpecificToInstallment() && variation.getTermApplicableFrom().isEqual(modifiedScheduledDueDate))
+                    || variation.isApplicable(modifiedScheduledDueDate)) && variation.getDecimalValue() != null
+                    && !variation.isProcessed()) {
                 if (!variation.isSpecificToInstallment()) {
                     loanApplicationTerms.updateBasicInterestRate(variation.getDecimalValue());
                 }
@@ -1379,9 +1375,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
         // Applies interest rate changes for installments
         for (LoanTermVariationsData variation : interestRatesForInstallments) {
-            if (variation.getTermVariationType().isInterestRateFromInstallment() && variation.isSpecificToInstallment()
-                    ? variation.getTermApplicableFrom().isEqual(scheduleParams.getPeriodStartDate())
-                    : variation.isApplicable(scheduleParams.getPeriodStartDate()) && variation.getDecimalValue() != null) {
+            if (variation.getTermVariationType().isInterestRateFromInstallment() && ((variation.isSpecificToInstallment()
+                    && variation.getTermApplicableFrom().isEqual(scheduleParams.getPeriodStartDate()))
+                    || variation.isApplicable(scheduleParams.getPeriodStartDate())) && variation.getDecimalValue() != null) {
                 loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
                 variation.setProcessed(true);
             }
@@ -2520,6 +2516,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         BigDecimal rescheuleInterestPortionTobeAppropriated = rescheuleInterestPortionTotal.subtract(rescheuleInterestPortionTobeRetained);
         loanApplicationTerms.setInterestTobeApproppriated(Money.of(loan.getCurrency(), rescheuleInterestPortionTobeAppropriated));
 
+        // Those 3 Lines are basically undoing everything before generating the schedule - were not sure why this whole
+        // function is needed
         loanScheduleParams = null;
         periods.clear();
         retainedInstallments.clear();
