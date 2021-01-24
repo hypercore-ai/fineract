@@ -2114,7 +2114,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         LocalDate revolvingPeriodEndDate = loanApplicationTerms.getRevolvingPeriodEndDate();
         LocalDate revolvingPeriodStartDate = loanApplicationTerms.getRevolvingPeriodStartDate();
 
-
         if (inRevolvingPeriodOnly) {
             boolean isRevolvingStartDateValid = true;
             if (revolvingPeriodStartDate != null) {
