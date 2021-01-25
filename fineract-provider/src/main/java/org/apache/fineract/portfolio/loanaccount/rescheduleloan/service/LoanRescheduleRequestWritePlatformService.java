@@ -20,10 +20,13 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 
 public interface LoanRescheduleRequestWritePlatformService {
 
     CommandProcessingResult create(JsonCommand jsonCommand);
+
+    LoanRescheduleRequest createForPreview(JsonCommand jsonCommand);
 
     CommandProcessingResult approve(JsonCommand jsonCommand);
 

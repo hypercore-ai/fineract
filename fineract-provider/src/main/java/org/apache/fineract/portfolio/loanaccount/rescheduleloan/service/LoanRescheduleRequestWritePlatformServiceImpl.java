@@ -157,6 +157,136 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
         this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
     }
 
+    @Override
+    public LoanRescheduleRequest createForPreview(JsonCommand jsonCommand) {
+
+        try {
+            // get the loan id from the JsonCommand object
+            final Long loanId = jsonCommand.longValueOfParameterNamed(RescheduleLoansApiConstants.loanIdParamName);
+
+            // use the loan id to get a Loan entity object
+            final Loan loan = this.loanAssembler.assembleFrom(loanId);
+
+            // validate the request in the JsonCommand object passed as
+            // parameter
+            this.loanRescheduleRequestDataValidator.validateForCreateAction(jsonCommand, loan);
+
+            // get the reschedule reason code value id from the JsonCommand
+            // object
+            final Long rescheduleReasonId = jsonCommand.longValueOfParameterNamed(RescheduleLoansApiConstants.rescheduleReasonIdParamName);
+
+            // use the reschedule reason code value id to get a CodeValue entity
+            // object
+            final CodeValue rescheduleReasonCodeValue = this.codeValueRepositoryWrapper.findOneWithNotFoundDetection(rescheduleReasonId);
+
+            // get the grace on principal integer value from the JsonCommand
+            // object
+            final Integer graceOnPrincipal = jsonCommand
+                    .integerValueOfParameterNamed(RescheduleLoansApiConstants.graceOnPrincipalParamName);
+
+            // get the grace on interest integer value from the JsonCommand
+            // object
+            final Integer graceOnInterest = jsonCommand.integerValueOfParameterNamed(RescheduleLoansApiConstants.graceOnInterestParamName);
+
+            // get the extra terms to be added at the end of the new schedule
+            // from the JsonCommand object
+            final Integer extraTerms = jsonCommand.integerValueOfParameterNamed(RescheduleLoansApiConstants.extraTermsParamName);
+
+            // get the new interest rate that would be applied to the new loan
+            // schedule
+            final BigDecimal interestRate = jsonCommand
+                    .bigDecimalValueOfParameterNamed(RescheduleLoansApiConstants.newInterestRateParamName);
+
+            // get the reschedule reason comment text from the JsonCommand
+            // object
+            final String rescheduleReasonComment = jsonCommand
+                    .stringValueOfParameterNamed(RescheduleLoansApiConstants.rescheduleReasonCommentParamName);
+
+            // get the recalculate interest option
+            final Boolean recalculateInterest = jsonCommand
+                    .booleanObjectValueOfParameterNamed(RescheduleLoansApiConstants.recalculateInterestParamName);
+
+            final Date endDate = jsonCommand.dateValueOfParameterNamed(RescheduleLoansApiConstants.endDateParamName);
+            final BigDecimal emi = jsonCommand.bigDecimalValueOfParameterNamed(RescheduleLoansApiConstants.emiParamName);
+
+            // initialize set the value to null
+            Date submittedOnDate = null;
+
+            // check if the parameter is in the JsonCommand object
+            if (jsonCommand.hasParameter(RescheduleLoansApiConstants.submittedOnDateParamName)) {
+                // create a LocalDate object from the "submittedOnDate" Date
+                // string
+                LocalDate localDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.submittedOnDateParamName);
+
+                if (localDate != null) {
+                    // update the value of the "submittedOnDate" variable
+                    submittedOnDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                }
+            }
+
+            // initially set the value to null
+            Date rescheduleFromDate = null;
+
+            // start point of the rescheduling exercise
+            Integer rescheduleFromInstallment = null;
+
+            // initially set the value to null
+            Date adjustedDueDate = null;
+
+            // check if the parameter is in the JsonCommand object
+            if (jsonCommand.hasParameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)) {
+                // create a LocalDate object from the "rescheduleFromDate" Date
+                // string
+                LocalDate localDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.rescheduleFromDateParamName);
+
+                if (localDate != null) {
+                    // get installment by due date
+                    LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallment(localDate);
+                    rescheduleFromInstallment = installment.getInstallmentNumber();
+
+                    // update the value of the "rescheduleFromDate" variable
+                    rescheduleFromDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                }
+            }
+
+            if (jsonCommand.hasParameter(RescheduleLoansApiConstants.adjustedDueDateParamName)) {
+                // create a LocalDate object from the "adjustedDueDate" Date
+                // string
+                LocalDate localDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.adjustedDueDateParamName);
+
+                if (localDate != null) {
+                    // update the value of the "adjustedDueDate"variable
+                    adjustedDueDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                }
+            }
+
+            final LoanRescheduleRequest loanRescheduleRequest = LoanRescheduleRequest.instance(loan,
+                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), rescheduleFromInstallment, rescheduleFromDate,
+                    recalculateInterest, rescheduleReasonCodeValue, rescheduleReasonComment, submittedOnDate,
+                    this.platformSecurityContext.authenticatedUser(), null, null, null, null);
+
+            // update reschedule request to term variations mapping
+            List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings = new ArrayList<>();
+            final Boolean isActive = false;
+            final boolean isSpecificToInstallment = jsonCommand
+                    .booleanPrimitiveValueOfParameterNamed(RescheduleLoansApiConstants.isSpecificToInstallmentParamName);
+            BigDecimal decimalValue = null;
+            Date dueDate = null;
+            // create term variations for flat and declining balance loans
+            createLoanTermVariationsForRegularLoans(loan, graceOnPrincipal, graceOnInterest, extraTerms, interestRate, rescheduleFromDate,
+                    adjustedDueDate, loanRescheduleRequest, loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment,
+                    decimalValue, dueDate, endDate, emi);
+
+            return loanRescheduleRequest;
+        }
+
+        catch (DataIntegrityViolationException dve) {
+            // handle the data integrity violation
+            handleDataIntegrityViolation(dve);
+            return null;
+        }
+    }
+
     /**
      * create a new instance of the LoanRescheduleRequest object from the JsonCommand object and persist
      *
