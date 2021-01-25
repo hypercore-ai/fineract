@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.api;
 
+import com.google.gson.JsonElement;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.HashSet;
 import java.util.List;
 import javax.ws.rs.Consumes;
@@ -35,17 +37,21 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestData;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.service.LoanReschedulePreviewPlatformService;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.service.LoanRescheduleRequestReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.service.LoanRescheduleRequestWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -60,24 +66,29 @@ public class RescheduleLoansApiResource {
     private final PlatformSecurityContext platformSecurityContext;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final LoanRescheduleRequestReadPlatformService loanRescheduleRequestReadPlatformService;
+    private final LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService;
     private final LoanReschedulePreviewPlatformService loanReschedulePreviewPlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
     public RescheduleLoansApiResource(final DefaultToApiJsonSerializer<LoanRescheduleRequestData> loanRescheduleRequestToApiJsonSerializer,
             final PlatformSecurityContext platformSecurityContext,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final LoanRescheduleRequestReadPlatformService loanRescheduleRequestReadPlatformService,
+            final LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final DefaultToApiJsonSerializer<LoanScheduleData> loanRescheduleToApiJsonSerializer,
-            final LoanReschedulePreviewPlatformService loanReschedulePreviewPlatformService) {
+            final LoanReschedulePreviewPlatformService loanReschedulePreviewPlatformService, final FromJsonHelper fromApiJsonHelper) {
         this.loanRescheduleRequestToApiJsonSerializer = loanRescheduleRequestToApiJsonSerializer;
         this.platformSecurityContext = platformSecurityContext;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.loanRescheduleRequestReadPlatformService = loanRescheduleRequestReadPlatformService;
+        this.loanRescheduleRequestWritePlatformService = loanRescheduleRequestWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.loanRescheduleToApiJsonSerializer = loanRescheduleToApiJsonSerializer;
         this.loanReschedulePreviewPlatformService = loanReschedulePreviewPlatformService;
+        this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @GET
@@ -121,13 +132,32 @@ public class RescheduleLoansApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createLoanRescheduleRequest(final String apiRequestBodyAsJson) {
+    public String createLoanRescheduleRequest(@Context final UriInfo uriInfo,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam, final String apiRequestBodyAsJson) {
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+        if (is(commandParam, "previewLoanReschedule")) {
+            final JsonElement parsedCommand = this.fromApiJsonHelper.parse(apiRequestBodyAsJson);
+            final JsonCommand jsonCommand = JsonCommand.from(apiRequestBodyAsJson, parsedCommand, this.fromApiJsonHelper, null, null, null,
+                    null, null, null, null, null, null, null, null, null);
+            final LoanRescheduleRequest loanRescheduleRequest = this.loanRescheduleRequestWritePlatformService
+                    .createForPreview(jsonCommand);
+            final LoanScheduleModel loanRescheduleModel = this.loanReschedulePreviewPlatformService
+                    .previewLoanReschedule(loanRescheduleRequest);
+            return this.loanRescheduleToApiJsonSerializer.serialize(settings, loanRescheduleModel.toData(), new HashSet<String>());
+        }
+
         final CommandWrapper commandWrapper = new CommandWrapperBuilder()
                 .createLoanRescheduleRequest(RescheduleLoansApiConstants.ENTITY_NAME).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
 
         return this.loanRescheduleRequestToApiJsonSerializer.serialize(commandProcessingResult);
+    }
+
+    private boolean is(final String commandParam, final String commandValue) {
+        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
     @POST
