@@ -19,8 +19,11 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 
 public interface LoanReschedulePreviewPlatformService {
 
     LoanScheduleModel previewLoanReschedule(Long requestId);
+
+    LoanScheduleModel previewLoanReschedule(final LoanRescheduleRequest loanRescheduleRequest);
 }
