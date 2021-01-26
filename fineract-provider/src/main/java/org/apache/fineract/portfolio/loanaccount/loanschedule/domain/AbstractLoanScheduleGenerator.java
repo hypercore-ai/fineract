@@ -2102,7 +2102,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     private BigDecimal calcUntilizedChargeAmount(LoanApplicationTerms applicationTerms, final LoanCharge loanCharge,
                                      LocalDate periodStart, LocalDate periodEnd, List<LoanTransaction> transactions, final MathContext mc) {
-        long loanTermPeriodsInOneYear = applicationTerms.calculatePeriodsInOneYear(this.paymentPeriodsInOneYearCalculator);
+        long loanTermPeriodsInOneYear = LoanApplicationTerms.calculateDaysInYear(applicationTerms.getDaysInYearType(), this.paymentPeriodsInOneYearCalculator);
         final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
         final BigDecimal oneDayUnutilizedChargeRate = loanCharge.getPercentage().divide(loanTermPeriodsInYearBigDecimal, mc).divide(BigDecimal.valueOf(100), mc);
 

@@ -129,10 +129,12 @@ import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementData
 import org.apache.fineract.portfolio.loanaccount.exception.UndoLastTrancheDisbursementException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultPaymentPeriodsInOneYearCalculator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.PaymentPeriodsInOneYearCalculator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.TransactionHelper;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
@@ -2723,7 +2725,8 @@ public class Loan extends AbstractPersistableCustom {
     public BigDecimal calcUnutilizeChargeAmount(LocalDate periodStart, LocalDate periodEnd, final BigDecimal chargePercentage) {
 
         final MathContext mc = createMathContext();
-        long loanTermPeriodsInOneYear = 365; // TODO applicationTerms.calculatePeriodsInOneYear(this.paymentPeriodsInOneYearCalculator);
+        PaymentPeriodsInOneYearCalculator calculator = new DefaultPaymentPeriodsInOneYearCalculator();
+        long loanTermPeriodsInOneYear = LoanApplicationTerms.calculateDaysInYear(this.getLoanProductRelatedDetail().fetchDaysInYearType(), calculator);
         final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
         final BigDecimal oneDayUnutilizedChargeRate = chargePercentage.divide(loanTermPeriodsInYearBigDecimal, mc).divide(BigDecimal.valueOf(100), mc);
 

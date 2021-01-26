@@ -219,6 +219,13 @@ public final class LoanApplicationTerms {
 
     private BigDecimal basicInterestRate;
 
+    public static long calculateDaysInYear(DaysInYearType daysInYearType, PaymentPeriodsInOneYearCalculator calculator ) {
+        // Potential issue with days in year for "actual" and leap year. validate if should return 366 for leap year.
+        return !daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual")
+                ? daysInYearType.getValue().longValue()
+                : calculator.calculate(PeriodFrequencyType.DAYS).longValue();
+    }
+
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
             final PeriodFrequencyType repaymentPeriodFrequencyType, Integer nthDay, DayOfWeekType weekDayType,
@@ -1131,9 +1138,7 @@ public final class LoanApplicationTerms {
         return outstandingBalance.getAmount().multiply(interestRate, mc);
     }
 
-    public long calculatePeriodsInOneYear(final PaymentPeriodsInOneYearCalculator calculator) {
-        // Potential issue with days in year for "actual" and leap year. validate if should return 366 for leap year.
-
+    private long calculatePeriodsInOneYear(final PaymentPeriodsInOneYearCalculator calculator) {
         // check if daysInYears is set if so change periodsInOneYear to days set
         // in db
         long periodsInOneYear;
@@ -1146,9 +1151,7 @@ public final class LoanApplicationTerms {
         }
         switch (this.interestCalculationPeriodMethod) {
             case DAILY:
-                periodsInOneYear = !this.daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual")
-                        ? this.daysInYearType.getValue().longValue()
-                        : calculator.calculate(PeriodFrequencyType.DAYS).longValue();
+                periodsInOneYear = calculateDaysInYear(this.daysInYearType, calculator);
             break;
             case INVALID:
             break;
@@ -1504,6 +1507,10 @@ public final class LoanApplicationTerms {
 
     public DayOfWeekType getWeekDayType() {
         return this.weekDayType;
+    }
+
+    public DaysInYearType getDaysInYearType() {
+        return daysInYearType;
     }
 
     public void setFixedEmiAmount(BigDecimal fixedEmiAmount) {
