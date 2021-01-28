@@ -1019,22 +1019,25 @@ public class Loan extends AbstractPersistableCustom {
         switch (calculationType) {
             case PERCENT_OF_AMOUNT:
                 percentOf = installment.getPrincipal(getCurrency());
+                amount = amount.plus(LoanCharge.percentageOf(percentOf.getAmount(), percentage));
             break;
             case PERCENT_OF_AMOUNT_AND_INTEREST:
                 percentOf = installment.getPrincipal(getCurrency()).plus(installment.getInterestCharged(getCurrency()));
+                amount = amount.plus(LoanCharge.percentageOf(percentOf.getAmount(), percentage));
             break;
             case PERCENT_OF_INTEREST:
                 percentOf = installment.getInterestCharged(getCurrency());
+                amount = amount.plus(LoanCharge.percentageOf(percentOf.getAmount(), percentage));
             break;
             case PERCENT_OF_UNUTILIZED_AMOUNT:
                 BigDecimal unutilizeAmount = calcUnutilizeChargeAmount(installment.getFromDate(), installment.getDueDate(), percentage);
-                amount.plus(Money.of(getCurrency(), unutilizeAmount));
+                amount = amount.plus(Money.of(getCurrency(), unutilizeAmount));
                 LOG.info("Calculate Installment UNUTILIZED_AMOUNT, unutilize charge: {}", unutilizeAmount);
             break;
             default:
             break;
         }
-        amount = amount.plus(LoanCharge.percentageOf(percentOf.getAmount(), percentage));
+
         return amount;
     }
 
@@ -2723,6 +2726,9 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public BigDecimal calcUnutilizeChargeAmount(LocalDate periodStart, LocalDate periodEnd, final BigDecimal chargePercentage) {
+        if (!isMultiDisburmentLoan()) {
+            return BigDecimal.ZERO;
+        }
 
         final MathContext mc = createMathContext();
         PaymentPeriodsInOneYearCalculator calculator = new DefaultPaymentPeriodsInOneYearCalculator();
@@ -5045,7 +5051,7 @@ public class Loan extends AbstractPersistableCustom {
             List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
             for (final LoanRepaymentScheduleInstallment installment : installments) {
                 if (installment.isRecalculatedInterestComponent()
-                        || (loanCharge.isRevolvingPeriodInstalmentFee() && !isDateInRevolvingPeriod(installment.getDueDate()))) {
+                        || (loanCharge.isRevolvingPeriodInstalmentFee() && !isInstallmentInRevolvingPeriod(installment))) {
                     continue;
                 }
 
