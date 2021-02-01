@@ -219,10 +219,9 @@ public final class LoanApplicationTerms {
 
     private BigDecimal basicInterestRate;
 
-    public static long calculateDaysInYear(DaysInYearType daysInYearType, PaymentPeriodsInOneYearCalculator calculator ) {
+    public static long calculateDaysInYear(DaysInYearType daysInYearType, PaymentPeriodsInOneYearCalculator calculator) {
         // Potential issue with days in year for "actual" and leap year. validate if should return 366 for leap year.
-        return !daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual")
-                ? daysInYearType.getValue().longValue()
+        return !daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual") ? daysInYearType.getValue().longValue()
                 : calculator.calculate(PeriodFrequencyType.DAYS).longValue();
     }
 

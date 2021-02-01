@@ -2709,22 +2709,6 @@ public class Loan extends AbstractPersistableCustom {
         return principal;
     }
 
-    private boolean checkDateBetween(LocalDate dateToCheck, LocalDate startDate, LocalDate endDate) {
-        return (startDate == null || !dateToCheck.isBefore(startDate)) && (endDate == null || !dateToCheck.isAfter(endDate));
-    }
-
-    private boolean checkDateBetween(Date dateToCheck, LocalDate startDate, LocalDate endDate) {
-        return checkDateBetween(LocalDate.ofInstant(dateToCheck.toInstant(), ZoneId.systemDefault()), startDate, endDate);
-    }
-
-    private boolean checkDateBetween(LocalDate dateToCheck, Date startDate, Date endDate) {
-        return checkDateBetween(
-                dateToCheck,
-                LocalDate.ofInstant(startDate.toInstant(), ZoneId.systemDefault()),
-                LocalDate.ofInstant(endDate.toInstant(), ZoneId.systemDefault())
-        );
-    }
-
     public BigDecimal calcUnutilizeChargeAmount(LocalDate periodStart, LocalDate periodEnd, final BigDecimal chargePercentage) {
         if (!isMultiDisburmentLoan()) {
             return BigDecimal.ZERO;
@@ -2732,60 +2716,63 @@ public class Loan extends AbstractPersistableCustom {
 
         final MathContext mc = createMathContext();
         PaymentPeriodsInOneYearCalculator calculator = new DefaultPaymentPeriodsInOneYearCalculator();
-        long loanTermPeriodsInOneYear = LoanApplicationTerms.calculateDaysInYear(this.getLoanProductRelatedDetail().fetchDaysInYearType(), calculator);
+        long loanTermPeriodsInOneYear = LoanApplicationTerms.calculateDaysInYear(this.getLoanProductRelatedDetail().fetchDaysInYearType(),
+                calculator);
         final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
-        final BigDecimal oneDayUnutilizedChargeRate = chargePercentage.divide(loanTermPeriodsInYearBigDecimal, mc).divide(BigDecimal.valueOf(100), mc);
+        final BigDecimal oneDayUnutilizedChargeRate = chargePercentage.divide(loanTermPeriodsInYearBigDecimal, mc)
+                .divide(BigDecimal.valueOf(100), mc);
 
         // Calc disbursed until start period
         BigDecimal disbursedAmount = getExpectedDisbursedAmount(periodStart);
         BigDecimal unutilizedAmount = this.approvedPrincipal.subtract(disbursedAmount);
 
-        Stream<TransactionHelper> disbursementsInPeriodStream = this.getDisbursementDetails().stream()
-                .filter(disbursementDetail -> {
-                    Date disbursedDate = disbursementDetail.actualDisbursementDate() != null ?
-                            disbursementDetail.actualDisbursementDate() : disbursementDetail.expectedDisbursementDate();
-                    return checkDateBetween(disbursedDate, periodStart, periodEnd);
-                })
-                .map(disbursementDetail -> {
-                    Date disbursedDate = disbursementDetail.actualDisbursementDate() != null ?
-                            disbursementDetail.actualDisbursementDate() : disbursementDetail.expectedDisbursementDate();
-                    return new TransactionHelper(LocalDate.ofInstant(disbursedDate.toInstant(), ZoneId.systemDefault()),
-                            disbursementDetail.principal().negate());
-                });
+        Stream<TransactionHelper> disbursementsInPeriodStream = this.getDisbursementDetails().stream().filter(disbursementDetail -> {
+            Date disbursedDate = disbursementDetail.actualDisbursementDate() != null ? disbursementDetail.actualDisbursementDate()
+                    : disbursementDetail.expectedDisbursementDate();
+            return CalendarUtils.checkDateBetween(disbursedDate, periodStart, periodEnd);
+        }).map(disbursementDetail -> {
+            Date disbursedDate = disbursementDetail.actualDisbursementDate() != null ? disbursementDetail.actualDisbursementDate()
+                    : disbursementDetail.expectedDisbursementDate();
+            return new TransactionHelper(LocalDate.ofInstant(disbursedDate.toInstant(), ZoneId.systemDefault()),
+                    disbursementDetail.principal().negate());
+        });
         Stream<TransactionHelper> transactionInPeriodStream = Stream.empty();
 
         if (this.getLoanProduct().isRevolving()) {
-            BigDecimal totalUntilPeriodStartRepaid = getLoanTransactions().stream().filter(
-                    loanTransaction -> loanTransaction.isPaymentTransaction() && loanTransaction.getTransactionDate().isBefore(periodStart))
-                    .map(loanTransaction -> loanTransaction.getPrincipalPortion(getCurrency()))
-                    .map(Money::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal totalUntilPeriodStartRepaid = getLoanTransactions().stream()
+                    .filter(loanTransaction -> loanTransaction.isPaymentTransaction()
+                            && loanTransaction.getTransactionDate().isBefore(periodStart))
+                    .map(loanTransaction -> loanTransaction.getPrincipalPortion(getCurrency())).map(Money::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             unutilizedAmount = unutilizedAmount.add(totalUntilPeriodStartRepaid);
 
             transactionInPeriodStream = getLoanTransactions().stream()
-                    .filter(transaction -> transaction.isPaymentTransaction() &&
-                            checkDateBetween(transaction.getTransactionDate(), periodStart, periodEnd) &&
-                            checkDateBetween(transaction.getTransactionDate(), getRevolvingPeriodStartDate(), getRevolvingPeriodEndDate()))
+                    .filter(transaction -> transaction.isPaymentTransaction()
+                            && CalendarUtils.checkDateBetween(transaction.getTransactionDate(), periodStart, periodEnd)
+                            && CalendarUtils.checkDateBetween(transaction.getTransactionDate(), getRevolvingPeriodStartDate(),
+                                    getRevolvingPeriodEndDate()))
                     .map(loanTransaction -> new TransactionHelper(loanTransaction.getTransactionDate(),
-                                                                  loanTransaction.getPrincipalPortion(getCurrency()).getAmount()));
+                            loanTransaction.getPrincipalPortion(getCurrency()).getAmount()));
         }
 
         BigDecimal chargeAmount = BigDecimal.ZERO;
         LocalDate fromCalcDate = periodStart;
         // For calculating unutilized amount disbursements are negative and transactions are positive
-        List<TransactionHelper> transactionsAndDisbursements =  Stream.concat(disbursementsInPeriodStream, transactionInPeriodStream)
-                .sorted(Comparator.comparing(TransactionHelper::getDate))
-                .collect(Collectors.toList());
+        List<TransactionHelper> transactionsAndDisbursements = Stream.concat(disbursementsInPeriodStream, transactionInPeriodStream)
+                .sorted(Comparator.comparing(TransactionHelper::getDate)).collect(Collectors.toList());
 
         // Add last date that the fee will be calculated for.
-        var revolvingEndDate = Optional.ofNullable(revolvingPeriodEndDate).map(date -> LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault()));
-        LocalDate lastDateCalculatedFor = this.getLoanProduct().isRevolving() && revolvingEndDate.isPresent() &&
-                                        revolvingEndDate.get().isBefore(periodEnd) ? revolvingEndDate.get() : periodEnd;
+        var revolvingEndDate = Optional.ofNullable(revolvingPeriodEndDate)
+                .map(date -> LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault()));
+        LocalDate lastDateCalculatedFor = this.getLoanProduct().isRevolving() && revolvingEndDate.isPresent()
+                && revolvingEndDate.get().isBefore(periodEnd) ? revolvingEndDate.get() : periodEnd;
         transactionsAndDisbursements.add(new TransactionHelper(lastDateCalculatedFor, BigDecimal.ZERO));
 
-        for (TransactionHelper transactionOrDisbursement :transactionsAndDisbursements) {
+        for (TransactionHelper transactionOrDisbursement : transactionsAndDisbursements) {
             unutilizedAmount = unutilizedAmount.add(transactionOrDisbursement.getAmount());
-            BigDecimal numberOfDaysInPeriod = BigDecimal.valueOf(Math.toIntExact(ChronoUnit.DAYS.between(fromCalcDate, transactionOrDisbursement.getDate())));
+            BigDecimal numberOfDaysInPeriod = BigDecimal
+                    .valueOf(Math.toIntExact(ChronoUnit.DAYS.between(fromCalcDate, transactionOrDisbursement.getDate())));
             chargeAmount = chargeAmount.add(numberOfDaysInPeriod.multiply(oneDayUnutilizedChargeRate, mc).multiply(unutilizedAmount, mc));
 
             fromCalcDate = transactionOrDisbursement.getDate();

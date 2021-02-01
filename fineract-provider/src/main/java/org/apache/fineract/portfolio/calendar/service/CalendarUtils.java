@@ -891,4 +891,18 @@ public final class CalendarUtils {
                 .setPosList(recur.getSetPosList()).weekStartDay(recur.getWeekStartDay());
         return recurBuilder;
     }
+
+    public static boolean checkDateBetween(LocalDate dateToCheck, LocalDate startDate, LocalDate endDate) {
+        return (startDate == null || !dateToCheck.isBefore(startDate)) && (endDate == null || !dateToCheck.isAfter(endDate));
+    }
+
+    public static boolean checkDateBetween(java.util.Date dateToCheck, LocalDate startDate, LocalDate endDate) {
+        return checkDateBetween(LocalDate.ofInstant(dateToCheck.toInstant(), ZoneId.systemDefault()), startDate, endDate);
+    }
+
+    public static boolean checkDateBetween(LocalDate dateToCheck, java.util.Date startDate, java.util.Date endDate) {
+        return checkDateBetween(dateToCheck, LocalDate.ofInstant(startDate.toInstant(), ZoneId.systemDefault()),
+                LocalDate.ofInstant(endDate.toInstant(), ZoneId.systemDefault()));
+    }
+
 }
