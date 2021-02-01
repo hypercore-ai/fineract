@@ -71,23 +71,27 @@ public class LoanRepaymentScheduleProcessingWrapper {
         Money cumulative = Money.zero(monetaryCurrency);
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isFeeCharge() && !loanCharge.isDueAtDisbursement()) {
-                if ((loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) && isInstallmentChargeApplicable) {
+                boolean isValidRevolvingFee = (loanCharge.isRevolvingPeriodInstalmentFee()
+                        && period.getLoan().isInstallmentInRevolvingPeriod(period));
+                if ((loanCharge.isInstalmentFee() || isValidRevolvingFee) && isInstallmentChargeApplicable) {
                     if (loanCharge.getChargeCalculation().isPercentageBased()) {
                         BigDecimal amount = BigDecimal.ZERO;
+                        BigDecimal loanChargeAmt = BigDecimal.ZERO;
                         if (loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest()) {
                             amount = amount.add(period.getPrincipal(monetaryCurrency).getAmount())
                                     .add(period.getInterestCharged(monetaryCurrency).getAmount());
+                            loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
                         } else if (loanCharge.getChargeCalculation().isPercentageOfInterest()) {
                             amount = amount.add(period.getInterestCharged(monetaryCurrency).getAmount());
+                            loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
                         } else if (loanCharge.getChargeCalculation().isPercentageOfUnutilizedAmount()) {
-                            if (!loanCharge.isRevolvingPeriodInstalmentFee() || (loanCharge.isRevolvingPeriodInstalmentFee()
-                                    && period.getLoan().isDateInRevolvingPeriod(period.getDueDate()))) {
-                                amount = period.getLoan().calcUnutilizeAmount(period.getDueDate());
-                            }
+                            loanChargeAmt = period.getLoan().calcUnutilizeChargeAmount(period.getFromDate(), period.getDueDate(),
+                                    loanCharge.getPercentage());
                         } else {
                             amount = amount.add(period.getPrincipal(monetaryCurrency).getAmount());
+                            loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
                         }
-                        BigDecimal loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
+
                         cumulative = cumulative.plus(loanChargeAmt);
                     } else {
                         cumulative = cumulative.plus(loanCharge.amountOrPercentage());
@@ -180,23 +184,27 @@ public class LoanRepaymentScheduleProcessingWrapper {
 
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isPenaltyCharge()) {
-                if ((loanCharge.isInstalmentFee() || loanCharge.isRevolvingPeriodInstalmentFee()) && isInstallmentChargeApplicable) {
+                boolean isValidRevolvingFee = (loanCharge.isRevolvingPeriodInstalmentFee()
+                        && period.getLoan().isInstallmentInRevolvingPeriod(period));
+                if ((loanCharge.isInstalmentFee() || isValidRevolvingFee) && isInstallmentChargeApplicable) {
                     if (loanCharge.getChargeCalculation().isPercentageBased()) {
                         BigDecimal amount = BigDecimal.ZERO;
+                        BigDecimal loanChargeAmt = BigDecimal.ZERO;
                         if (loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest()) {
                             amount = amount.add(period.getPrincipal(currency).getAmount())
                                     .add(period.getInterestCharged(currency).getAmount());
+                            loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
                         } else if (loanCharge.getChargeCalculation().isPercentageOfInterest()) {
                             amount = amount.add(period.getInterestCharged(currency).getAmount());
+                            loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
                         } else if (loanCharge.getChargeCalculation().isPercentageOfUnutilizedAmount()) {
-                            if (!loanCharge.isRevolvingPeriodInstalmentFee() || (loanCharge.isRevolvingPeriodInstalmentFee()
-                                    && period.getLoan().isDateInRevolvingPeriod(period.getDueDate()))) {
-                                amount = period.getLoan().calcUnutilizeAmount(period.getDueDate());
-                            }
+                            loanChargeAmt = period.getLoan().calcUnutilizeChargeAmount(period.getFromDate(), period.getDueDate(),
+                                    loanCharge.getPercentage());
                         } else {
                             amount = amount.add(period.getPrincipal(currency).getAmount());
+                            loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
                         }
-                        BigDecimal loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
+
                         cumulative = cumulative.plus(loanChargeAmt);
                     } else {
                         cumulative = cumulative.plus(loanCharge.amountOrPercentage());
