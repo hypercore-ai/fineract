@@ -70,7 +70,17 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     }
 
     @Override
+    public boolean isRepaymentSubPeriod() {
+        return false;
+    }
+
+    @Override
     public Integer periodNumber() {
+        return null;
+    }
+
+    @Override
+    public Integer subPeriodNumber() {
         return null;
     }
 

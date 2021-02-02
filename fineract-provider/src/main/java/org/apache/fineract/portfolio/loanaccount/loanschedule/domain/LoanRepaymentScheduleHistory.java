@@ -48,6 +48,9 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
     @Column(name = "installment", nullable = false)
     private Integer installmentNumber;
 
+    @Column(name = "installment_sub_period", nullable = true)
+    private Integer installmentSubPeriodNumber;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "fromdate", nullable = true)
     private Date fromDate;
@@ -96,13 +99,15 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
      * LoanRepaymentScheduleHistory constructor
      **/
     private LoanRepaymentScheduleHistory(final Loan loan, final LoanRescheduleRequest loanRescheduleRequest,
-            final Integer installmentNumber, final Date fromDate, final Date dueDate, final BigDecimal principal,
-            final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges, final Date createdOnDate,
-            final AppUser createdByUser, final AppUser lastModifiedByUser, final Date lastModifiedOnDate, final Integer version) {
+            final Integer installmentNumber, final Integer installmentSubPeriodNumber, final Date fromDate, final Date dueDate,
+            final BigDecimal principal, final BigDecimal interestCharged, final BigDecimal feeChargesCharged,
+            final BigDecimal penaltyCharges, final Date createdOnDate, final AppUser createdByUser, final AppUser lastModifiedByUser,
+            final Date lastModifiedOnDate, final Integer version) {
 
         this.loan = loan;
         this.loanRescheduleRequest = loanRescheduleRequest;
         this.installmentNumber = installmentNumber;
+        this.installmentSubPeriodNumber = installmentSubPeriodNumber;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
         this.principal = principal;
@@ -120,13 +125,14 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
      * @return an instance of the LoanRepaymentScheduleHistory class
      **/
     public static LoanRepaymentScheduleHistory instance(final Loan loan, final LoanRescheduleRequest loanRescheduleRequest,
-            final Integer installmentNumber, final Date fromDate, final Date dueDate, final BigDecimal principal,
-            final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges, final Date createdOnDate,
-            final AppUser createdByUser, final AppUser lastModifiedByUser, final Date lastModifiedOnDate, final Integer version) {
+            final Integer installmentNumber, final Integer installmentSubPeriodNumber, final Date fromDate, final Date dueDate,
+            final BigDecimal principal, final BigDecimal interestCharged, final BigDecimal feeChargesCharged,
+            final BigDecimal penaltyCharges, final Date createdOnDate, final AppUser createdByUser, final AppUser lastModifiedByUser,
+            final Date lastModifiedOnDate, final Integer version) {
 
-        return new LoanRepaymentScheduleHistory(loan, loanRescheduleRequest, installmentNumber, fromDate, dueDate, principal,
-                interestCharged, feeChargesCharged, penaltyCharges, createdOnDate, createdByUser, lastModifiedByUser, lastModifiedOnDate,
-                version);
+        return new LoanRepaymentScheduleHistory(loan, loanRescheduleRequest, installmentNumber, installmentSubPeriodNumber, fromDate,
+                dueDate, principal, interestCharged, feeChargesCharged, penaltyCharges, createdOnDate, createdByUser, lastModifiedByUser,
+                lastModifiedOnDate, version);
 
     }
 

@@ -18,18 +18,26 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import java.util.Collection;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
-public class PrincipalInterest {
+public class ComponentsForPeriod {
 
     private final Money principal;
     private final Money interest;
     private final Money interestPaymentDueToGrace;
+    private final Collection<LoanScheduleModelPeriod> variationSubPeriods;
 
-    public PrincipalInterest(final Money principal, final Money interest, final Money interestPaymentDueToGrace) {
+    public ComponentsForPeriod(final Money principal, final Money interest, final Money interestPaymentDueToGrace) {
+        this(principal, interest, interestPaymentDueToGrace, null);
+    }
+
+    public ComponentsForPeriod(final Money principal, final Money interest, final Money interestPaymentDueToGrace,
+            final Collection<LoanScheduleModelPeriod> variationSubPeriods) {
         this.principal = principal;
         this.interest = interest;
         this.interestPaymentDueToGrace = interestPaymentDueToGrace;
+        this.variationSubPeriods = variationSubPeriods;
     }
 
     public Money principal() {
@@ -42,5 +50,9 @@ public class PrincipalInterest {
 
     public Money interestPaymentDueToGrace() {
         return this.interestPaymentDueToGrace;
+    }
+
+    public Collection<LoanScheduleModelPeriod> variationSubPeriods() {
+        return this.variationSubPeriods;
     }
 }

@@ -708,7 +708,7 @@ public final class LoanApplicationTerms {
         return dueRepaymentPeriodDate;
     }
 
-    public PrincipalInterest calculateTotalInterestForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
+    public ComponentsForPeriod calculateTotalInterestForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
             final double interestCalculationGraceOnRepaymentPeriodFraction, final int periodNumber, final MathContext mc,
             final Money cumulatingInterestPaymentDueToGrace, final Money outstandingBalance, final LocalDate periodStartDate,
             final LocalDate periodEndDate) {
@@ -737,7 +737,7 @@ public final class LoanApplicationTerms {
                             // brought
                             // forward to next applicable interest payment
                             // period
-                            final PrincipalInterest result = calculateTotalFlatInterestForPeriod(calculator, periodNumber, mc,
+                            final ComponentsForPeriod result = calculateTotalFlatInterestForPeriod(calculator, periodNumber, mc,
                                     interestBroughtForwardDueToGrace);
                             interestForInstallment = result.interest();
                             interestBroughtForwardDueToGrace = result.interestPaymentDueToGrace();
@@ -772,7 +772,7 @@ public final class LoanApplicationTerms {
             break;
         }
 
-        return new PrincipalInterest(null, interestForInstallment, interestBroughtForwardDueToGrace);
+        return new ComponentsForPeriod(null, interestForInstallment, interestBroughtForwardDueToGrace);
     }
 
     private boolean isLastRepaymentPeriod(final int numberOfRepayments, final int periodNumber) {
@@ -966,7 +966,7 @@ public final class LoanApplicationTerms {
         return principalPerPeriod;
     }
 
-    private PrincipalInterest calculateTotalFlatInterestForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
+    private ComponentsForPeriod calculateTotalFlatInterestForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
             final int periodNumber, final MathContext mc, final Money cumulatingInterestPaymentDueToGrace) {
 
         Money interestBroughtForwardDueToGrace = cumulatingInterestPaymentDueToGrace.copy();
@@ -982,7 +982,7 @@ public final class LoanApplicationTerms {
             interestBroughtForwardDueToGrace = interestBroughtForwardDueToGrace.zero();
         }
 
-        return new PrincipalInterest(null, interestForInstallment, interestBroughtForwardDueToGrace);
+        return new ComponentsForPeriod(null, interestForInstallment, interestBroughtForwardDueToGrace);
     }
 
     /*

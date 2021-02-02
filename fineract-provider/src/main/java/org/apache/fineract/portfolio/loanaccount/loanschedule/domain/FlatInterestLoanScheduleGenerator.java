@@ -29,7 +29,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGenerator {
 
     @Override
-    public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
+    public ComponentsForPeriod calculatePrincipalInterestComponentsForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
             final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
             Money totalCumulativeInterest, Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
             final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
@@ -37,7 +37,7 @@ public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGener
             @SuppressWarnings("unused") Map<LocalDate, Money> compoundingMap, LocalDate periodStartDate, LocalDate periodEndDate,
             @SuppressWarnings("unused") Collection<LoanTermVariationsData> termVariations) {
 
-        final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
+        final ComponentsForPeriod result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
                 interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace,
                 outstandingBalance, periodStartDate, periodEndDate);
         Money interestForThisInstallment = result.interest();
@@ -65,6 +65,6 @@ public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGener
         interestForThisInstallment = loanApplicationTerms.adjustInterestIfLastRepaymentPeriod(interestForThisInstallment,
                 totalCumulativeInterestToDate, totalInterestDueForLoan, periodNumber);
 
-        return new PrincipalInterest(principalForThisInstallment, interestForThisInstallment, interestBroughtForwardDueToGrace);
+        return new ComponentsForPeriod(principalForThisInstallment, interestForThisInstallment, interestBroughtForwardDueToGrace, null);
     }
 }

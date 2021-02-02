@@ -56,6 +56,7 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
 
         for (LoanRepaymentScheduleInstallment repaymentScheduleInstallment : repaymentScheduleInstallments) {
             final Integer installmentNumber = repaymentScheduleInstallment.getInstallmentNumber();
+            final Integer installmentSubPeriodNumber = repaymentScheduleInstallment.getInstallmentSubPeriodNumber();
             Date fromDate = null;
             Date dueDate = null;
 
@@ -87,8 +88,8 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
             }
 
             LoanRepaymentScheduleHistory loanRepaymentScheduleHistory = LoanRepaymentScheduleHistory.instance(loan, loanRescheduleRequest,
-                    installmentNumber, fromDate, dueDate, principal, interestCharged, feeChargesCharged, penaltyCharges, createdOnDate,
-                    createdByUser, lastModifiedByUser, lastModifiedOnDate, version);
+                    installmentNumber, installmentSubPeriodNumber, fromDate, dueDate, principal, interestCharged, feeChargesCharged,
+                    penaltyCharges, createdOnDate, createdByUser, lastModifiedByUser, lastModifiedOnDate, version);
 
             loanRepaymentScheduleHistoryList.add(loanRepaymentScheduleHistory);
         }

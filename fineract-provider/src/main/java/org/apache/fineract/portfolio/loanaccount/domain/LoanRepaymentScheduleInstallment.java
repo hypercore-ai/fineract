@@ -51,6 +51,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @Column(name = "installment", nullable = false)
     private Integer installmentNumber;
 
+    @Column(name = "installment_sub_period", nullable = true)
+    private Integer installmentSubPeriodNumber;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "fromdate", nullable = true)
     private Date fromDate;
@@ -147,8 +150,18 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
             final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
             final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
             final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails, final BigDecimal rescheduleInterestPortion) {
+
+        this(loan, installmentNumber, null, fromDate, dueDate, principal, interest, feeCharges, penaltyCharges,
+                recalculatedInterestComponent, compoundingDetails, rescheduleInterestPortion);
+    }
+
+    public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final Integer installmentSubPeriodNumber,
+            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest,
+            final BigDecimal feeCharges, final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
+            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails, final BigDecimal rescheduleInterestPortion) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
+        this.installmentSubPeriodNumber = installmentSubPeriodNumber;
         this.fromDate = Date.from(fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.dueDate = Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.principal = defaultToNullIfZero(principal);
@@ -165,8 +178,17 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
             final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
             final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
             final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails) {
+        this(loan, installmentNumber, null, fromDate, dueDate, principal, interest, feeCharges, penaltyCharges,
+                recalculatedInterestComponent, compoundingDetails);
+    }
+
+    public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final Integer installmentSubPeriodNumber,
+            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest,
+            final BigDecimal feeCharges, final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
+            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
+        this.installmentSubPeriodNumber = installmentSubPeriodNumber;
         this.fromDate = Date.from(fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.dueDate = Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.principal = defaultToNullIfZero(principal);
@@ -188,7 +210,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
     private BigDecimal defaultToNullIfZero(final BigDecimal value) {
         BigDecimal result = value;
-        if (BigDecimal.ZERO.compareTo(value) == 0) {
+        if (value != null && BigDecimal.ZERO.compareTo(value) == 0) {
             result = null;
         }
         return result;
@@ -200,6 +222,10 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
     public Integer getInstallmentNumber() {
         return this.installmentNumber;
+    }
+
+    public Integer getInstallmentSubPeriodNumber() {
+        return this.installmentSubPeriodNumber;
     }
 
     public LocalDate getFromDate() {

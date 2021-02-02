@@ -1263,13 +1263,13 @@ public class Loan extends AbstractPersistableCustom {
         this.repaymentScheduleInstallments.clear();
         for (final LoanScheduleModelPeriod scheduledLoanInstallment : modifiedLoanSchedule.getPeriods()) {
 
-            if (scheduledLoanInstallment.isRepaymentPeriod()) {
+            if (scheduledLoanInstallment.isRepaymentPeriod() || scheduledLoanInstallment.isRepaymentSubPeriod()) {
                 final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(this,
-                        scheduledLoanInstallment.periodNumber(), scheduledLoanInstallment.periodFromDate(),
-                        scheduledLoanInstallment.periodDueDate(), scheduledLoanInstallment.principalDue(),
-                        scheduledLoanInstallment.interestDue(), scheduledLoanInstallment.feeChargesDue(),
-                        scheduledLoanInstallment.penaltyChargesDue(), scheduledLoanInstallment.isRecalculatedInterestComponent(),
-                        scheduledLoanInstallment.getLoanCompoundingDetails());
+                        scheduledLoanInstallment.periodNumber(), scheduledLoanInstallment.subPeriodNumber(),
+                        scheduledLoanInstallment.periodFromDate(), scheduledLoanInstallment.periodDueDate(),
+                        scheduledLoanInstallment.principalDue(), scheduledLoanInstallment.interestDue(),
+                        scheduledLoanInstallment.feeChargesDue(), scheduledLoanInstallment.penaltyChargesDue(),
+                        scheduledLoanInstallment.isRecalculatedInterestComponent(), scheduledLoanInstallment.getLoanCompoundingDetails());
                 addLoanRepaymentScheduleInstallment(installment);
             }
         }
