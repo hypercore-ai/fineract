@@ -2100,8 +2100,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             return BigDecimal.ZERO;
         }
 
+        // Potential issue with leap year for periods between years
         long loanTermPeriodsInOneYear = LoanApplicationTerms.calculateDaysInYear(applicationTerms.getDaysInYearType(),
-                this.paymentPeriodsInOneYearCalculator);
+                periodStart);
         final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
         final BigDecimal oneDayUnutilizedChargeRate = loanCharge.getPercentage().divide(loanTermPeriodsInYearBigDecimal, mc)
                 .divide(BigDecimal.valueOf(100), mc);

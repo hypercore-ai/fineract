@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -219,10 +220,9 @@ public final class LoanApplicationTerms {
 
     private BigDecimal basicInterestRate;
 
-    public static long calculateDaysInYear(DaysInYearType daysInYearType, PaymentPeriodsInOneYearCalculator calculator) {
-        // Potential issue with days in year for "actual" and leap year. validate if should return 366 for leap year.
+    public static long calculateDaysInYear(DaysInYearType daysInYearType, LocalDate date) {
         return !daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual") ? daysInYearType.getValue().longValue()
-                : calculator.calculate(PeriodFrequencyType.DAYS).longValue();
+                : date != null ? Year.of(date.getYear()).length() : DaysInYearType.DAYS_365.getValue();
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
@@ -806,7 +806,8 @@ public final class LoanApplicationTerms {
 
         final BigDecimal divisor = BigDecimal.valueOf(Double.valueOf("100.0"));
 
-        final long loanTermPeriodsInOneYear = calculatePeriodsInOneYear(calculator);
+        // Potential issue with leap year for periods between years
+        final long loanTermPeriodsInOneYear = calculatePeriodsInOneYear(calculator, null);
         final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
 
         final BigDecimal loanTermFrequencyBigDecimal = calculatePeriodsInLoanTerm();
@@ -1042,7 +1043,8 @@ public final class LoanApplicationTerms {
             final DaysInMonthType daysInMonthType, final DaysInYearType daysInYearType, LocalDate periodStartDate, LocalDate periodEndDate,
             boolean isForPMT) {
 
-        final long loanTermPeriodsInOneYear = calculatePeriodsInOneYear(calculator);
+        // Potential issue with leap year for periods between years
+        final long loanTermPeriodsInOneYear = calculatePeriodsInOneYear(calculator, periodStartDate);
 
         final BigDecimal divisor = BigDecimal.valueOf(Double.valueOf("100.0"));
         final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
@@ -1125,7 +1127,8 @@ public final class LoanApplicationTerms {
         long loanTermPeriodsInOneYear = calculator.calculate(PeriodFrequencyType.DAYS).longValue();
         int repaymentEvery = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, toDate));
         if (isFallingInRepaymentPeriod(fromDate, toDate)) {
-            loanTermPeriodsInOneYear = calculatePeriodsInOneYear(calculator);
+            // Potential issue with leap year for periods between years
+            loanTermPeriodsInOneYear = calculatePeriodsInOneYear(calculator, fromDate);
             repaymentEvery = getPeriodsBetween(fromDate, toDate);
         }
 
@@ -1137,7 +1140,7 @@ public final class LoanApplicationTerms {
         return outstandingBalance.getAmount().multiply(interestRate, mc);
     }
 
-    private long calculatePeriodsInOneYear(final PaymentPeriodsInOneYearCalculator calculator) {
+    private long calculatePeriodsInOneYear(final PaymentPeriodsInOneYearCalculator calculator, LocalDate date) {
         // check if daysInYears is set if so change periodsInOneYear to days set
         // in db
         long periodsInOneYear;
@@ -1150,7 +1153,7 @@ public final class LoanApplicationTerms {
         }
         switch (this.interestCalculationPeriodMethod) {
             case DAILY:
-                periodsInOneYear = calculateDaysInYear(this.daysInYearType, calculator);
+                periodsInOneYear = calculateDaysInYear(this.daysInYearType, date);
             break;
             case INVALID:
             break;

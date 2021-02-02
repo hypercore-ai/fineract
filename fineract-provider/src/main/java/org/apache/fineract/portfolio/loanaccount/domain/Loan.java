@@ -2716,8 +2716,10 @@ public class Loan extends AbstractPersistableCustom {
 
         final MathContext mc = createMathContext();
         PaymentPeriodsInOneYearCalculator calculator = new DefaultPaymentPeriodsInOneYearCalculator();
+
+        // Potential issue with leap year for periods between years
         long loanTermPeriodsInOneYear = LoanApplicationTerms.calculateDaysInYear(this.getLoanProductRelatedDetail().fetchDaysInYearType(),
-                calculator);
+                periodStart);
         final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
         final BigDecimal oneDayUnutilizedChargeRate = chargePercentage.divide(loanTermPeriodsInYearBigDecimal, mc)
                 .divide(BigDecimal.valueOf(100), mc);
