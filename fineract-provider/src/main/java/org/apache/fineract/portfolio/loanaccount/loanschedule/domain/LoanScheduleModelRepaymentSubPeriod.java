@@ -27,62 +27,51 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtio
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 
 /**
- * Domain representation of a Loan Schedule Repayment Period (not used for persistence)
+ * Domain representation of a Loan Schedule Repayment Sub Period (not used for persistence)
  */
-public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModelPeriod {
+public final class LoanScheduleModelRepaymentSubPeriod implements LoanScheduleModelPeriod {
 
     private final int periodNumber;
+    private final int subPeriodNumber;
     private final LocalDate fromDate;
     private final LocalDate dueDate;
-    private Money principalDue;
     private final Money outstandingLoanBalance;
     private Money interestDue;
-    private Money feeChargesDue;
-    private Money penaltyChargesDue;
-    private Money totalDue;
-    private final boolean recalculatedInterestComponent;
     private final Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
     private boolean isEMIFixedSpecificToInstallment = false;
     BigDecimal rescheduleInterestPortion;
 
-    public static LoanScheduleModelRepaymentPeriod repayment(final int periodNumber, final LocalDate startDate,
-            final LocalDate scheduledDueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
-            final Money feeChargesDue, final Money penaltyChargesDue, final Money totalDue, boolean recalculatedInterestComponent) {
+    public static LoanScheduleModelRepaymentSubPeriod repayment(final int periodNumber, final int subPeriodNumber,
+            final LocalDate startDate, final LocalDate scheduledDueDate, final Money outstandingLoanBalance, final Money interestDue) {
 
-        return new LoanScheduleModelRepaymentPeriod(periodNumber, startDate, scheduledDueDate, principalDue, outstandingLoanBalance,
-                interestDue, feeChargesDue, penaltyChargesDue, totalDue, recalculatedInterestComponent);
+        return new LoanScheduleModelRepaymentSubPeriod(periodNumber, subPeriodNumber, startDate, scheduledDueDate, outstandingLoanBalance,
+                interestDue);
     }
 
-    public LoanScheduleModelRepaymentPeriod(final int periodNumber, final LocalDate fromDate, final LocalDate dueDate,
-            final Money principalDue, final Money outstandingLoanBalance, final Money interestDue, final Money feeChargesDue,
-            final Money penaltyChargesDue, final Money totalDue, final boolean recalculatedInterestComponent) {
+    public LoanScheduleModelRepaymentSubPeriod(final int periodNumber, final int subPeriodNumber, final LocalDate fromDate,
+            final LocalDate dueDate, final Money outstandingLoanBalance, final Money interestDue) {
         this.periodNumber = periodNumber;
+        this.subPeriodNumber = subPeriodNumber;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
-        this.principalDue = principalDue;
         this.outstandingLoanBalance = outstandingLoanBalance;
         this.interestDue = interestDue;
-        this.feeChargesDue = feeChargesDue;
-        this.penaltyChargesDue = penaltyChargesDue;
-        this.totalDue = totalDue;
-        this.recalculatedInterestComponent = recalculatedInterestComponent;
     }
 
     @Override
     public LoanSchedulePeriodData toData() {
-        return LoanSchedulePeriodData.repaymentOnlyPeriod(this.periodNumber, this.fromDate, this.dueDate, this.principalDue.getAmount(),
-                this.outstandingLoanBalance.getAmount(), this.interestDue.getAmount(), this.feeChargesDue.getAmount(),
-                this.penaltyChargesDue.getAmount(), this.totalDue.getAmount(), this.principalDue.plus(this.interestDue).getAmount());
+        return LoanSchedulePeriodData.repaymentSubPeriod(this.periodNumber, this.subPeriodNumber, this.fromDate, this.dueDate,
+                this.outstandingLoanBalance.getAmount(), this.interestDue.getAmount());
     }
 
     @Override
     public boolean isRepaymentPeriod() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isRepaymentSubPeriod() {
-        return false;
+        return true;
     }
 
     @Override
@@ -92,7 +81,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
 
     @Override
     public Integer subPeriodNumber() {
-        return null;
+        return this.subPeriodNumber;
     }
 
     @Override
@@ -107,12 +96,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
 
     @Override
     public BigDecimal principalDue() {
-        BigDecimal value = null;
-        if (this.principalDue != null) {
-            value = this.principalDue.getAmount();
-        }
-
-        return value;
+        return null;
     }
 
     @Override
@@ -127,46 +111,28 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
 
     @Override
     public BigDecimal feeChargesDue() {
-        BigDecimal value = null;
-        if (this.feeChargesDue != null) {
-            value = this.feeChargesDue.getAmount();
-        }
-
-        return value;
+        return null;
     }
 
     @Override
     public BigDecimal penaltyChargesDue() {
-        BigDecimal value = null;
-        if (this.penaltyChargesDue != null) {
-            value = this.penaltyChargesDue.getAmount();
-        }
-
-        return value;
+        return null;
     }
 
     @Override
-    public void addLoanCharges(BigDecimal feeCharge, BigDecimal penaltyCharge) {
-        this.feeChargesDue = this.feeChargesDue.plus(feeCharge);
-        this.penaltyChargesDue = this.penaltyChargesDue.plus(penaltyCharge);
-        this.totalDue = this.totalDue.plus(feeCharge).plus(penaltyCharge);
-    }
+    public void addLoanCharges(BigDecimal feeCharge, BigDecimal penaltyCharge) {}
 
     @Override
-    public void addPrincipalAmount(final Money principalDue) {
-        this.principalDue = this.principalDue.plus(principalDue);
-        this.totalDue = this.totalDue.plus(principalDue);
-    }
+    public void addPrincipalAmount(final Money principalDue) {}
 
     @Override
     public boolean isRecalculatedInterestComponent() {
-        return this.recalculatedInterestComponent;
+        return true;
     }
 
     @Override
     public void addInterestAmount(Money interestDue) {
         this.interestDue = this.interestDue.plus(interestDue);
-        this.totalDue = this.totalDue.plus(interestDue);
     }
 
     @Override

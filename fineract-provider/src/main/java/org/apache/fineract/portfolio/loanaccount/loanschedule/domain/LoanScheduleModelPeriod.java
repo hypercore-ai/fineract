@@ -31,7 +31,11 @@ public interface LoanScheduleModelPeriod {
 
     boolean isRepaymentPeriod();
 
+    boolean isRepaymentSubPeriod();
+
     Integer periodNumber();
+
+    Integer subPeriodNumber();
 
     LocalDate periodFromDate();
 
