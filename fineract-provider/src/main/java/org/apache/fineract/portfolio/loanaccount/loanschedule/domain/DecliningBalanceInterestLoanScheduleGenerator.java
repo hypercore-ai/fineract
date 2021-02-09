@@ -25,8 +25,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -88,8 +88,9 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
             }
         }
 
-        final Set<Map.Entry<LocalDate, Money>> relevantPrincipalVariations = principalVariation.entrySet().stream()
-                .filter(principal -> !principal.getKey().isAfter(periodEndDate)).collect(Collectors.toSet());
+        final List<Map.Entry<LocalDate, Money>> relevantPrincipalVariations = principalVariation.entrySet().stream()
+                .filter(principal -> !principal.getKey().isAfter(periodEndDate)).sorted((v1, v2) -> v1.getKey().compareTo(v2.getKey()))
+                .collect(Collectors.toList());
         final Collection<LoanScheduleModelPeriod> variationPeriods = new ArrayList<>();
         int subPeriod = 1;
         if (principalVariation != null) {

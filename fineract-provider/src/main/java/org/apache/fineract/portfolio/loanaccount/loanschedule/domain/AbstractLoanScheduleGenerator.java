@@ -2609,7 +2609,15 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
         // Those 3 Lines are basically undoing everything before generating the schedule - were not sure why this whole
         // function is needed
-        loanScheduleParams = null;
+        recalculationDetails.clear();
+        for (LoanTransaction loanTransaction : transactions) {
+            if (loanTransaction.isPaymentTransaction()) {
+                recalculationDetails.add(new RecalculationDetail(loanTransaction.getTransactionDate(),
+                        LoanTransaction.copyTransactionProperties(loanTransaction)));
+            }
+        }
+        loanScheduleParams = LoanScheduleParams.createLoanScheduleParamsForCompleteUpdate(recalculationDetails,
+                loanRepaymentScheduleTransactionProcessor, scheduleTillDate, applyInterestRecalculation, transactions);
         periods.clear();
         retainedInstallments.clear();
 
