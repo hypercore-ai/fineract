@@ -168,7 +168,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.interestCharged = defaultToNullIfZero(interest);
         this.feeChargesCharged = defaultToNullIfZero(feeCharges);
         this.penaltyCharges = defaultToNullIfZero(penaltyCharges);
-        this.obligationsMet = false;
+        this.obligationsMet = installmentSubPeriodNumber != null;
         this.recalculatedInterestComponent = recalculatedInterestComponent;
         this.loanCompoundingDetails = compoundingDetails;
         this.rescheduleInterestPortion = rescheduleInterestPortion;

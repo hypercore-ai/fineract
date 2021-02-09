@@ -19,4 +19,3 @@
 
 ALTER TABLE `m_loan_repayment_schedule` ADD COLUMN `installment_sub_period` SMALLINT(5) NULL DEFAULT NULL AFTER `installment`;
 ALTER TABLE `m_loan_repayment_schedule_history` ADD COLUMN `installment_sub_period` SMALLINT(5) NULL DEFAULT NULL AFTER `installment`;
-
