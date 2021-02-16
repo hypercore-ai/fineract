@@ -69,7 +69,12 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
             final DocumentMapper mapper = new DocumentMapper(false, false);
             final DocumentData documentData = fetchDocumentDetails(entityType, entityId, documentId, mapper);
             final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(documentData.storageType());
-            return contentRepository.fetchFile(documentData);
+
+            if (contentRepository != null) {
+                return contentRepository.fetchFile(documentData);
+            } else {
+                return new FileData(documentData.fileName(), documentData.contentType(), documentData.fileLocation());
+            }
         } catch (final EmptyResultDataAccessException e) {
             throw new DocumentNotFoundException(entityType, entityId, documentId, e);
         }

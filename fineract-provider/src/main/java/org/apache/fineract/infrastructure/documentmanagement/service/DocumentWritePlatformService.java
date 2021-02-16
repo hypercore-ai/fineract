@@ -28,6 +28,9 @@ public interface DocumentWritePlatformService {
     @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'CREATE_DOCUMENT')")
     Long createDocument(DocumentCommand documentCommand, InputStream inputStream);
 
+    @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'CREATE_DOCUMENT')")
+    Long attachDocument(DocumentCommand documentCommand);
+
     @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'UPDATE_DOCUMENT')")
     CommandProcessingResult updateDocument(DocumentCommand documentCommand, InputStream inputStream);
 

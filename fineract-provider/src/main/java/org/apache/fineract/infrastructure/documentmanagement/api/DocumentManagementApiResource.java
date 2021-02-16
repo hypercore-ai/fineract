@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.api;
 
+import com.google.gson.JsonElement;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
@@ -48,8 +49,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
@@ -80,19 +83,24 @@ public class DocumentManagementApiResource {
     private final DocumentWritePlatformService documentWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ToApiJsonSerializer<DocumentData> toApiJsonSerializer;
+    private final ToApiJsonSerializer<FileData> fileDataToApiJsonSerializer;
     private final FileUploadValidator fileUploadValidator;
+    private final FromJsonHelper fromJsonHelper;
 
     @Autowired
     public DocumentManagementApiResource(final PlatformSecurityContext context,
             final DocumentReadPlatformService documentReadPlatformService, final DocumentWritePlatformService documentWritePlatformService,
             final ApiRequestParameterHelper apiRequestParameterHelper, final ToApiJsonSerializer<DocumentData> toApiJsonSerializer,
-            final FileUploadValidator fileUploadValidator) {
+            final FileUploadValidator fileUploadValidator, final FromJsonHelper fromJsonHelper,
+            ToApiJsonSerializer<FileData> fileDataToApiJsonSerializer) {
         this.context = context;
         this.documentReadPlatformService = documentReadPlatformService;
         this.documentWritePlatformService = documentWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.fileUploadValidator = fileUploadValidator;
+        this.fromJsonHelper = fromJsonHelper;
+        this.fileDataToApiJsonSerializer = fileDataToApiJsonSerializer;
     }
 
     @GET
@@ -139,8 +147,32 @@ public class DocumentManagementApiResource {
 
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileDetails.getFileName(),
                 fileSize, bodyPart.getMediaType().toString(), description, null);
-
         final Long documentId = this.documentWritePlatformService.createDocument(documentCommand, inputStream);
+
+        return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(documentId, null));
+    }
+
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Attach a remote Document", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.PostEntityTypeEntityIdDocumentsResponse.class))) })
+    public String attachDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+            @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+
+        final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+        final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
+        final String filename = query.stringValueOfParameterNamed("name");
+        final Long fileSize = query.longValueOfParameterNamed("fileSize");
+        final String fileType = query.stringValueOfParameterNamed("fileType");
+        final String description = query.stringValueOfParameterNamed("description");
+        final String fileLocation = query.stringValueOfParameterNamed("location");
+
+        final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, filename, filename, fileSize,
+                fileType, description, fileLocation);
+        final Long documentId = this.documentWritePlatformService.attachDocument(documentCommand);
 
         return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(documentId, null));
     }
@@ -215,17 +247,23 @@ public class DocumentManagementApiResource {
     @GET
     @Path("{documentId}/attachment")
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_OCTET_STREAM })
+    @Produces({ MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Binary File associated with Document", description = "Request used to download the file associated with the document\n"
             + "\n" + "Example Requests:\n" + "\n" + "clients/1/documents/1/attachment\n" + "\n" + "\n" + "loans/1/documents/1/attachment")
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "Not Shown: The corresponding Binary file") })
     public Response downloadFile(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
-            @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
+            @PathParam("documentId") @Parameter(description = "documentId") final Long documentId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.systemEntityType);
         final FileData fileData = this.documentReadPlatformService.retrieveFileData(entityType, entityId, documentId);
-        return ContentResources.fileDataToResponse(fileData, "attachment");
+        if (!fileData.isRemote()) {
+            return ContentResources.fileDataToResponse(fileData, "attachment");
+        } else {
+            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+            final String json = this.fileDataToApiJsonSerializer.serialize(settings, fileData);
+            return Response.ok(json).header("Content-Type", "application/json").build();
+        }
     }
 
     @DELETE
