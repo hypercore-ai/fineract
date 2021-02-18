@@ -37407,7 +37407,14 @@ POST https://DomainName/api/v1/{entityType}/{entityId}/documents
 POST clients/1/documents
 Content-Type: multipart/form-data
 Request Body:
-<i>Not Shown (multi-part form data)</i>
+<i>Either multi-part form data to upload the document or a JSON object to indicate a remote file.</i>
+{
+	"name": "report.csv",
+	"fileSize": 50,
+	"fileType": "text/csv",
+	"description": "report",
+	"location": "clients/9/report.csv"
+}
 					</code>
 					<code class="method-response">
 {
