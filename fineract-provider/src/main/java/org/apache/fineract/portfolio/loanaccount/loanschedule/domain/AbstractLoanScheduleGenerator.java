@@ -2169,12 +2169,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         transactionsAndDisbursements.add(new TransactionHelper(lastDateCalculatedFor, BigDecimal.ZERO));
 
         for (TransactionHelper transactionOrDisbursement : transactionsAndDisbursements) {
-            unutilizedAmount = unutilizedAmount.add(transactionOrDisbursement.getAmount());
             BigDecimal numberOfDaysInPeriod = BigDecimal
                     .valueOf(Math.toIntExact(ChronoUnit.DAYS.between(fromCalcDate, transactionOrDisbursement.getDate())));
             chargeAmount = chargeAmount.add(numberOfDaysInPeriod.multiply(oneDayUnutilizedChargeRate, mc).multiply(unutilizedAmount, mc));
 
             fromCalcDate = transactionOrDisbursement.getDate();
+            unutilizedAmount = unutilizedAmount.add(transactionOrDisbursement.getAmount());
         }
 
         return chargeAmount;
