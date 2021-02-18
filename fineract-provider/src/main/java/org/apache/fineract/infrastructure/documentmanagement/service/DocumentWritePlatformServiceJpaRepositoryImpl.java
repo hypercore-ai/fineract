@@ -89,6 +89,34 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
     @Transactional
     @Override
+    public Long attachDocument(final DocumentCommand documentCommand) {
+        try {
+            this.context.authenticatedUser();
+
+            final DocumentCommandValidator validator = new DocumentCommandValidator(documentCommand);
+
+            validateParentEntityType(documentCommand);
+
+            validator.validateForAttachment();
+
+            final String fileLocation = documentCommand.getLocation();
+
+            final Document document = Document.createNew(documentCommand.getParentEntityType(), documentCommand.getParentEntityId(),
+                    documentCommand.getName(), documentCommand.getFileName(), documentCommand.getSize(), documentCommand.getType(),
+                    documentCommand.getDescription(), fileLocation, StorageType.REMOTE);
+
+            this.documentRepository.save(document);
+
+            return document.getId();
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            LOG.error("Error occured.", dve);
+            throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.", dve);
+        }
+    }
+
+    @Transactional
+    @Override
     public Long createInternalDocument(final String entityType, final Long entityId, final Long fileSize, final InputStream inputStream,
             final String mimeType, final String name, final String description, final String fileName) {
 
@@ -157,7 +185,9 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
         this.documentRepository.delete(document);
 
         final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(document.storageType());
-        contentRepository.deleteFile(document.getLocation());
+        if (contentRepository != null) {
+            contentRepository.deleteFile(document.getLocation());
+        }
         return new CommandProcessingResult(document.getId());
     }
 

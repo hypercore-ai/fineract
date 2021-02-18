@@ -49,10 +49,14 @@ public class ContentRepositoryFactory {
     }
 
     public ContentRepository getRepository(final StorageType documentStoreType) {
+        ContentRepository repository = null;
         if (documentStoreType == StorageType.FILE_SYSTEM) {
-            return new FileSystemContentRepository();
+            repository = new FileSystemContentRepository();
+        } else if (documentStoreType == StorageType.S3) {
+            repository = createS3DocumentStore();
         }
-        return createS3DocumentStore();
+
+        return repository;
     }
 
     private ContentRepository createS3DocumentStore() {

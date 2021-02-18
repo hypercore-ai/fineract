@@ -25,11 +25,22 @@ public class FileData {
     private final String fileName;
     private final String contentType;
     private final ByteSource byteSource;
+    private final String remoteLocation;
+    private boolean isRemote = false;
 
     public FileData(final ByteSource byteSource, final String fileName, final String contentType) {
         this.fileName = fileName;
         this.contentType = contentType;
         this.byteSource = byteSource;
+        this.remoteLocation = null;
+    }
+
+    public FileData(final String fileName, final String contentType, final String remoteLocation) {
+        this.fileName = fileName;
+        this.contentType = contentType;
+        this.byteSource = null;
+        this.remoteLocation = remoteLocation;
+        this.isRemote = true;
     }
 
     public String contentType() {
@@ -42,5 +53,13 @@ public class FileData {
 
     public ByteSource getByteSource() {
         return this.byteSource;
+    }
+
+    public String remoteLocation() {
+        return this.remoteLocation;
+    }
+
+    public boolean isRemote() {
+        return this.isRemote;
     }
 }

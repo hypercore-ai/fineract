@@ -70,4 +70,23 @@ public class DocumentCommandValidator {
                     dataValidationErrors);
         }
     }
+
+    public void validateForAttachment() {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("document");
+        baseDataValidator.reset().parameter("parentEntityType").value(this.command.getParentEntityType()).notBlank()
+                .notExceedingLengthOf(50);
+        baseDataValidator.reset().parameter("parentEntityId").value(this.command.getParentEntityId()).integerGreaterThanZero();
+        baseDataValidator.reset().parameter("name").value(this.command.getName()).notBlank().notExceedingLengthOf(250);
+        baseDataValidator.reset().parameter("size").value(this.command.getSize()).integerGreaterThanZero();
+        baseDataValidator.reset().parameter("fileName").value(this.command.getFileName()).notBlank().notExceedingLengthOf(250);
+        baseDataValidator.reset().parameter("description").value(this.command.getName()).notExceedingLengthOf(250);
+        baseDataValidator.reset().parameter("location").value(this.command.getLocation()).ignoreIfNull().notBlank();
+
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
+    }
 }
