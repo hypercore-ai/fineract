@@ -33,5 +33,6 @@ public final class DataTableApiConstant {
     public static final String categoryParamName = "category";
     public static final String localParamName = "locale";
     public static final String DATATABLE_RESOURCE_NAME = "dataTables";
+    public static final String LOCATION_TYPE_SUFFIX = "_location";
 
 }

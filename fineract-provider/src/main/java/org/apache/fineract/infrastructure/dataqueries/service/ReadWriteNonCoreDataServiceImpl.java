@@ -84,6 +84,8 @@ import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.LOCATION_TYPE_SUFFIX;
+
 @Service
 public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataService {
 
@@ -94,7 +96,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private static final Logger LOG = LoggerFactory.getLogger(ReadWriteNonCoreDataServiceImpl.class);
     private static final ImmutableMap<String, String> apiTypeToMySQL = ImmutableMap.<String, String>builder().put("string", "VARCHAR")
             .put("number", "INT").put("boolean", "BIT").put("decimal", "DECIMAL").put("date", "DATE").put("datetime", "DATETIME")
-            .put("text", "TEXT").put("dropdown", "INT").build();
+            .put("text", "TEXT").put("dropdown", "INT").put("location","VARCHAR").build();
 
     private static final List<String> stringDataTypes = Arrays.asList("char", "varchar", "blob", "text", "tinyblob", "tinytext",
             "mediumblob", "mediumtext", "longblob", "longtext");
@@ -534,7 +536,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         final String mysqlType = apiTypeToMySQL.get(type);
-        sqlBuilder = sqlBuilder.append("`" + name + "` " + mysqlType);
+        String nameSuffix = "";
+        if (type.equalsIgnoreCase("Location")) {
+            nameSuffix = LOCATION_TYPE_SUFFIX;
+        }
+
+        sqlBuilder = sqlBuilder.append("`" + name + nameSuffix + "` " + mysqlType);
 
         if (type != null) {
             if (type.equalsIgnoreCase("String")) {
@@ -543,6 +550,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 sqlBuilder = sqlBuilder.append("(19,6)");
             } else if (type.equalsIgnoreCase("Dropdown")) {
                 sqlBuilder = sqlBuilder.append("(11)");
+            } else if (type.equalsIgnoreCase("Location")) {
+                sqlBuilder = sqlBuilder.append("(255)");
             }
         }
 
@@ -783,7 +792,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         final String mysqlType = apiTypeToMySQL.get(type);
-        sqlBuilder = sqlBuilder.append(", ADD `" + name + "` " + mysqlType);
+        String nameSuffix = "";
+        if (type.equalsIgnoreCase("Location")) {
+            nameSuffix = LOCATION_TYPE_SUFFIX;
+        }
+
+        sqlBuilder = sqlBuilder.append(", ADD `" + name + nameSuffix + "` " + mysqlType);
 
         if (type != null) {
             if (type.equalsIgnoreCase("String") && length != null) {
@@ -792,6 +806,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 sqlBuilder = sqlBuilder.append("(19,6)");
             } else if (type.equalsIgnoreCase("Dropdown")) {
                 sqlBuilder = sqlBuilder.append("(11)");
+            } else if (type.equalsIgnoreCase("Location")) {
+                sqlBuilder = sqlBuilder.append("(255)");
             }
         }
 
