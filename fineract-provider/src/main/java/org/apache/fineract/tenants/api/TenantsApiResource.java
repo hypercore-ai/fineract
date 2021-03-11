@@ -70,6 +70,6 @@ public class TenantsApiResource {
     public String refreshTenantsDataBases(@Parameter(hidden = true) final String apiRequestBodyAsJson) throws Exception {
         // Better Authentication needed here, probably some kind of Super User
         this.tenantsUpgradeService.upgradeAllTenants();
-        return new JSONObject().append("result","ok").toString();
+        return new JSONObject().append("result", "ok").toString();
     }
 }

@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
+import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.LOCATION_TYPE_SUFFIX;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.LOCATION_TYPE_SUFFIX;
 
 /**
  * Immutable data object representing a resultset column.
@@ -76,7 +76,7 @@ public final class ResultsetColumnHeaderData implements Serializable {
         String displayType = null;
         if (this.columnCode == null) {
             if (isString()) {
-                if (this.columnName.endsWith(LOCATION_TYPE_SUFFIX)){
+                if (this.columnName.endsWith(LOCATION_TYPE_SUFFIX)) {
                     displayType = "LOCATION";
                 } else {
                     displayType = "STRING";
