@@ -369,10 +369,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             periods.add(installment);
 
             Collection<LoanScheduleModelPeriod> variationSubPeriods = componentsForThisPeriod.variationSubPeriods();
-            periods.addAll(variationSubPeriods);
+            if (variationSubPeriods != null) {
+                periods.addAll(variationSubPeriods);
 
-            for (LoanScheduleModelPeriod variationSubPeriod : variationSubPeriods) {
-                addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), variationSubPeriod);
+                for (LoanScheduleModelPeriod variationSubPeriod : variationSubPeriods) {
+                    addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), variationSubPeriod);
+                }
             }
 
             // Updates principal paid map with efective date for reducing
