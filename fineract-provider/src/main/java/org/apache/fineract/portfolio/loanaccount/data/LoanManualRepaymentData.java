@@ -24,10 +24,10 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 public class LoanManualRepaymentData {
 
-    private final Money principalPortion;
-    private final Money interestPortion;
-    private final Money feeChargesPortion;
-    private final Money penaltyChargesPortion;
+    private Money principalPortion;
+    private Money interestPortion;
+    private Money feeChargesPortion;
+    private Money penaltyChargesPortion;
 
     public LoanManualRepaymentData(MonetaryCurrency currency, BigDecimal principalPortion, BigDecimal interestPortion,
             BigDecimal feeChargesPortion, BigDecimal penaltyChargesPortion) {
@@ -35,6 +35,22 @@ public class LoanManualRepaymentData {
         this.interestPortion = Money.of(currency, interestPortion);
         this.feeChargesPortion = Money.of(currency, feeChargesPortion);
         this.penaltyChargesPortion = Money.of(currency, penaltyChargesPortion);
+    }
+
+    public void setPrincipalPortion(Money principalPortion) {
+        this.principalPortion = principalPortion;
+    }
+
+    public void setInterestPortion(Money interestPortion) {
+        this.interestPortion = interestPortion;
+    }
+
+    public void setFeeChargesPortion(Money feeChargesPortion) {
+        this.feeChargesPortion = feeChargesPortion;
+    }
+
+    public void setPenaltyChargesPortion(Money penaltyChargesPortion) {
+        this.penaltyChargesPortion = penaltyChargesPortion;
     }
 
     public Money getPenaltyChargesPortion() {
@@ -51,5 +67,9 @@ public class LoanManualRepaymentData {
 
     public Money getPrincipalPortion() {
         return principalPortion;
+    }
+
+    public Money getSum() {
+        return principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion);
     }
 }
