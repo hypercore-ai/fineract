@@ -2875,7 +2875,6 @@ public class Loan extends AbstractPersistableCustom {
 
     private BigDecimal constructFloatingInterestRates(final BigDecimal annualNominalInterestRate, final FloatingRateDTO floatingRateDTO,
             final List<LoanTermVariationsData> loanTermVariations) {
-        // Might be important
         final LocalDate dateValue = null;
         final boolean isSpecificToInstallment = false;
         BigDecimal interestRate = annualNominalInterestRate;
