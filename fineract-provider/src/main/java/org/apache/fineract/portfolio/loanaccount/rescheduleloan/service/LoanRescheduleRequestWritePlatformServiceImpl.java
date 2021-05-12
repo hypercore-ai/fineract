@@ -242,7 +242,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 if (localDate != null) {
                     // get installment by due date
                     LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallment(localDate);
-                    rescheduleFromInstallment = installment.getInstallmentNumber();
+                    if (installment != null) {
+                        rescheduleFromInstallment = installment.getInstallmentNumber();
+                    }
 
                     // update the value of the "rescheduleFromDate" variable
                     rescheduleFromDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -261,8 +263,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             }
 
             final LoanRescheduleRequest loanRescheduleRequest = LoanRescheduleRequest.instance(loan,
-                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), rescheduleFromInstallment, rescheduleFromDate,
-                    recalculateInterest, rescheduleReasonCodeValue, rescheduleReasonComment, submittedOnDate,
+                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), rescheduleFromInstallment != null ? rescheduleFromInstallment : 0,
+                    rescheduleFromDate, recalculateInterest, rescheduleReasonCodeValue, rescheduleReasonComment, submittedOnDate,
                     this.platformSecurityContext.authenticatedUser(), null, null, null, null);
 
             // update reschedule request to term variations mapping
@@ -378,7 +380,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 if (localDate != null) {
                     // get installment by due date
                     LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallment(localDate);
-                    rescheduleFromInstallment = installment.getInstallmentNumber();
+                    if (installment != null) {
+                        rescheduleFromInstallment = installment.getInstallmentNumber();
+                    }
 
                     // update the value of the "rescheduleFromDate" variable
                     rescheduleFromDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -397,8 +401,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             }
 
             final LoanRescheduleRequest loanRescheduleRequest = LoanRescheduleRequest.instance(loan,
-                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), rescheduleFromInstallment, rescheduleFromDate,
-                    recalculateInterest, rescheduleReasonCodeValue, rescheduleReasonComment, submittedOnDate,
+                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), rescheduleFromInstallment != null ? rescheduleFromInstallment : 0,
+                    rescheduleFromDate, recalculateInterest, rescheduleReasonCodeValue, rescheduleReasonComment, submittedOnDate,
                     this.platformSecurityContext.authenticatedUser(), null, null, null, null);
 
             // update reschedule request to term variations mapping
@@ -449,7 +453,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     createLoanTermVariations(termType, loan,
                             Date.from(installment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
                             Date.from(installment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                            loanRescheduleRequestToTermVariationMappings, isActive, true, emi, parent);
+                            loanRescheduleRequestToTermVariationMappings, isActive, true, emi, parent, null);
                 }
                 if (installment.getDueDate().isAfter(endDateLocDate)) {
                     break;
@@ -461,25 +465,29 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             LoanTermVariations parent = null;
             final Integer termType = LoanTermVariationType.DUE_DATE.getValue();
             createLoanTermVariations(termType, loan, rescheduleFromDate, adjustedDueDate, loanRescheduleRequestToTermVariationMappings,
-                    isActive, isSpecificToInstallment, decimalValue, parent);
+                    isActive, isSpecificToInstallment, decimalValue, parent, null);
         }
 
         if (rescheduleFromDate != null && interestRate != null) {
-            LoanTermVariations parent = null;
-            final Integer termType = LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue();
-            createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
-                    isSpecificToInstallment, interestRate, parent);
+            if (endDate == null) {
+                createLoanTermVariations(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue(), loan, rescheduleFromDate, dueDate,
+                        loanRescheduleRequestToTermVariationMappings, isActive, false, interestRate, null, null);
+            } else {
+                createLoanTermVariations(LoanTermVariationType.OVERRIDE_INTEREST_RATE.getValue(), loan, rescheduleFromDate, dueDate,
+                        loanRescheduleRequestToTermVariationMappings, isActive, false, interestRate, null, endDate);
+            }
         }
 
         if (rescheduleFromDate != null && graceOnPrincipal != null) {
             final Integer termType = LoanTermVariationType.GRACE_ON_PRINCIPAL.getValue();
             LoanTermVariations parent = null;
             parent = createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings,
-                    isActive, isSpecificToInstallment, BigDecimal.valueOf(graceOnPrincipal), parent);
+                    isActive, isSpecificToInstallment, BigDecimal.valueOf(graceOnPrincipal), parent, null);
 
             BigDecimal extraTermsBasedOnGracePeriods = BigDecimal.valueOf(graceOnPrincipal);
             createLoanTermVariations(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue(), loan, rescheduleFromDate, dueDate,
-                    loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment, extraTermsBasedOnGracePeriods, parent);
+                    loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment, extraTermsBasedOnGracePeriods, parent,
+                    null);
 
         }
 
@@ -487,23 +495,24 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             LoanTermVariations parent = null;
             final Integer termType = LoanTermVariationType.GRACE_ON_INTEREST.getValue();
             createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
-                    isSpecificToInstallment, BigDecimal.valueOf(graceOnInterest), parent);
+                    isSpecificToInstallment, BigDecimal.valueOf(graceOnInterest), parent, null);
         }
 
         if (rescheduleFromDate != null && extraTerms != null) {
             LoanTermVariations parent = null;
             final Integer termType = LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue();
             createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
-                    isSpecificToInstallment, BigDecimal.valueOf(extraTerms), parent);
+                    isSpecificToInstallment, BigDecimal.valueOf(extraTerms), parent, null);
         }
         loanRescheduleRequest.updateLoanRescheduleRequestToTermVariationMappings(loanRescheduleRequestToTermVariationMappings);
     }
 
     private LoanTermVariations createLoanTermVariations(final Integer termType, final Loan loan, Date rescheduleFromDate,
             Date adjustedDueDate, List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings,
-            final Boolean isActive, final boolean isSpecificToInstallment, final BigDecimal decimalValue, LoanTermVariations parent) {
+            final Boolean isActive, final boolean isSpecificToInstallment, final BigDecimal decimalValue, LoanTermVariations parent,
+            Date endDate) {
         LoanTermVariations loanTermVariation = new LoanTermVariations(termType, rescheduleFromDate, decimalValue, adjustedDueDate,
-                isSpecificToInstallment, loan, loan.status().getValue(), isActive, parent);
+                isSpecificToInstallment, loan, loan.status().getValue(), isActive, parent, endDate, new Date());
         loanRescheduleRequestToTermVariationMappings.add(LoanRescheduleRequestToTermVariationMapping.createNew(loanTermVariation));
         return loanTermVariation;
     }

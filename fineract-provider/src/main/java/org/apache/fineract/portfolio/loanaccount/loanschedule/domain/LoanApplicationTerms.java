@@ -525,7 +525,7 @@ public final class LoanApplicationTerms {
 
         this.loanCalendar = loanCalendar;
         this.approvedPrincipal = Money.of(principal.getCurrency(), approvedAmount);
-        this.variationsDataWrapper = new LoanTermVariationsDataWrapper(loanTermVariations);
+        this.variationsDataWrapper = new LoanTermVariationsDataWrapper(loanTermVariations, annualNominalInterestRate);
         this.actualNumberOfRepayments = numberOfRepayments + getLoanTermVariations().adjustNumberOfRepayments();
         this.adjustPrincipalForFlatLoans = principal.zero();
         if (activateOnApproval != null && activateOnApproval) {

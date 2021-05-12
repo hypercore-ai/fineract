@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import javax.persistence.Column;
@@ -50,6 +51,14 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     @Temporal(TemporalType.DATE)
     @Column(name = "applicable_date", nullable = false)
     private Date termApplicableFrom;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "end_date", nullable = true)
+    private Date endDate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_date", nullable = true)
+    private Date createdDate;
 
     @Column(name = "decimal_value", scale = 6, precision = 19)
     private BigDecimal decimalValue;
@@ -82,6 +91,8 @@ public class LoanTermVariations extends AbstractPersistableCustom {
         this.onLoanStatus = loan.status().getValue();
         this.isActive = true;
         this.parent = null;
+        this.endDate = null;
+        this.createdDate = null;
     }
 
     public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
@@ -95,6 +106,8 @@ public class LoanTermVariations extends AbstractPersistableCustom {
         this.onLoanStatus = loanStatus;
         this.isActive = true;
         this.parent = null;
+        this.endDate = null;
+        this.createdDate = null;
     }
 
     public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
@@ -109,6 +122,24 @@ public class LoanTermVariations extends AbstractPersistableCustom {
         this.onLoanStatus = loanStatus;
         this.isActive = isActive;
         this.parent = parent;
+        this.endDate = null;
+        this.createdDate = null;
+    }
+
+    public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
+            final boolean isSpecificToInstallment, final Loan loan, final Integer loanStatus, final Boolean isActive,
+            final LoanTermVariations parent, final Date endDate, final Date createdDate) {
+        this.loan = loan;
+        this.termApplicableFrom = termApplicableFrom;
+        this.termType = termType;
+        this.decimalValue = decimalValue;
+        this.dateValue = dateValue;
+        this.isSpecificToInstallment = isSpecificToInstallment;
+        this.onLoanStatus = loanStatus;
+        this.isActive = isActive;
+        this.parent = parent;
+        this.endDate = endDate;
+        this.createdDate = createdDate;
     }
 
     protected LoanTermVariations() {
@@ -121,12 +152,16 @@ public class LoanTermVariations extends AbstractPersistableCustom {
 
     public LoanTermVariationsData toData() {
         LocalDate termStartDate = LocalDate.ofInstant(this.termApplicableFrom.toInstant(), ZoneId.systemDefault());
+        LocalDate endDate = LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault());
+        LocalDateTime createdDate = this.createdDate != null ? LocalDateTime.ofInstant(this.createdDate.toInstant(), ZoneId.systemDefault())
+                : null;
         LocalDate dateValue = null;
         if (this.dateValue != null) {
             dateValue = LocalDate.ofInstant(this.dateValue.toInstant(), ZoneId.systemDefault());
         }
         EnumOptionData type = LoanEnumerations.loanvariationType(this.termType);
-        return new LoanTermVariationsData(getId(), type, termStartDate, this.decimalValue, dateValue, this.isSpecificToInstallment);
+        return new LoanTermVariationsData(getId(), type, termStartDate, this.decimalValue, dateValue, this.isSpecificToInstallment, endDate,
+                createdDate);
     }
 
     public Date getTermApplicableFrom() {
@@ -176,5 +211,4 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     public void markAsInactive() {
         this.isActive = false;
     }
-
 }

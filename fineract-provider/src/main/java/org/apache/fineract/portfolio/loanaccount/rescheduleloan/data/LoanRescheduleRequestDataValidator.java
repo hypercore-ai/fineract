@@ -145,7 +145,8 @@ public class LoanRescheduleRequestDataValidator {
                 .ignoreIfNull().notExceedingLengthOf(500);
 
         if (this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.emiParamName, jsonElement)
-                || this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.endDateParamName, jsonElement)) {
+        // || this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.endDateParamName, jsonElement)
+        ) {
             final LocalDate endDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.endDateParamName);
             final BigDecimal emi = jsonCommand.bigDecimalValueOfParameterNamed(RescheduleLoansApiConstants.emiParamName);
 
@@ -156,8 +157,9 @@ public class LoanRescheduleRequestDataValidator {
                 LoanRepaymentScheduleInstallment endInstallment = loan.getRepaymentScheduleInstallment(endDate);
 
                 if (endInstallment == null) {
-                    dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.endDateParamName)
-                            .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
+                    // dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.endDateParamName)
+                    // .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment
+                    // does not exist");
                 }
             }
 
@@ -186,8 +188,9 @@ public class LoanRescheduleRequestDataValidator {
             installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
 
             if (installment == null) {
-                dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
-                        .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
+                // dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
+                // .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does
+                // not exist");
             }
 
             if (installment != null && installment.isObligationsMet()) {
@@ -271,8 +274,9 @@ public class LoanRescheduleRequestDataValidator {
                 installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
 
                 if (installment == null) {
-                    dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
-                            "loan.repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
+                    // dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
+                    // "loan.repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not
+                    // exist");
                 }
 
                 if (installment != null && installment.isObligationsMet()) {

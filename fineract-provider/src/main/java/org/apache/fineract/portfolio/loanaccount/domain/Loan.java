@@ -2872,13 +2872,15 @@ public class Loan extends AbstractPersistableCustom {
 
     private BigDecimal constructFloatingInterestRates(final BigDecimal annualNominalInterestRate, final FloatingRateDTO floatingRateDTO,
             final List<LoanTermVariationsData> loanTermVariations) {
+        // Might be important
         final LocalDate dateValue = null;
         final boolean isSpecificToInstallment = false;
         BigDecimal interestRate = annualNominalInterestRate;
-        if (loanProduct.isLinkedToFloatingInterestRate()) {
+        if (loanProduct.isLinkedToFloatingInterestRate()
+                || this.loanTermVariations.stream().anyMatch(v -> v.getTermType().isOverrideInterestRate())) {
             floatingRateDTO.resetInterestRateDiff();
             Collection<FloatingRatePeriodData> applicableRates = loanProduct.fetchInterestRates(floatingRateDTO,
-                    this.minFloatingRateInterest);
+                    this.minFloatingRateInterest, this.loanTermVariations, annualNominalInterestRate);
             LocalDate interestRateStartDate = DateUtils.getLocalDateOfTenant();
             for (FloatingRatePeriodData periodData : applicableRates) {
                 LoanTermVariationsData loanTermVariation = new LoanTermVariationsData(
@@ -2891,6 +2893,10 @@ public class Loan extends AbstractPersistableCustom {
                 loanTermVariations.add(loanTermVariation);
             }
         }
+
+        loanTermVariations.stream().filter(v -> v.getTermVariationType().isOverrideInterestRate()).collect(Collectors.toList())
+                .forEach(v -> loanTermVariations.remove(v));
+
         return interestRate;
     }
 

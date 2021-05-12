@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -1586,7 +1587,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private static final class LoanTermVariationsMapper implements RowMapper<LoanTermVariationsData> {
 
         public String schema() {
-            return "tv.id as id,tv.applicable_date as variationApplicableFrom,tv.decimal_value as decimalValue, tv.date_value as dateValue, tv.is_specific_to_installment as isSpecificToInstallment "
+            return "tv.id as id,tv.applicable_date as variationApplicableFrom,tv.end_date as endDate,tv.created_date as createdDate,tv.decimal_value as decimalValue, tv.date_value as dateValue, tv.is_specific_to_installment as isSpecificToInstallment "
                     + "from m_loan_term_variations tv";
         }
 
@@ -1594,13 +1595,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         public LoanTermVariationsData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
             final LocalDate variationApplicableFrom = JdbcSupport.getLocalDate(rs, "variationApplicableFrom");
+            final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
+            final LocalDateTime createdDate = JdbcSupport.getLocalDateTime(rs, "createdDate").toLocalDateTime();
             final BigDecimal decimalValue = rs.getBigDecimal("decimalValue");
             final LocalDate dateValue = JdbcSupport.getLocalDate(rs, "dateValue");
             final boolean isSpecificToInstallment = rs.getBoolean("isSpecificToInstallment");
 
             final LoanTermVariationsData loanTermVariationsData = new LoanTermVariationsData(id,
                     LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT), variationApplicableFrom, decimalValue, dateValue,
-                    isSpecificToInstallment);
+                    isSpecificToInstallment, endDate, createdDate);
             return loanTermVariationsData;
         }
 
