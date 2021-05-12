@@ -29,6 +29,7 @@ import java.util.Set;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidDetail;
+import org.apache.fineract.portfolio.loanaccount.data.LoanManualRepaymentData;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
@@ -273,6 +274,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         if (amountToProcess != null) {
             transactionAmountUnprocessed = amountToProcess;
         }
+
+        LoanManualRepaymentData transactionManualAmountsUnprocessed = new LoanManualRepaymentData(currency,
+                loanTransaction.getManualPrincipalPortion(), loanTransaction.getManualInterestPortion(),
+                loanTransaction.getManualFeeChargesPortion(), loanTransaction.getManualPenaltyChargesPortion());
+
         List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
 
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
@@ -283,8 +289,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     // the
                     // current installment?
                     if (loanTransaction.isManualRepayment()) {
-                        transactionAmountUnprocessed = handleTransactionThatIsManualPayment(currentInstallment, installments,
-                                loanTransaction, transactionDate, transactionAmountUnprocessed, transactionMappings);
+                        transactionManualAmountsUnprocessed = handleTransactionThatIsManualPayment(currentInstallment, installments,
+                                loanTransaction, transactionDate, transactionMappings, transactionManualAmountsUnprocessed);
+                        transactionAmountUnprocessed = transactionManualAmountsUnprocessed.getSum();
                     } else if (isTransactionInAdvanceOfInstallment(installmentIndex, installments, transactionDate,
                             transactionAmountUnprocessed)) {
                         transactionAmountUnprocessed = handleTransactionThatIsPaymentInAdvanceOfInstallment(currentInstallment,
@@ -309,32 +316,37 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return transactionAmountUnprocessed;
     }
 
-    private Money handleTransactionThatIsManualPayment(LoanRepaymentScheduleInstallment currentInstallment,
+    private LoanManualRepaymentData handleTransactionThatIsManualPayment(LoanRepaymentScheduleInstallment currentInstallment,
             List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, LocalDate transactionDate,
-            Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
-        Money transactionAmountRemaining = transactionAmountUnprocessed;
-        MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings,
+            LoanManualRepaymentData transactionManualAmountsUnprocessed) {
 
-        Money penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate,
-                loanTransaction.getPenaltyChargesPortion(currency));
-        transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+        // Pay each portion and update the remaining manual payment to process
+        Money manualPenaltyChargesPortion = transactionManualAmountsUnprocessed.getPenaltyChargesPortion();
+        Money penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, manualPenaltyChargesPortion);
+        transactionManualAmountsUnprocessed.setPenaltyChargesPortion(manualPenaltyChargesPortion.minus(penaltyChargesPortion));
 
-        Money feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate,
-                loanTransaction.getFeeChargesPortion(currency));
-        transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+        Money manualFeeChargesPortion = transactionManualAmountsUnprocessed.getFeeChargesPortion();
+        Money feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, manualFeeChargesPortion);
+        transactionManualAmountsUnprocessed.setFeeChargesPortion(manualFeeChargesPortion.minus(feeChargesPortion));
 
-        Money interestPortion = currentInstallment.payInterestComponent(transactionDate, loanTransaction.getInterestPortion(currency));
-        transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+        Money manualInterestPortion = transactionManualAmountsUnprocessed.getInterestPortion();
+        Money interestPortion = currentInstallment.payInterestComponent(transactionDate, manualInterestPortion);
+        transactionManualAmountsUnprocessed.setInterestPortion(manualInterestPortion.minus(interestPortion));
 
-        Money principalPortion = currentInstallment.payPrincipalComponent(transactionDate, loanTransaction.getPrincipalPortion(currency));
-        transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+        Money manualPrincipalPortion = transactionManualAmountsUnprocessed.getPrincipalPortion();
+        Money principalPortion = currentInstallment.payPrincipalComponent(transactionDate, manualPrincipalPortion);
+        transactionManualAmountsUnprocessed.setPrincipalPortion(manualPrincipalPortion.minus(principalPortion));
 
         if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
             transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(currentInstallment, principalPortion,
                     interestPortion, feeChargesPortion, penaltyChargesPortion));
         }
 
-        return transactionAmountRemaining;
+        // Update How much was paid by components
+        loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+
+        return transactionManualAmountsUnprocessed;
     }
 
     private Set<LoanCharge> extractFeeCharges(final Set<LoanCharge> loanCharges) {

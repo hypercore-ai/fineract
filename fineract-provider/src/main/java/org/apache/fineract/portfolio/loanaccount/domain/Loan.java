@@ -1372,8 +1372,11 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     private void updateLoanSummaryDerivedFields() {
+        this.updateLoanSummaryDerivedFields(true);
+    }
 
-        if (isNotDisbursed()) {
+    private void updateLoanSummaryDerivedFields(boolean checkIfNeedToResetSummary) {
+        if (isNotDisbursed() && checkIfNeedToResetSummary) {
             this.summary.zeroFields();
             this.totalOverpaid = null;
         } else {
@@ -3346,7 +3349,9 @@ public class Loan extends AbstractPersistableCustom {
             this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
         }
 
-        updateLoanSummaryDerivedFields();
+        // Repayment for credit-line doesnt need to reset the summary
+        boolean activeCreditLine = this.shouldActivateOnApproval() && this.status().isActive();
+        updateLoanSummaryDerivedFields(!activeCreditLine);
 
         /**
          * FIXME: Vishwas, skipping post loan transaction checks for Loan recoveries
