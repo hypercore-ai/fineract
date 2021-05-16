@@ -2701,9 +2701,9 @@ public class Loan extends AbstractPersistableCustom {
         BigDecimal principal = BigDecimal.ZERO;
         if (untilDate != null) {
             for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
-                LocalDate disbursedLocalDate = disbursementDetail.actualDisbursementDate() != null ?
-                        LocalDate.ofInstant(disbursementDetail.actualDisbursementDate().toInstant(), ZoneId.systemDefault()) :
-                        null;
+                LocalDate disbursedLocalDate = disbursementDetail.actualDisbursementDate() != null
+                        ? LocalDate.ofInstant(disbursementDetail.actualDisbursementDate().toInstant(), ZoneId.systemDefault())
+                        : null;
                 if (disbursedLocalDate != null && disbursedLocalDate.isBefore(untilDate)) {
                     principal = principal.add(disbursementDetail.principal());
                 }

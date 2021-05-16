@@ -648,12 +648,16 @@ public class LoanScheduleAssembler {
         final MathContext mc = new MathContext(8, roundingMode);
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
 
+        boolean activeNotDisbursed = loanApplicationTerms.isActivatedOnApproval() && loanApplicationTerms.isMultiDisburseLoan()
+                && disbursementDetails.stream().anyMatch(disbursement -> disbursement.actualDisbursementDate() != null);
+
         LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
         if (loanApplicationTerms.isEqualAmortization()) {
             if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
                 final LoanScheduleGenerator decliningLoanScheduleGenerator = this.loanScheduleFactory
                         .create(InterestMethod.DECLINING_BALANCE);
-                LoanScheduleModel loanSchedule = decliningLoanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO);
+                LoanScheduleModel loanSchedule = decliningLoanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO,
+                        activeNotDisbursed);
 
                 loanApplicationTerms
                         .updateTotalInterestDue(Money.of(loanApplicationTerms.getCurrency(), loanSchedule.getTotalInterestCharged()));
@@ -664,7 +668,7 @@ public class LoanScheduleAssembler {
             loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
         }
 
-        return loanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO);
+        return loanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO, activeNotDisbursed);
     }
 
     public LoanScheduleModel assembleForInterestRecalculation(final LoanApplicationTerms loanApplicationTerms, final Long officeId,
