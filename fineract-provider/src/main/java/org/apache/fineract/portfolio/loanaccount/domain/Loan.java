@@ -1916,8 +1916,8 @@ public class Loan extends AbstractPersistableCustom {
     private void createOrUpdateDisbursementDetails(Long disbursementID, final Map<String, Object> actualChanges,
             Date expectedDisbursementDate, BigDecimal principal, List<Long> existingDisbursementList) {
 
-        if (disbursementID != null) {
-            LoanDisbursementDetails loanDisbursementDetail = fetchLoanDisbursementsById(disbursementID);
+        LoanDisbursementDetails loanDisbursementDetail = disbursementID != null ? fetchLoanDisbursementsById(disbursementID) : null;
+        if (loanDisbursementDetail != null) {
             existingDisbursementList.remove(disbursementID);
             if (loanDisbursementDetail.actualDisbursementDate() == null) {
                 Date actualDisbursementDate = null;
@@ -2534,18 +2534,6 @@ public class Loan extends AbstractPersistableCustom {
             if (this.loanProduct.isRevolving() && !isDateInRevolvingPeriod(actualDisbursementLocalDate)) {
                 throw new LoanDisbursalException("Cannot disburse out of the revolving period",
                         "actualdisbursementdate.not.revolvingperiods", getRevolvingPeriodStartDate(), getRevolvingPeriodEndDate(), actualDisbursementDate);
-//                final Date revolvingStartDate = this.getRevolvingPeriodStartDate();
-//                if (revolvingStartDate != null) {
-//                    if (actualDisbursementDate.before(revolvingStartDate)) {
-//
-//                    }
-//
-//                    final Date revolvingEndDate = this.getRevolvingPeriodEndDate();
-//                    if (revolvingEndDate != null && actualDisbursementDate.after(revolvingEndDate)) {
-//                        throw new LoanDisbursalException("Cannot disburse out of the revolving period",
-//                                "actualdisbursementdate.after.revolvingperiodend", revolvingEndDate, actualDisbursementDate);
-//                    }
-//                }
             }
 
             isValidMultiTrancheDisburse = true;
