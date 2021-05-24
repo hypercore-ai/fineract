@@ -67,15 +67,15 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     @Override
     public LoanScheduleModel generate(MathContext mc, LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges,
-            HolidayDetailDTO holidayDetailDTO, boolean activeNoDisbursementSchedule) {
+            HolidayDetailDTO holidayDetailDTO, boolean activeLoanWithoutDisbursementSchedule) {
         final LoanScheduleParams loanScheduleRecalculationDTO = null;
         return generate(mc, loanApplicationTerms, loanCharges, holidayDetailDTO, loanScheduleRecalculationDTO,
-                activeNoDisbursementSchedule);
+                activeLoanWithoutDisbursementSchedule);
     }
 
     private LoanScheduleModel generate(final MathContext mc, final LoanApplicationTerms loanApplicationTerms,
             final Set<LoanCharge> loanCharges, final HolidayDetailDTO holidayDetailDTO, final LoanScheduleParams loanScheduleParams,
-            boolean activeLoanNoDisbursementSchedule) {
+            boolean activeLoanWithoutDisbursementSchedule) {
         final ApplicationCurrency applicationCurrency = loanApplicationTerms.getApplicationCurrency();
         // generate list of proposed schedule due dates
         LocalDate loanEndDate = this.scheduledDateGenerator.getLastRepaymentDate(loanApplicationTerms, holidayDetailDTO);
@@ -147,7 +147,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 BigDecimal disburseAmt = BigDecimal.ZERO;
                 // Skip this part if loan is active and doesnt have any actual disbursements then
                 this.loanDisbursements = new ArrayList<>();
-                if (!activeLoanNoDisbursementSchedule) {
+                if (!activeLoanWithoutDisbursementSchedule) {
                     this.loanDisbursements = loanApplicationTerms.getDisbursementDatas();
                     disburseAmt = getDisbursementAmountAndUpdatePeriods(loanApplicationTerms, scheduleParams.getPeriodStartDate(), periods,
                             chargesDueAtTimeOfDisbursement, scheduleParams.getDisburseDetailMap(),
@@ -201,7 +201,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
         boolean lastTermVariationWasSpecificToInstallment = false;
 
-        if (!activeLoanNoDisbursementSchedule) {
+        if (!activeLoanWithoutDisbursementSchedule) {
             while (!scheduleParams.getOutstandingBalance().isZero() || !scheduleParams.getDisburseDetailMap().isEmpty()) {
                 LocalDate previousRepaymentDate = scheduleParams.getActualRepaymentDate();
                 scheduleParams.setActualRepaymentDate(this.scheduledDateGenerator
@@ -446,18 +446,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     scheduledDueDate = scheduleParams.getScheduleTillDate();
                     isNextRepaymentAvailable = false;
                 }
-
-                // maybe
-                // process repayments to the schedule as per the repayment
-                // transaction processor configuration
-                // will add a new schedule with interest till the transaction date
-                // for a loan repayment which falls between the
-                // two periods for interest first repayment strategies
-                // handleRecalculationForNonDueDateTransactions(mc, loanApplicationTerms, loanCharges, holidayDetailDTO,
-                // scheduleParams, periods,
-                // loanApplicationTerms.getTotalInterestDue(), idealDisbursementDate, firstRepaymentdate, lastRestDate,
-                // scheduledDueDate,
-                // periodStartDateApplicableForInterest, applicableTransactions, currentPeriodParams);
 
                 ScheduleCurrentPeriodParams currentPeriodParams = new ScheduleCurrentPeriodParams(currency, 0);
 
