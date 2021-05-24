@@ -193,6 +193,7 @@ public final class LoanAccountData {
     private final Long closureLoanId;
     private final String closureLoanAccountNo;
     private final BigDecimal topupAmount;
+    private final LoanScheduleData initialExpectedSchedule;
 
     private LoanProductData product;
 
@@ -429,6 +430,37 @@ public final class LoanAccountData {
         this.isRevolving = null;
         this.revolvingPeriodStartDate = null;
         this.revolvingPeriodEndDate = null;
+        this.initialExpectedSchedule = null;
+    }
+
+    public static LoanAccountData withInitialExpectedSchedule(LoanAccountData acc, LoanScheduleData initialExpectedScheduleData) {
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientAccountNo, acc.clientName,
+                acc.clientOfficeId, acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
+                acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId,
+                acc.loanOfficerName, acc.currency, acc.proposedPrincipal, acc.principal, acc.approvedPrincipal, acc.totalOverpaid,
+                acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery,
+                acc.repaymentFrequencyType, acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType,
+                acc.transactionProcessingStrategyId, acc.transactionProcessingStrategyName, acc.amortizationType, acc.interestRatePerPeriod,
+                acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType, acc.isFloatingInterestRate,
+                acc.interestRateDifferential, acc.interestCalculationPeriodType, acc.allowPartialPeriodInterestCalcualtion,
+                acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment, acc.recurringMoratoriumOnPrincipalPeriods,
+                acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate, acc.timeline, acc.summary,
+                acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule, acc.transactions, acc.charges, acc.collateral, acc.guarantors,
+                acc.meeting, acc.productOptions, acc.termFrequencyTypeOptions, acc.repaymentFrequencyTypeOptions,
+                acc.repaymentFrequencyNthDayTypeOptions, acc.repaymentFrequencyDaysOfWeekTypeOptions,
+                acc.transactionProcessingStrategyOptions, acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions,
+                acc.interestTypeOptions, acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null,
+                acc.loanOfficerOptions, acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions,
+                acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, acc.notes, acc.accountLinkingOptions,
+                acc.linkedAccount, acc.disbursementDetails, acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount,
+                acc.maxOutstandingLoanBalance, acc.emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears,
+                acc.graceOnArrearsAgeing, acc.overdueCharges, acc.isNPA, acc.daysInMonthType, acc.daysInYearType,
+                acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
+                acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
+                acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
+                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
+                acc.minFloatingRateInterest, acc.activateOnApproval, acc.isRevolving, acc.revolvingPeriodStartDate,
+                acc.revolvingPeriodEndDate, initialExpectedScheduleData);
     }
 
     public Integer getRowIndex() {
@@ -598,6 +630,7 @@ public final class LoanAccountData {
         final boolean isRevolving = false;
         final LocalDate revolvingPeriodStartDate = null;
         final LocalDate revolvingPeriodEndDate = null;
+        final LoanScheduleData initialExpectedSchedule = null;
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId, group,
                 loanType, loanProductId, loanProductName, loanProductDescription, isLoanProductLinkedToFloatingRate, fundId, fundName,
@@ -619,7 +652,7 @@ public final class LoanAccountData {
                 interestRecalculationData, originalSchedule, createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods,
                 isVariableInstallmentsAllowed, minimumGap, maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup,
                 closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, rates, isRatesEnabled, minFloatingRateInterest,
-                activateOnApproval, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate);
+                activateOnApproval, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate, initialExpectedSchedule);
 
     }
 
@@ -748,6 +781,7 @@ public final class LoanAccountData {
         final boolean isRevolving = false;
         final LocalDate revolvingPeriodStartDate = null;
         final LocalDate revolvingPeriodEndDate = null;
+        final LoanScheduleData initialExpectedSchedule = null;
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId, group,
                 loanType, loanProductId, loanProductName, loanProductDescription, isLoanProductLinkedToFloatingRate, fundId, fundName,
@@ -769,7 +803,7 @@ public final class LoanAccountData {
                 originalSchedule, createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods,
                 isVariableInstallmentsAllowed, minimumGap, maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup,
                 closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, rates, isRatesEnabled, minFloatingRateInterest,
-                activateOnApproval, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate);
+                activateOnApproval, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate, initialExpectedSchedule);
 
     }
 
@@ -801,7 +835,7 @@ public final class LoanAccountData {
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
                 acc.minFloatingRateInterest, acc.activateOnApproval, acc.isRevolving, acc.revolvingPeriodStartDate,
-                acc.revolvingPeriodEndDate);
+                acc.revolvingPeriodEndDate, acc.initialExpectedSchedule);
     }
 
     /**
@@ -931,6 +965,7 @@ public final class LoanAccountData {
         final boolean isRevolving = false;
         final LocalDate revolvingPeriodStartDate = null;
         final LocalDate revolvingPeriodEndDate = null;
+        final LoanScheduleData initialExpectedSchedule = null;
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId, group,
                 loanType, loanProductId, loanProductName, loanProductDescription, isLoanProductLinkedToFloatingRate, fundId, fundName,
@@ -952,7 +987,7 @@ public final class LoanAccountData {
                 originalSchedule, createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods,
                 isVariableInstallmentsAllowed, minimumGap, maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup,
                 closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, rates, isRatesEnabled, minFloatingRateInterest,
-                activateOnApproval, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate);
+                activateOnApproval, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate, initialExpectedSchedule);
 
     }
 
@@ -984,7 +1019,7 @@ public final class LoanAccountData {
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
                 acc.minFloatingRateInterest, acc.activateOnApproval, acc.isRevolving, acc.revolvingPeriodStartDate,
-                acc.revolvingPeriodEndDate);
+                acc.revolvingPeriodEndDate, acc.initialExpectedSchedule);
 
     }
 
@@ -1122,6 +1157,7 @@ public final class LoanAccountData {
         final boolean isRevolving = false;
         final LocalDate revolvingPeriodStartDate = null;
         final LocalDate revolvingPeriodEndDate = null;
+        final LoanScheduleData initialExpectedSchedule = null;
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId, group,
                 loanType, product.getId(), product.getName(), product.getDescription(), product.isLinkedToFloatingInterestRates(),
@@ -1148,7 +1184,7 @@ public final class LoanAccountData {
                 product.isVariableInstallmentsAllowed(), product.getMinimumGapBetweenInstallments(),
                 product.getMaximumGapBetweenInstallments(), subStatus, canUseForTopup, clientActiveLoanOptions, isTopup, closureLoanId,
                 closureLoanAccountNo, topupAmount, product.isEqualAmortization(), rates, isRatesEnabled, minFloatingRateInterest,
-                activateOnApproval, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate);
+                activateOnApproval, isRevolving, revolvingPeriodStartDate, revolvingPeriodEndDate, initialExpectedSchedule);
     }
 
     public static LoanAccountData populateLoanProductDefaults(final LoanAccountData acc, final LoanProductData product) {
@@ -1211,7 +1247,7 @@ public final class LoanAccountData {
                 product.getMaximumGapBetweenInstallments(), acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, product.isEqualAmortization(), acc.rates, acc.isRatesEnabled,
                 acc.minFloatingRateInterest, acc.activateOnApproval, acc.isRevolving, acc.revolvingPeriodStartDate,
-                acc.revolvingPeriodEndDate);
+                acc.revolvingPeriodEndDate, acc.initialExpectedSchedule);
 
     }
 
@@ -1279,6 +1315,7 @@ public final class LoanAccountData {
         final LoanProductData product = null;
         final Collection<ChargeData> overdueCharges = null;
         final LoanScheduleData originalSchedule = null;
+        final LoanScheduleData initialExpectedSchedule = null;
         final PaidInAdvanceData paidInAdvance = null;
         final Collection<InterestRatePeriodData> interestRatesPeriods = null;
         final Collection<LoanAccountSummaryData> clientActiveLoanOptions = null;
@@ -1305,7 +1342,7 @@ public final class LoanAccountData {
                 createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods, isVariableInstallmentsAllowed, minimumGap,
                 maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup, closureLoanId, closureLoanAccountNo, topupAmount,
                 isEqualAmortization, rates, isRatesEnabled, minFloatingRateInterest, activateOnApproval, isRevolving,
-                revolvingPeriodStartDate, revolvingPeriodEndDate);
+                revolvingPeriodStartDate, revolvingPeriodEndDate, initialExpectedSchedule);
     }
 
     /*
@@ -1358,7 +1395,8 @@ public final class LoanAccountData {
                 acc.createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, clientActiveLoanOptions, acc.isTopup, acc.closureLoanId,
                 acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, rates, isRatesEnabled, acc.minFloatingRateInterest,
-                acc.activateOnApproval, acc.isRevolving, acc.revolvingPeriodStartDate, acc.revolvingPeriodEndDate);
+                acc.activateOnApproval, acc.isRevolving, acc.revolvingPeriodStartDate, acc.revolvingPeriodEndDate,
+                acc.initialExpectedSchedule);
     }
 
     public static LoanAccountData associationsAndTemplate(final LoanAccountData acc, final Collection<LoanProductData> productOptions,
@@ -1402,7 +1440,7 @@ public final class LoanAccountData {
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
                 acc.minFloatingRateInterest, acc.activateOnApproval, acc.isRevolving, acc.revolvingPeriodStartDate,
-                acc.revolvingPeriodEndDate);
+                acc.revolvingPeriodEndDate, acc.initialExpectedSchedule);
     }
 
     public static LoanAccountData associateMemberVariations(final LoanAccountData acc, final Map<Long, Integer> memberLoanCycle) {
@@ -1469,7 +1507,7 @@ public final class LoanAccountData {
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
                 acc.minFloatingRateInterest, acc.activateOnApproval, acc.isRevolving, acc.revolvingPeriodStartDate,
-                acc.revolvingPeriodEndDate);
+                acc.revolvingPeriodEndDate, acc.initialExpectedSchedule);
 
     }
 
@@ -1505,7 +1543,7 @@ public final class LoanAccountData {
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
                 acc.minFloatingRateInterest, acc.activateOnApproval, acc.isRevolving, acc.revolvingPeriodStartDate,
-                acc.revolvingPeriodEndDate);
+                acc.revolvingPeriodEndDate, acc.initialExpectedSchedule);
     }
 
     public static LoanAccountData withLoanCalendarData(final LoanAccountData acc, final CalendarData calendarData) {
@@ -1535,7 +1573,7 @@ public final class LoanAccountData {
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
                 acc.minFloatingRateInterest, acc.activateOnApproval, acc.isRevolving, acc.revolvingPeriodStartDate,
-                acc.revolvingPeriodEndDate);
+                acc.revolvingPeriodEndDate, acc.initialExpectedSchedule);
     }
 
     public static LoanAccountData withOriginalSchedule(final LoanAccountData acc, final LoanScheduleData originalSchedule) {
@@ -1566,7 +1604,7 @@ public final class LoanAccountData {
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
                 acc.minFloatingRateInterest, acc.activateOnApproval, acc.isRevolving, acc.revolvingPeriodStartDate,
-                acc.revolvingPeriodEndDate);
+                acc.revolvingPeriodEndDate, acc.initialExpectedSchedule);
     }
 
     private LoanAccountData(final Long id, //
@@ -1620,7 +1658,8 @@ public final class LoanAccountData {
             final Collection<LoanAccountSummaryData> clientActiveLoanOptions, final boolean isTopup, final Long closureLoanId,
             final String closureLoanAccountNo, final BigDecimal topupAmount, final boolean isEqualAmortization, final List<RateData> rates,
             final Boolean isRatesEnabled, final BigDecimal minFloatingRateInterest, final Boolean activateOnApproval,
-            final Boolean isRevolving, final LocalDate revolvingPeriodStartDate, final LocalDate revolvingPeriodEndDate) {
+            final Boolean isRevolving, final LocalDate revolvingPeriodStartDate, final LocalDate revolvingPeriodEndDate,
+            final LoanScheduleData initialExpectedSchedule) {
 
         this.id = id;
         this.accountNo = accountNo;
@@ -1811,6 +1850,8 @@ public final class LoanAccountData {
         this.isRevolving = isRevolving;
         this.revolvingPeriodStartDate = revolvingPeriodStartDate;
         this.revolvingPeriodEndDate = revolvingPeriodEndDate;
+
+        this.initialExpectedSchedule = initialExpectedSchedule;
     }
 
     public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData() {

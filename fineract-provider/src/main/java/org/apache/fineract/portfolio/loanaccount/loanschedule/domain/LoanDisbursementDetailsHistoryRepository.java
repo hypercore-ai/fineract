@@ -16,20 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 
-import java.util.Collection;
-import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
-import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
+package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
-public interface LoanScheduleHistoryReadPlatformService {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-    Integer fetchCurrentVersionNumber(Long loanId);
+import java.util.List;
 
-    LoanScheduleData retrieveRepaymentArchiveSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
-            Collection<DisbursementData> disbursementData);
+public interface LoanDisbursementDetailsHistoryRepository
+        extends JpaRepository<LoanDisbursementDetailsHistory, Long>, JpaSpecificationExecutor<LoanDisbursementDetailsHistory> {
 
-    LoanScheduleData retrieveRepaymentInitialArchivedSchedule(Long loanId,
-            RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData);
+    @Query("select d from LoanDisbursementDetailsHistory d where d.loan.id = :loanId and d.version= :version")
+    List<LoanDisbursementDetailsHistory> findByLoanIdAndVersion(@Param("loanId") Long loanId,@Param("version") Integer version);
 }

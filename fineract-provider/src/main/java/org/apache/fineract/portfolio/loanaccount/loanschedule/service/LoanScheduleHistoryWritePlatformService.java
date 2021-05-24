@@ -18,18 +18,27 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 
-import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanDisbursementDetailsHistory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 
+import java.util.List;
+
 public interface LoanScheduleHistoryWritePlatformService {
+
+    List<LoanDisbursementDetailsHistory> createDisbursementsArchive(Loan loan, Integer version);
+
+    void createAndSaveLoanDisbursementArchive(Loan loan, Integer version);
 
     List<LoanRepaymentScheduleHistory> createLoanScheduleArchive(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             Loan loan, LoanRescheduleRequest loanRescheduleRequest);
 
     void createAndSaveLoanScheduleArchive(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Loan loan,
             LoanRescheduleRequest loanRescheduleRequest);
+
+    void saveScheduleAndDisbursementsArchive(List<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList,
+                                             List<LoanDisbursementDetailsHistory> loanDisbursementDetailsHistoryList);
 
 }

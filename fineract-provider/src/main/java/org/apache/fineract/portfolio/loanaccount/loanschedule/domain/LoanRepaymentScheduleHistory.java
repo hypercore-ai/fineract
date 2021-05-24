@@ -90,6 +90,10 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
     @Column(name = "version")
     private Integer version;
 
+    public Integer getVersion() {
+        return version;
+    }
+
     /**
      * LoanRepaymentScheduleHistory constructor
      **/

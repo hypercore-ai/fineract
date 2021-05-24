@@ -483,7 +483,7 @@ public class LoansApiResource {
     @Operation(summary = "Retrieve a Loan", description = "Note: template=true parameter doesn't apply to this resource."
             + "Example Requests:\n" + "\n" + "loans/1\n" + "\n" + "\n" + "loans/1?fields=id,principal,annualInterestRate\n" + "\n" + "\n"
             + "loans/1?associations=all\n" + "\n" + "loans/1?associations=all&exclude=guarantors\n" + "\n" + "\n"
-            + "loans/1?fields=id,principal,annualInterestRate&associations=repaymentSchedule,transactions")
+            + "loans/1?fields=id,principal,annualInterestRate&associations=repaymentSchedule,transactions,initialExpectedSchedule")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.GetLoansLoanIdResponse.class))) })
     public String retrieveLoan(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
@@ -541,8 +541,9 @@ public class LoansApiResource {
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList("repaymentSchedule", "futureSchedule", "originalSchedule", "transactions",
-                        "charges", "guarantors", "collateral", "notes", "linkedAccount", "multiDisburseDetails"));
+                associationParameters
+                        .addAll(Arrays.asList("repaymentSchedule", "futureSchedule", "originalSchedule", "transactions", "charges",
+                                "guarantors", "collateral", "notes", "linkedAccount", "multiDisburseDetails", "initialExpectedSchedule"));
             }
 
             ApiParameterHelper.excludeAssociationsForResponseIfProvided(uriInfo.getQueryParameters(), associationParameters);
@@ -578,19 +579,27 @@ public class LoansApiResource {
                 mandatoryResponseParameters.add("repaymentSchedule");
                 final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = loanBasicDetails.repaymentScheduleRelatedData();
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, repaymentScheduleRelatedData,
-                        disbursementData, loanBasicDetails.isInterestRecalculationEnabled(), loanBasicDetails.getTotalPaidFeeCharges());
+                        disbursementData, loanBasicDetails.isInterestRecalculationEnabled(), loanBasicDetails.getTotalPaidFeeCharges(),
+                        loanBasicDetails);
 
                 if (associationParameters.contains("futureSchedule") && loanBasicDetails.isInterestRecalculationEnabled()) {
                     mandatoryResponseParameters.add("futureSchedule");
                     this.calculationPlatformService.updateFutureSchedule(repaymentSchedule, loanId);
                 }
 
-                if (associationParameters.contains("originalSchedule") && loanBasicDetails.isInterestRecalculationEnabled()
-                        && loanBasicDetails.isActive()) {
+                if (associationParameters.contains("originalSchedule") && loanBasicDetails.isInterestRecalculationEnabled()) {
                     mandatoryResponseParameters.add("originalSchedule");
                     LoanScheduleData loanScheduleData = this.loanScheduleHistoryReadPlatformService.retrieveRepaymentArchiveSchedule(loanId,
                             repaymentScheduleRelatedData, disbursementData);
                     loanBasicDetails = LoanAccountData.withOriginalSchedule(loanBasicDetails, loanScheduleData);
+                }
+
+                if (associationParameters.contains("initialExpectedSchedule")) {
+                    mandatoryResponseParameters.add("initialExpectedSchedule");
+
+                    LoanScheduleData initialExpectedScheduleData = this.loanScheduleHistoryReadPlatformService
+                            .retrieveRepaymentInitialArchivedSchedule(loanId, repaymentScheduleRelatedData);
+                    loanBasicDetails = LoanAccountData.withInitialExpectedSchedule(loanBasicDetails, initialExpectedScheduleData);
                 }
             }
 

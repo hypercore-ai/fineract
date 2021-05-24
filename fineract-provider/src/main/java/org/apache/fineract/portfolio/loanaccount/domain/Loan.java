@@ -815,7 +815,6 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public void removeLoanCharge(final LoanCharge loanCharge) {
-
         validateLoanIsNotClosed(loanCharge);
 
         // NOTE: to remove this constraint requires that loan transactions
@@ -2532,20 +2531,21 @@ public class Loan extends AbstractPersistableCustom {
                         actualDisbursementDate);
             }
 
-            if (this.loanProduct.isRevolving()) {
-                final Date revolvingStartDate = this.getRevolvingPeriodStartDate();
-                if (revolvingStartDate != null) {
-                    if (actualDisbursementDate.before(revolvingStartDate)) {
-                        throw new LoanDisbursalException("Cannot disburse out of the revolving period",
-                                "actualdisbursementdate.before.revolvingperiodstart", revolvingStartDate, actualDisbursementDate);
-                    }
-
-                    final Date revolvingEndDate = this.getRevolvingPeriodEndDate();
-                    if (revolvingEndDate != null && actualDisbursementDate.after(revolvingEndDate)) {
-                        throw new LoanDisbursalException("Cannot disburse out of the revolving period",
-                                "actualdisbursementdate.after.revolvingperiodend", revolvingEndDate, actualDisbursementDate);
-                    }
-                }
+            if (this.loanProduct.isRevolving() && !isDateInRevolvingPeriod(actualDisbursementLocalDate)) {
+                throw new LoanDisbursalException("Cannot disburse out of the revolving period",
+                        "actualdisbursementdate.not.revolvingperiods", getRevolvingPeriodStartDate(), getRevolvingPeriodEndDate(), actualDisbursementDate);
+//                final Date revolvingStartDate = this.getRevolvingPeriodStartDate();
+//                if (revolvingStartDate != null) {
+//                    if (actualDisbursementDate.before(revolvingStartDate)) {
+//
+//                    }
+//
+//                    final Date revolvingEndDate = this.getRevolvingPeriodEndDate();
+//                    if (revolvingEndDate != null && actualDisbursementDate.after(revolvingEndDate)) {
+//                        throw new LoanDisbursalException("Cannot disburse out of the revolving period",
+//                                "actualdisbursementdate.after.revolvingperiodend", revolvingEndDate, actualDisbursementDate);
+//                    }
+//                }
             }
 
             isValidMultiTrancheDisburse = true;
