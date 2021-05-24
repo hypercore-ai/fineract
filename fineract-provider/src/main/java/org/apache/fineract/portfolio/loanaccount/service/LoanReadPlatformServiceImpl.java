@@ -249,13 +249,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public LoanScheduleData retrieveRepaymentSchedule(final Long loanId,
             final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
-            boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges) {
+            boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges, LoanAccountData loanBasicDetails) {
 
         try {
             this.context.authenticatedUser();
 
             final LoanScheduleResultSetExtractor fullResultsetExtractor = new LoanScheduleResultSetExtractor(
-                    repaymentScheduleRelatedLoanData, disbursementData, isInterestRecalculationEnabled, totalPaidFeeCharges);
+                    repaymentScheduleRelatedLoanData, disbursementData, isInterestRecalculationEnabled, totalPaidFeeCharges,
+                    loanBasicDetails);
             final String sql = "select " + fullResultsetExtractor.schema()
                     + " where ls.loan_id = ? order by ls.loan_id, ls.installment, ls.installment_sub_period";
 
@@ -1038,9 +1039,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         private BigDecimal outstandingLoanPrincipalBalance;
         private boolean excludePastUndisbursed;
         private BigDecimal totalPaidFeeCharges;
+        private LoanAccountData loanBasicDetails;
 
         LoanScheduleResultSetExtractor(final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
-                Collection<DisbursementData> disbursementData, boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges) {
+                Collection<DisbursementData> disbursementData, boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges,
+                LoanAccountData loanBasicDetails) {
             this.currency = repaymentScheduleRelatedLoanData.getCurrency();
             this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();
             this.totalFeeChargesDueAtDisbursement = repaymentScheduleRelatedLoanData.getTotalFeeChargesAtDisbursement();
@@ -1049,6 +1052,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             this.disbursementData = disbursementData;
             this.excludePastUndisbursed = isInterestRecalculationEnabled;
             this.totalPaidFeeCharges = totalPaidFeeCharges;
+            this.loanBasicDetails = loanBasicDetails;
         }
 
         public String schema() {
@@ -1124,6 +1128,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 if (disbursementData != null && subPeriod == null) {
                     BigDecimal principal = BigDecimal.ZERO;
                     for (final DisbursementData data : disbursementData) {
+                        // Active loan will contain actual disbursements only
+                        if (this.loanBasicDetails.isActive() && !data.isDisbursed()) {
+                            continue;
+                        }
+
                         if (fromDate.equals(this.disbursement.disbursementDate()) && data.disbursementDate().equals(fromDate)) {
                             if (periods.size() == 0) {
                                 principal = principal.add(data.amount());

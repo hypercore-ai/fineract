@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,14 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 
-import java.math.BigDecimal;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanDisbursementDetailsHistory;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanDisbursementDetailsHistoryRepository;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistoryRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
@@ -33,18 +31,45 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanScheduleHistoryWritePlatformService {
 
     private final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService;
     private final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository;
+    private final LoanDisbursementDetailsHistoryRepository loanDisbursementDetailsHistoryRepository;
 
     @Autowired
     public LoanScheduleHistoryWritePlatformServiceImpl(final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService,
-            final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository) {
+            final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
+            final LoanDisbursementDetailsHistoryRepository loanDisbursementDetailsHistoryRepository) {
         this.loanScheduleHistoryReadPlatformService = loanScheduleHistoryReadPlatformService;
         this.loanRepaymentScheduleHistoryRepository = loanRepaymentScheduleHistoryRepository;
+        this.loanDisbursementDetailsHistoryRepository = loanDisbursementDetailsHistoryRepository;
 
+    }
+
+    @Override
+    public List<LoanDisbursementDetailsHistory> createDisbursementsArchive(Loan loan, Integer version) {
+        List<LoanDisbursementDetails> disbursementDetails = loan.getDisbursementDetails();
+
+        return disbursementDetails.stream()
+                .map(loanDisbursementDetails -> new LoanDisbursementDetailsHistory(loan, version,
+                        loanDisbursementDetails.expectedDisbursementDate(), loanDisbursementDetails.actualDisbursementDate(),
+                        loanDisbursementDetails.principal()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void createAndSaveLoanDisbursementArchive(Loan loan, Integer version) {
+        List<LoanDisbursementDetailsHistory> loanDisbursementHistory = createDisbursementsArchive(loan, version);
+        this.loanDisbursementDetailsHistoryRepository.saveAll(loanDisbursementHistory);
     }
 
     @Override
@@ -102,7 +127,15 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
         List<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList = createLoanScheduleArchive(repaymentScheduleInstallments, loan,
                 loanRescheduleRequest);
         this.loanRepaymentScheduleHistoryRepository.saveAll(loanRepaymentScheduleHistoryList);
+        Integer version = loanRepaymentScheduleHistoryList.get(0).getVersion();
+        createAndSaveLoanDisbursementArchive(loan, version);
+    }
 
+    @Override
+    public void saveScheduleAndDisbursementsArchive(List<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList,
+                                                    List<LoanDisbursementDetailsHistory> loanDisbursementDetailsHistoryList) {
+        this.loanRepaymentScheduleHistoryRepository.saveAll(loanRepaymentScheduleHistoryList);
+        this.loanDisbursementDetailsHistoryRepository.saveAll(loanDisbursementDetailsHistoryList);
     }
 
 }
