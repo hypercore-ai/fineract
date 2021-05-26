@@ -18,6 +18,16 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -38,17 +48,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleHistoryReadPlatformService {
@@ -95,8 +94,9 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
         List<DisbursementData> disbursementDataList = disbursementDetailsHistoryList.stream().map(disbursement -> {
             LocalDate expectedDisbursementDate = LocalDate.ofInstant(disbursement.expectedDisbursementDate().toInstant(),
                     ZoneId.systemDefault());
-            LocalDate actualDisbursementDate = disbursement.actualDisbursementDate() != null ? LocalDate.ofInstant(disbursement.actualDisbursementDate().toInstant(),
-                    ZoneId.systemDefault()) : null;
+            LocalDate actualDisbursementDate = disbursement.actualDisbursementDate() != null
+                    ? LocalDate.ofInstant(disbursement.actualDisbursementDate().toInstant(), ZoneId.systemDefault())
+                    : null;
             return new DisbursementData(disbursement.getId(), expectedDisbursementDate, actualDisbursementDate, disbursement.principal(),
                     null, null, null);
         }).collect(Collectors.toList());
@@ -147,7 +147,8 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
 
         public String schema() {
             StringBuilder stringBuilder = new StringBuilder(200);
-            stringBuilder.append(" ls.installment as period, ls.installment_sub_period as subPeriod, ls.fromdate as fromDate, ls.duedate as dueDate, ");
+            stringBuilder.append(
+                    " ls.installment as period, ls.installment_sub_period as subPeriod, ls.fromdate as fromDate, ls.duedate as dueDate, ");
             stringBuilder.append(
                     "ls.principal_amount as principalDue, ls.interest_amount as interestDue, ls.fee_charges_amount as feeChargesDue, ls.penalty_charges_amount as penaltyChargesDue ");
             stringBuilder.append(" from m_loan_repayment_schedule_history ls ");
@@ -250,14 +251,14 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
                 this.lastDueDate = dueDate;
                 this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.subtract(principalDue);
 
-
                 LoanSchedulePeriodData periodData;
                 if (subPeriod != null) {
-                    periodData = LoanSchedulePeriodData.repaymentSubPeriod(period, subPeriod, fromDate, dueDate, outstandingPrincipalBalanceOfLoan, interestExpectedDue);
+                    periodData = LoanSchedulePeriodData.repaymentSubPeriod(period, subPeriod, fromDate, dueDate,
+                            outstandingPrincipalBalanceOfLoan, interestExpectedDue);
                 } else {
-                     periodData = LoanSchedulePeriodData.repaymentOnlyPeriod(period, fromDate, dueDate,
-                            principalDue, outstandingPrincipalBalanceOfLoan, interestExpectedDue, feeChargesExpectedDue,
-                            penaltyChargesExpectedDue, totalDueForPeriod, totalInstallmentAmount);
+                    periodData = LoanSchedulePeriodData.repaymentOnlyPeriod(period, fromDate, dueDate, principalDue,
+                            outstandingPrincipalBalanceOfLoan, interestExpectedDue, feeChargesExpectedDue, penaltyChargesExpectedDue,
+                            totalDueForPeriod, totalInstallmentAmount);
 
                 }
 

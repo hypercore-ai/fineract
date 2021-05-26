@@ -19,16 +19,15 @@
 
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-
 public interface LoanDisbursementDetailsHistoryRepository
         extends JpaRepository<LoanDisbursementDetailsHistory, Long>, JpaSpecificationExecutor<LoanDisbursementDetailsHistory> {
 
     @Query("select d from LoanDisbursementDetailsHistory d where d.loan.id = :loanId and d.version= :version")
-    List<LoanDisbursementDetailsHistory> findByLoanIdAndVersion(@Param("loanId") Long loanId,@Param("version") Integer version);
+    List<LoanDisbursementDetailsHistory> findByLoanIdAndVersion(@Param("loanId") Long loanId, @Param("version") Integer version);
 }

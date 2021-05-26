@@ -2533,7 +2533,8 @@ public class Loan extends AbstractPersistableCustom {
 
             if (this.loanProduct.isRevolving() && !isDateInRevolvingPeriod(actualDisbursementLocalDate)) {
                 throw new LoanDisbursalException("Cannot disburse out of the revolving period",
-                        "actualdisbursementdate.not.revolvingperiods", getRevolvingPeriodStartDate(), getRevolvingPeriodEndDate(), actualDisbursementDate);
+                        "actualdisbursementdate.not.revolvingperiods", getRevolvingPeriodStartDate(), getRevolvingPeriodEndDate(),
+                        actualDisbursementDate);
             }
 
             isValidMultiTrancheDisburse = true;
