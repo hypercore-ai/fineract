@@ -79,6 +79,10 @@ public class DisbursementData implements Comparable<DisbursementData> {
         this.waivedChargeAmount = waivedChargeAmount;
     }
 
+    public LocalDate getExpectedDisbursementDate() {
+        return expectedDisbursementDate;
+    }
+
     public LocalDate disbursementDate() {
         LocalDate disbursementDate = this.expectedDisbursementDate;
         if (this.actualDisbursementDate != null) {
@@ -110,6 +114,11 @@ public class DisbursementData implements Comparable<DisbursementData> {
 
     public boolean isDueForDisbursement(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive) {
         final LocalDate dueDate = disbursementDate();
+        return occursOnDayFromAndUpToAndIncluding(fromNotInclusive, upToAndInclusive, dueDate);
+    }
+
+    public boolean isExpectedDueForDisbursement(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive) {
+        final LocalDate dueDate = getExpectedDisbursementDate();
         return occursOnDayFromAndUpToAndIncluding(fromNotInclusive, upToAndInclusive, dueDate);
     }
 

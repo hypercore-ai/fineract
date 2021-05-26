@@ -115,9 +115,12 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInS
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanDisbursementDetailsHistory;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTransitionApiJsonValidator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
@@ -188,6 +191,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final FineractEntityToEntityMappingRepository repository;
     private final FineractEntityRelationRepository fineractEntityRelationRepository;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
+    private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
 
     private final RateAssembler rateAssembler;
     private final GLIMAccountInfoWritePlatformService glimAccountInfoWritePlatformService;
@@ -220,7 +224,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             final GLIMAccountInfoWritePlatformService glimAccountInfoWritePlatformService, final GLIMAccountInfoRepository glimRepository,
             final LoanRepository loanRepository, final GSIMReadPlatformService gsimReadPlatformService, final RateAssembler rateAssembler,
-            final LoanProductReadPlatformService loanProductReadPlatformService) {
+            final LoanProductReadPlatformService loanProductReadPlatformService, final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -261,6 +265,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.glimRepository = glimRepository;
         this.loanRepository = loanRepository;
         this.gsimReadPlatformService = gsimReadPlatformService;
+        this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -1383,6 +1388,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         }
 
+        // Get initial expected schedule
+        List<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList =loanScheduleHistoryWritePlatformService.createLoanScheduleArchive(loan.getRepaymentScheduleInstallments(), loan, null);
+        Integer version = loanRepaymentScheduleHistoryList.get(0).getVersion();
+        List<LoanDisbursementDetailsHistory> loanDisbursementDetailsHistories = loanScheduleHistoryWritePlatformService.createDisbursementsArchive(loan, version);
+
         final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, disbursementDataArray,
                 defaultLoanLifecycleStateMachine());
 
@@ -1430,6 +1440,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
 
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+
+            // After successfully approved save the initial expected schedule
+            loanScheduleHistoryWritePlatformService.saveScheduleAndDisbursementsArchive(loanRepaymentScheduleHistoryList, loanDisbursementDetailsHistories);
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {

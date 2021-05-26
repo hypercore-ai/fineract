@@ -16,20 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
+package org.apache.fineract.portfolio.loanaccount.loanschedule.exception;
 
-import java.util.Collection;
-import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
-import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface LoanScheduleHistoryReadPlatformService {
+public class ActiveOnApprovalException extends AbstractPlatformDomainRuleException {
 
-    Integer fetchCurrentVersionNumber(Long loanId);
-
-    LoanScheduleData retrieveRepaymentArchiveSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
-            Collection<DisbursementData> disbursementData);
-
-    LoanScheduleData retrieveRepaymentInitialArchivedSchedule(Long loanId,
-            RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData);
+    public ActiveOnApprovalException(final String defaultUserMessage, final Object... defaultUserMessageArgs) {
+        super("error.msg.schedule.with.no.disbursements.valid.for.active.on.approval.only", defaultUserMessage, defaultUserMessageArgs);
+    }
 }

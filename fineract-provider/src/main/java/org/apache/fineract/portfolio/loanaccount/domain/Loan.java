@@ -815,7 +815,6 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public void removeLoanCharge(final LoanCharge loanCharge) {
-
         validateLoanIsNotClosed(loanCharge);
 
         // NOTE: to remove this constraint requires that loan transactions
@@ -1917,8 +1916,8 @@ public class Loan extends AbstractPersistableCustom {
     private void createOrUpdateDisbursementDetails(Long disbursementID, final Map<String, Object> actualChanges,
             Date expectedDisbursementDate, BigDecimal principal, List<Long> existingDisbursementList) {
 
-        if (disbursementID != null) {
-            LoanDisbursementDetails loanDisbursementDetail = fetchLoanDisbursementsById(disbursementID);
+        LoanDisbursementDetails loanDisbursementDetail = disbursementID != null ? fetchLoanDisbursementsById(disbursementID) : null;
+        if (loanDisbursementDetail != null) {
             existingDisbursementList.remove(disbursementID);
             if (loanDisbursementDetail.actualDisbursementDate() == null) {
                 Date actualDisbursementDate = null;
@@ -2532,20 +2531,9 @@ public class Loan extends AbstractPersistableCustom {
                         actualDisbursementDate);
             }
 
-            if (this.loanProduct.isRevolving()) {
-                final Date revolvingStartDate = this.getRevolvingPeriodStartDate();
-                if (revolvingStartDate != null) {
-                    if (actualDisbursementDate.before(revolvingStartDate)) {
-                        throw new LoanDisbursalException("Cannot disburse out of the revolving period",
-                                "actualdisbursementdate.before.revolvingperiodstart", revolvingStartDate, actualDisbursementDate);
-                    }
-
-                    final Date revolvingEndDate = this.getRevolvingPeriodEndDate();
-                    if (revolvingEndDate != null && actualDisbursementDate.after(revolvingEndDate)) {
-                        throw new LoanDisbursalException("Cannot disburse out of the revolving period",
-                                "actualdisbursementdate.after.revolvingperiodend", revolvingEndDate, actualDisbursementDate);
-                    }
-                }
+            if (this.loanProduct.isRevolving() && !isDateInRevolvingPeriod(actualDisbursementLocalDate)) {
+                throw new LoanDisbursalException("Cannot disburse out of the revolving period",
+                        "actualdisbursementdate.not.revolvingperiods", getRevolvingPeriodStartDate(), getRevolvingPeriodEndDate(), actualDisbursementDate);
             }
 
             isValidMultiTrancheDisburse = true;
@@ -2697,14 +2685,14 @@ public class Loan extends AbstractPersistableCustom {
         return principal;
     }
 
-    private BigDecimal getExpectedDisbursedAmount(LocalDate untilDate) {
+    private BigDecimal getActualDisbursedAmount(LocalDate untilDate) {
         BigDecimal principal = BigDecimal.ZERO;
         if (untilDate != null) {
             for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
-                Date disbursedDate = disbursementDetail.actualDisbursementDate() != null ? disbursementDetail.actualDisbursementDate()
-                        : disbursementDetail.expectedDisbursementDate();
-                LocalDate disbursedLocalDate = LocalDate.ofInstant(disbursedDate.toInstant(), ZoneId.systemDefault());
-                if (disbursedLocalDate.isBefore(untilDate)) {
+                LocalDate disbursedLocalDate = disbursementDetail.actualDisbursementDate() != null
+                        ? LocalDate.ofInstant(disbursementDetail.actualDisbursementDate().toInstant(), ZoneId.systemDefault())
+                        : null;
+                if (disbursedLocalDate != null && disbursedLocalDate.isBefore(untilDate)) {
                     principal = principal.add(disbursementDetail.principal());
                 }
             }
@@ -2726,16 +2714,14 @@ public class Loan extends AbstractPersistableCustom {
                 .divide(BigDecimal.valueOf(100), mc);
 
         // Calc disbursed until start period
-        BigDecimal disbursedAmount = getExpectedDisbursedAmount(periodStart);
+        BigDecimal disbursedAmount = getActualDisbursedAmount(periodStart);
         BigDecimal unutilizedAmount = this.approvedPrincipal.subtract(disbursedAmount);
 
         Stream<TransactionHelper> disbursementsInPeriodStream = this.getDisbursementDetails().stream().filter(disbursementDetail -> {
-            Date disbursedDate = disbursementDetail.actualDisbursementDate() != null ? disbursementDetail.actualDisbursementDate()
-                    : disbursementDetail.expectedDisbursementDate();
-            return CalendarUtils.checkDateBetween(disbursedDate, periodStart, periodEnd);
+            Date actualDisbursementDate = disbursementDetail.actualDisbursementDate();
+            return actualDisbursementDate != null && CalendarUtils.checkDateBetween(actualDisbursementDate, periodStart, periodEnd);
         }).map(disbursementDetail -> {
-            Date disbursedDate = disbursementDetail.actualDisbursementDate() != null ? disbursementDetail.actualDisbursementDate()
-                    : disbursementDetail.expectedDisbursementDate();
+            Date disbursedDate = disbursementDetail.actualDisbursementDate();
             return new TransactionHelper(LocalDate.ofInstant(disbursedDate.toInstant(), ZoneId.systemDefault()),
                     disbursementDetail.principal().negate());
         });
@@ -2842,6 +2828,7 @@ public class Loan extends AbstractPersistableCustom {
     public LoanScheduleModel regenerateScheduleModel(final ScheduleGeneratorDTO scheduleGeneratorDTO) {
 
         final MathContext mc = createMathContext();
+        boolean activeNotDisbursed = this.shouldActivateOnApproval() && this.isMultiDisburmentLoan() && !this.isDisbursed();
 
         final LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(scheduleGeneratorDTO);
         LoanScheduleGenerator loanScheduleGenerator = null;
@@ -2851,7 +2838,7 @@ public class Loan extends AbstractPersistableCustom {
                         .create(InterestMethod.DECLINING_BALANCE);
                 Set<LoanCharge> loanCharges = charges();
                 LoanScheduleModel loanSchedule = decliningLoanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges,
-                        scheduleGeneratorDTO.getHolidayDetailDTO());
+                        scheduleGeneratorDTO.getHolidayDetailDTO(), activeNotDisbursed);
 
                 loanApplicationTerms
                         .updateTotalInterestDue(Money.of(loanApplicationTerms.getCurrency(), loanSchedule.getTotalInterestCharged()));
@@ -2863,7 +2850,7 @@ public class Loan extends AbstractPersistableCustom {
         }
 
         final LoanScheduleModel loanSchedule = loanScheduleGenerator.generate(mc, loanApplicationTerms, charges(),
-                scheduleGeneratorDTO.getHolidayDetailDTO());
+                scheduleGeneratorDTO.getHolidayDetailDTO(), activeNotDisbursed);
         return loanSchedule;
     }
 
