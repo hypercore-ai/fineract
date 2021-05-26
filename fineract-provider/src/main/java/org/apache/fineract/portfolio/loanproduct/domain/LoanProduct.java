@@ -1444,19 +1444,20 @@ public class LoanProduct extends AbstractPersistableCustom {
         }
         if (loanTermVariations != null) {
             List<LoanTermVariationsData> loanTermVariationsData = loanTermVariations.stream()
-                    .filter(v -> v.getTermType().isOverrideInterestRate()).map(v -> v.toData())
+                    .filter(v -> v.isActive() && v.getTermType().isOverrideInterestRate()).map(v -> v.toData())
                     .sorted((v1, v2) -> v1.getCreatedDate().compareTo(v2.getCreatedDate())).collect(Collectors.toList());
             for (LoanTermVariationsData variation : loanTermVariationsData) {
                 FloatingRatePeriodData lastPeriodData = null;
-                FloatingRatePeriodData firstPeriodData = applicableRates.iterator().next();
+                boolean isDifferentialToBaseLendingRate = !applicableRates.isEmpty()
+                        ? applicableRates.iterator().next().isDifferentialToBaseLendingRate()
+                        : false;
                 List<FloatingRatePeriodData> applicableRatesToRemove = new ArrayList<>();
                 for (FloatingRatePeriodData periodData : applicableRates) {
                     if (!periodData.getFromDate().isAfter(variation.getEndDate())
                             && (lastPeriodData == null || lastPeriodData.getFromDate().isBefore(periodData.getFromDate()))) {
                         lastPeriodData = periodData;
                     }
-                    if (variation.getTermApplicableFrom() != null && !variation.getTermApplicableFrom().isAfter(periodData.getFromDate())
-                            && variation.getEndDate() != null && !variation.getEndDate().isBefore(periodData.getFromDate())) {
+                    if (variation.isDateContained(periodData.getFromDate())) {
                         applicableRatesToRemove.add(periodData);
                     }
                 }
@@ -1466,13 +1467,16 @@ public class LoanProduct extends AbstractPersistableCustom {
                 }
 
                 applicableRates.add(new FloatingRatePeriodData(Double.valueOf(Math.random()).longValue(), variation.getTermApplicableFrom(),
-                        variation.getDecimalValue(), firstPeriodData != null ? firstPeriodData.isDifferentialToBaseLendingRate() : false,
-                        true, null, variation.getCreatedDate().toLocalDate(), null, variation.getCreatedDate().toLocalDate()));
-                applicableRates
-                        .add(new FloatingRatePeriodData(Double.valueOf(Math.random()).longValue(), variation.getEndDate().plusDays(1),
-                                lastPeriodData != null ? lastPeriodData.getInterestRate() : annualNominalInterestRate,
-                                firstPeriodData != null ? firstPeriodData.isDifferentialToBaseLendingRate() : false, true, null,
-                                variation.getCreatedDate().toLocalDate(), null, variation.getCreatedDate().toLocalDate()));
+                        variation.getDecimalValue(), isDifferentialToBaseLendingRate, true, null, variation.getCreatedDate().toLocalDate(),
+                        null, variation.getCreatedDate().toLocalDate()));
+
+                LocalDate newVariationNextDay = variation.getEndDate().plusDays(1);
+                if (!applicableRates.stream().anyMatch(x -> x.getFromDate().equals(newVariationNextDay))) {
+                    applicableRates.add(new FloatingRatePeriodData(Double.valueOf(Math.random()).longValue(), newVariationNextDay,
+                            lastPeriodData != null ? lastPeriodData.getInterestRate() : annualNominalInterestRate,
+                            isDifferentialToBaseLendingRate, true, null, variation.getCreatedDate().toLocalDate(), null,
+                            variation.getCreatedDate().toLocalDate()));
+                }
             }
         }
         return applicableRates;

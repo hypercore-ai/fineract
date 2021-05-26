@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -123,6 +124,17 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
         }
 
         loanApplicationTerms.getLoanTermVariations().updateLoanTermVariationsData(loanTermVariationsData);
+
+        // We need to set annualNominalInterestRate new override interest rate was added before loan start date
+        List<LoanTermVariationsData> overrideInterestLoanTermVariationsData = loanTermVariationsData.stream()
+                .filter(v -> v.getTermVariationType().isOverrideInterestRate() && v.isDateContained(loan.getLoanStartingDate()))
+                .sorted((v1, v2) -> v2.getCreatedDate().compareTo(v1.getCreatedDate())).collect(Collectors.toList());
+        if (!overrideInterestLoanTermVariationsData.isEmpty()) {
+            LoanTermVariationsData variation = overrideInterestLoanTermVariationsData.iterator().next();
+            loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
+            loanApplicationTerms.updateBasicInterestRate(variation.getDecimalValue());
+        }
+
         final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mathContext = new MathContext(8, roundingMode);
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.loanRepaymentScheduleTransactionProcessorFactory

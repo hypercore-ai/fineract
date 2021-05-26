@@ -152,7 +152,7 @@ public class LoanTermVariations extends AbstractPersistableCustom {
 
     public LoanTermVariationsData toData() {
         LocalDate termStartDate = LocalDate.ofInstant(this.termApplicableFrom.toInstant(), ZoneId.systemDefault());
-        LocalDate endDate = LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault());
+        LocalDate endDate = this.endDate != null ? LocalDate.ofInstant(this.endDate.toInstant(), ZoneId.systemDefault()) : null;
         LocalDateTime createdDate = this.createdDate != null ? LocalDateTime.ofInstant(this.createdDate.toInstant(), ZoneId.systemDefault())
                 : null;
         LocalDate dateValue = null;

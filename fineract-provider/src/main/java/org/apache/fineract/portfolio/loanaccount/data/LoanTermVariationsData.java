@@ -80,6 +80,22 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
         return occursOnDayFromAndUpTo(fromDate, dueDate);
     }
 
+    public boolean isDateRangeContained(LocalDate startDate, LocalDate endDate) {
+        if (this.endDate == null || this.termVariationApplicableFrom == null) {
+            return false;
+        }
+
+        return !this.termVariationApplicableFrom.isAfter(startDate) && !this.endDate.isBefore(endDate);
+    }
+
+    public boolean isDateContained(LocalDate date) {
+        if (this.endDate == null || this.termVariationApplicableFrom == null) {
+            return false;
+        }
+
+        return !this.termVariationApplicableFrom.isAfter(date) && !this.endDate.isBefore(date);
+    }
+
     private boolean occursOnDayFromAndUpTo(final LocalDate fromNotInclusive, final LocalDate upToInclusive) {
         return this.termVariationApplicableFrom != null && this.termVariationApplicableFrom.isAfter(fromNotInclusive)
                 && !this.termVariationApplicableFrom.isAfter(upToInclusive)

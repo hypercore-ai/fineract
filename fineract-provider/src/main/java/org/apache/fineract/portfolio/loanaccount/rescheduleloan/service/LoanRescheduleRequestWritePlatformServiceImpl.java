@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
@@ -471,7 +472,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
         if (rescheduleFromDate != null && interestRate != null) {
             if (endDate == null) {
                 createLoanTermVariations(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue(), loan, rescheduleFromDate, dueDate,
-                        loanRescheduleRequestToTermVariationMappings, isActive, false, interestRate, null, null);
+                        loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment, interestRate, null, null);
             } else {
                 createLoanTermVariations(LoanTermVariationType.OVERRIDE_INTEREST_RATE.getValue(), loan, rescheduleFromDate, dueDate,
                         loanRescheduleRequestToTermVariationMappings, isActive, false, interestRate, null, endDate);
@@ -609,6 +610,15 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
              * false, loanApplicationTerms.getHolidayDetailDTO());
              * loanTermVariation.setApplicableFromDate(adjustedDate); } } }
              */
+
+            List<LoanTermVariationsData> overrideInterestLoanTermVariationsData = loanTermVariations.stream()
+                    .filter(v -> v.getTermVariationType().isOverrideInterestRate() && v.isDateContained(loan.getLoanStartingDate()))
+                    .sorted((v1, v2) -> v2.getCreatedDate().compareTo(v1.getCreatedDate())).collect(Collectors.toList());
+            if (!overrideInterestLoanTermVariationsData.isEmpty()) {
+                LoanTermVariationsData variation = overrideInterestLoanTermVariationsData.iterator().next();
+                loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
+                loanApplicationTerms.updateBasicInterestRate(variation.getDecimalValue());
+            }
 
             final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
             final MathContext mathContext = new MathContext(8, roundingMode);

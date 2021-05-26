@@ -174,10 +174,7 @@ public class LoanTermVariationsDataWrapper {
                                 .isBefore(interestRateVariation.getTermApplicableFrom()))) {
                     lastInterestRateVariation = interestRateVariation;
                 }
-                if (overrideInterestRateVariation.getTermApplicableFrom() != null
-                        && !overrideInterestRateVariation.getTermApplicableFrom().isAfter(interestRateVariation.getTermApplicableFrom())
-                        && overrideInterestRateVariation.getEndDate() != null
-                        && !overrideInterestRateVariation.getEndDate().isBefore(interestRateVariation.getTermApplicableFrom())) {
+                if (overrideInterestRateVariation.isDateContained(interestRateVariation.getTermApplicableFrom())) {
                     interestRateVariationToRemove.add(interestRateVariation);
                 }
             }
@@ -189,11 +186,13 @@ public class LoanTermVariationsDataWrapper {
             this.interestRateChanges.add(new LoanTermVariationsData(LoanEnumerations.loanvariationType(LoanTermVariationType.INTEREST_RATE),
                     overrideInterestRateVariation.getTermApplicableFrom(), overrideInterestRateVariation.getDecimalValue(), null, false));
 
-            this.interestRateChanges.add(new LoanTermVariationsData(LoanEnumerations.loanvariationType(LoanTermVariationType.INTEREST_RATE),
-                    overrideInterestRateVariation.getEndDate().plusDays(1),
-                    lastInterestRateVariation != null ? lastInterestRateVariation.getDecimalValue() : this.annualNominalInterestRate, null,
-                    false));
-
+            LocalDate newVariationNextDay = overrideInterestRateVariation.getEndDate().plusDays(1);
+            if (!this.interestRateChanges.stream().anyMatch(x -> x.getTermApplicableFrom().equals(newVariationNextDay))) {
+                this.interestRateChanges.add(new LoanTermVariationsData(
+                        LoanEnumerations.loanvariationType(LoanTermVariationType.INTEREST_RATE), newVariationNextDay,
+                        lastInterestRateVariation != null ? lastInterestRateVariation.getDecimalValue() : this.annualNominalInterestRate,
+                        null, false));
+            }
         }
         Collections.sort(this.dueDateVariation);
         this.exceptionData.removeAll(this.interestRateChanges);
