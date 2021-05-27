@@ -577,6 +577,10 @@ public final class LoanEnumerations {
                 optionData = new EnumOptionData(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue().longValue(),
                         LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getCode(), "interestRateForInstallment");
             break;
+            case OVERRIDE_INTEREST_RATE:
+                optionData = new EnumOptionData(LoanTermVariationType.OVERRIDE_INTEREST_RATE.getValue().longValue(),
+                        LoanTermVariationType.OVERRIDE_INTEREST_RATE.getCode(), "overrideInterestRate");
+            break;
             default:
                 optionData = new EnumOptionData(LoanTermVariationType.INVALID.getValue().longValue(),
                         LoanTermVariationType.INVALID.getCode(), "Invalid");

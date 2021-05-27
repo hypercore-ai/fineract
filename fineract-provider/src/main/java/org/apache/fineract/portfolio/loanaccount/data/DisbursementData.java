@@ -30,7 +30,6 @@ public class DisbursementData implements Comparable<DisbursementData> {
     private final Long id;
     private final LocalDate expectedDisbursementDate;
 
-
     private final LocalDate actualDisbursementDate;
     private final BigDecimal principal;
     @SuppressWarnings("unused")

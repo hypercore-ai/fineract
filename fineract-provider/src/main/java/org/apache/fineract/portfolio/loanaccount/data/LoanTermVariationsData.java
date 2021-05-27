@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 
@@ -29,19 +30,24 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
     private final Long id;
     private final EnumOptionData termType;
     private LocalDate termVariationApplicableFrom;
+    private LocalDate endDate;
+    private LocalDateTime createdDate;
     private final BigDecimal decimalValue;
     private final LocalDate dateValue;
     private final boolean isSpecificToInstallment;
     private Boolean isProcessed;
 
     public LoanTermVariationsData(final Long id, final EnumOptionData termType, final LocalDate termVariationApplicableFrom,
-            final BigDecimal decimalValue, final LocalDate dateValue, final boolean isSpecificToInstallment) {
+            final BigDecimal decimalValue, final LocalDate dateValue, final boolean isSpecificToInstallment, final LocalDate endDate,
+            final LocalDateTime createdDate) {
         this.id = id;
         this.termType = termType;
         this.termVariationApplicableFrom = termVariationApplicableFrom;
         this.decimalValue = decimalValue;
         this.dateValue = dateValue;
         this.isSpecificToInstallment = isSpecificToInstallment;
+        this.endDate = endDate;
+        this.createdDate = createdDate;
     }
 
     public LoanTermVariationsData(final EnumOptionData termType, final LocalDate termVariationApplicableFrom, final BigDecimal decimalValue,
@@ -71,19 +77,37 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
     }
 
     public boolean isApplicable(final LocalDate fromDate, final LocalDate dueDate) {
-        return occursOnDayFromAndUpTo(fromDate, dueDate, this.termVariationApplicableFrom);
+        return occursOnDayFromAndUpTo(fromDate, dueDate);
     }
 
-    private boolean occursOnDayFromAndUpTo(final LocalDate fromNotInclusive, final LocalDate upToInclusive, final LocalDate target) {
-        return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToInclusive);
+    public boolean isDateRangeContained(LocalDate startDate, LocalDate endDate) {
+        if (this.endDate == null || this.termVariationApplicableFrom == null) {
+            return false;
+        }
+
+        return !this.termVariationApplicableFrom.isAfter(startDate) && !this.endDate.isBefore(endDate);
+    }
+
+    public boolean isDateContained(LocalDate date) {
+        if (this.endDate == null || this.termVariationApplicableFrom == null) {
+            return false;
+        }
+
+        return !this.termVariationApplicableFrom.isAfter(date) && !this.endDate.isBefore(date);
+    }
+
+    private boolean occursOnDayFromAndUpTo(final LocalDate fromNotInclusive, final LocalDate upToInclusive) {
+        return this.termVariationApplicableFrom != null && this.termVariationApplicableFrom.isAfter(fromNotInclusive)
+                && !this.termVariationApplicableFrom.isAfter(upToInclusive)
+                && (this.endDate == null || (this.endDate.isAfter(fromNotInclusive) && !this.endDate.isAfter(upToInclusive)));
     }
 
     public boolean isApplicable(final LocalDate fromDate) {
-        return occursBefore(fromDate, this.termVariationApplicableFrom);
+        return occursBefore(fromDate);
     }
 
-    private boolean occursBefore(final LocalDate date, final LocalDate target) {
-        return target != null && !target.isAfter(date);
+    private boolean occursBefore(final LocalDate date) {
+        return this.termVariationApplicableFrom != null && !this.termVariationApplicableFrom.isAfter(date);
     }
 
     public LocalDate getDateValue() {
@@ -115,6 +139,18 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
 
     public void setApplicableFromDate(final LocalDate applicableFromDate) {
         this.termVariationApplicableFrom = applicableFromDate;
+    }
+
+    public LocalDate getEndDate() {
+        return this.endDate;
+    }
+
+    public void setEndDate(final LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public LocalDateTime getCreatedDate() {
+        return this.createdDate;
     }
 
 }

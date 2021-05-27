@@ -18,6 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 
+import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
@@ -30,13 +36,6 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanResch
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanScheduleHistoryWritePlatformService {
@@ -133,7 +132,7 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
 
     @Override
     public void saveScheduleAndDisbursementsArchive(List<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList,
-                                                    List<LoanDisbursementDetailsHistory> loanDisbursementDetailsHistoryList) {
+            List<LoanDisbursementDetailsHistory> loanDisbursementDetailsHistoryList) {
         this.loanRepaymentScheduleHistoryRepository.saveAll(loanRepaymentScheduleHistoryList);
         this.loanDisbursementDetailsHistoryRepository.saveAll(loanDisbursementDetailsHistoryList);
     }
