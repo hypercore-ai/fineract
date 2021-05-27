@@ -144,9 +144,7 @@ public class LoanRescheduleRequestDataValidator {
         dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleReasonCommentParamName).value(rescheduleReasonComment)
                 .ignoreIfNull().notExceedingLengthOf(500);
 
-        if (this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.emiParamName, jsonElement)
-        // || this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.endDateParamName, jsonElement)
-        ) {
+        if (this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.emiParamName, jsonElement)) {
             final LocalDate endDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.endDateParamName);
             final BigDecimal emi = jsonCommand.bigDecimalValueOfParameterNamed(RescheduleLoansApiConstants.emiParamName);
 
@@ -183,10 +181,10 @@ public class LoanRescheduleRequestDataValidator {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.graceOnPrincipalParamName).notNull();
         }
         LoanRepaymentScheduleInstallment installment = null;
-        if (rescheduleFromDate != null) {
+        if (rescheduleFromDate != null && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.endDateParamName, jsonElement)) {
             installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
 
-            if (installment == null && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.endDateParamName, jsonElement)) {
+            if (installment == null) {
                 dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
                         .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
             }
@@ -268,13 +266,15 @@ public class LoanRescheduleRequestDataValidator {
                 dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode("loan.is.not.active", "Loan is not active");
             }
 
-            if (rescheduleFromDate != null) {
+            boolean requestHasOverrideInterestVariation = loanRescheduleRequest.getLoanRescheduleRequestToTermVariationMappings().stream()
+                    .anyMatch(x -> x.getLoanTermVariations().getTermType().isOverrideInterestRate());
+
+            if (rescheduleFromDate != null && !requestHasOverrideInterestVariation) {
                 installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
 
                 if (installment == null) {
-                    // dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
-                    // "loan.repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not
-                    // exist");
+                    dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
+                            "loan.repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
                 }
 
                 if (installment != null && installment.isObligationsMet()) {
