@@ -28,6 +28,7 @@ import java.util.TreeMap;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.RecalculationDetail;
@@ -35,6 +36,8 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.Recalculati
 public final class LoanScheduleParams {
 
     private final List<LoanTransaction> loanTransactions;
+
+    private final LoanStatus loanStatus;
     // Actual period Number as per the schedule
     private int periodNumber;
     // Actual period Number plus interest only repayments
@@ -75,6 +78,10 @@ public final class LoanScheduleParams {
     private Money unCompoundedAmount;
     private Money compoundedInLastInstallment;
 
+    public LoanStatus getLoanStatus() {
+        return loanStatus;
+    }
+
     public Money getCompoundedInLastInstallment() {
         return this.compoundedInLastInstallment;
     }
@@ -111,7 +118,7 @@ public final class LoanScheduleParams {
             final Collection<RecalculationDetail> recalculationDetails,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
             final boolean partialUpdate, final MonetaryCurrency currency, final boolean applyInterestRecalculation,
-            List<LoanTransaction> transactions) {
+            List<LoanTransaction> transactions, LoanStatus status) {
         this.periodNumber = periodNumber;
         this.instalmentNumber = instalmentNumber;
         this.loanTermInDays = loanTermInDays;
@@ -143,6 +150,7 @@ public final class LoanScheduleParams {
             this.compoundedInLastInstallment = Money.zero(this.currency);
         }
         this.loanTransactions = transactions;
+        this.loanStatus = status;
     }
 
     public static LoanScheduleParams createLoanScheduleParamsForPartialUpdate(final int periodNumber, final int instalmentNumber,
@@ -154,19 +162,20 @@ public final class LoanScheduleParams {
             final Money principalToBeScheduled, final Money outstandingBalance, final Money outstandingBalanceAsPerRest,
             final List<LoanRepaymentScheduleInstallment> installments, final Collection<RecalculationDetail> recalculationDetails,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
-            final MonetaryCurrency currency, final boolean applyInterestRecalculation, List<LoanTransaction> transactions) {
+            final MonetaryCurrency currency, final boolean applyInterestRecalculation, List<LoanTransaction> transactions,
+            LoanStatus status) {
         final boolean partialUpdate = true;
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
                 compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
                 outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
-                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, transactions);
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, transactions, status);
     }
 
     public static LoanScheduleParams createLoanScheduleParamsForCompleteUpdate(final Collection<RecalculationDetail> recalculationDetails,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
-            final boolean applyInterestRecalculation, List<LoanTransaction> transactions) {
+            final boolean applyInterestRecalculation, List<LoanTransaction> transactions, LoanStatus status) {
         final int periodNumber = 1;
         final int instalmentNumber = 1;
         final LocalDate periodStartDate = null;
@@ -195,7 +204,7 @@ public final class LoanScheduleParams {
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
                 compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
                 outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
-                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, transactions);
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, transactions, status);
     }
 
     public static LoanScheduleParams createLoanScheduleParams(final MonetaryCurrency currency, final Money chargesDueAtTimeOfDisbursement,
@@ -229,7 +238,7 @@ public final class LoanScheduleParams {
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
                 compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
                 outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
-                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, null);
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, null, null);
     }
 
     public static LoanScheduleParams createLoanScheduleParams(final MonetaryCurrency currency, final Money chargesDueAtTimeOfDisbursement,
@@ -263,7 +272,8 @@ public final class LoanScheduleParams {
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
                 compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
                 outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
-                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, null);
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, loanScheduleParams.getLoanTransactions(),
+                loanScheduleParams.loanStatus);
     }
 
     public int getPeriodNumber() {

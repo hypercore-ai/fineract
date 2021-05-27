@@ -3338,11 +3338,22 @@ public class Loan extends AbstractPersistableCustom {
              * save the reversed transactions first and then new transactions.
              */
             this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
+
+            // If has UU charge the recalculate schedule fees with current processed transaction
+            List<LoanCharge> uuFees = charges().stream()
+                    .filter(c -> c.getChargeCalculation() == ChargeCalculationType.PERCENT_OF_UNUTILIZED_AMOUNT)
+                    .collect(Collectors.toList());
+            if (!uuFees.isEmpty()) {
+                final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
+                wrapper.reprocess(getCurrency(), getDisbursementDate(), getRepaymentScheduleInstallments(), charges());
+
+                uuFees.forEach(c -> this.recalculateLoanCharge(c, scheduleGeneratorDTO.getPenaltyWaitPeriod()));
+            }
         }
 
-        // Repayment for credit-line doesnt need to reset the summary
-        boolean activeCreditLine = this.shouldActivateOnApproval() && this.status().isActive();
-        updateLoanSummaryDerivedFields(!activeCreditLine);
+        // Repayment for credit-line without disbursement doesnt need to reset the summary
+        boolean activeCreditLineWithoutDisbursement = this.shouldActivateOnApproval() && this.status().isActive() && !this.isDisbursed();
+        updateLoanSummaryDerivedFields(!activeCreditLineWithoutDisbursement);
 
         /**
          * FIXME: Vishwas, skipping post loan transaction checks for Loan recoveries
