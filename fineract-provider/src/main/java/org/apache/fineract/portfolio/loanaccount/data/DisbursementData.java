@@ -29,6 +29,8 @@ public class DisbursementData implements Comparable<DisbursementData> {
     @SuppressWarnings("unused")
     private final Long id;
     private final LocalDate expectedDisbursementDate;
+
+
     private final LocalDate actualDisbursementDate;
     private final BigDecimal principal;
     @SuppressWarnings("unused")
@@ -81,6 +83,10 @@ public class DisbursementData implements Comparable<DisbursementData> {
 
     public LocalDate getExpectedDisbursementDate() {
         return expectedDisbursementDate;
+    }
+
+    public LocalDate getActualDisbursementDate() {
+        return actualDisbursementDate;
     }
 
     public LocalDate disbursementDate() {
