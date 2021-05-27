@@ -2533,7 +2533,8 @@ public class Loan extends AbstractPersistableCustom {
 
             if (this.loanProduct.isRevolving() && !isDateInRevolvingPeriod(actualDisbursementLocalDate)) {
                 throw new LoanDisbursalException("Cannot disburse out of the revolving period",
-                        "actualdisbursementdate.not.revolvingperiods", getRevolvingPeriodStartDate(), getRevolvingPeriodEndDate(), actualDisbursementDate);
+                        "actualdisbursementdate.not.revolvingperiods", getRevolvingPeriodStartDate(), getRevolvingPeriodEndDate(),
+                        actualDisbursementDate);
             }
 
             isValidMultiTrancheDisburse = true;
@@ -2865,11 +2866,16 @@ public class Loan extends AbstractPersistableCustom {
         final LocalDate dateValue = null;
         final boolean isSpecificToInstallment = false;
         BigDecimal interestRate = annualNominalInterestRate;
-        if (loanProduct.isLinkedToFloatingInterestRate()) {
-            floatingRateDTO.resetInterestRateDiff();
+        if (loanProduct.isLinkedToFloatingInterestRate()
+                || this.loanTermVariations.stream().anyMatch(v -> v.isActive() && v.getTermType().isOverrideInterestRate())) {
+            if (floatingRateDTO != null) {
+                floatingRateDTO.resetInterestRateDiff();
+            }
             Collection<FloatingRatePeriodData> applicableRates = loanProduct.fetchInterestRates(floatingRateDTO,
-                    this.minFloatingRateInterest);
-            LocalDate interestRateStartDate = DateUtils.getLocalDateOfTenant();
+                    this.minFloatingRateInterest, this.loanTermVariations, annualNominalInterestRate != null ? annualNominalInterestRate
+                            : this.loanRepaymentScheduleDetail.getAnnualNominalInterestRate());
+            LocalDate interestRateStartDate = loanProduct.isLinkedToFloatingInterestRate() ? DateUtils.getLocalDateOfTenant()
+                    : this.getLoanStartingDate();
             for (FloatingRatePeriodData periodData : applicableRates) {
                 LoanTermVariationsData loanTermVariation = new LoanTermVariationsData(
                         LoanEnumerations.loanvariationType(LoanTermVariationType.INTEREST_RATE), periodData.getFromDateAsLocalDate(),
@@ -2881,6 +2887,10 @@ public class Loan extends AbstractPersistableCustom {
                 loanTermVariations.add(loanTermVariation);
             }
         }
+
+        loanTermVariations.stream().filter(v -> v.getTermVariationType().isOverrideInterestRate()).collect(Collectors.toList())
+                .forEach(v -> loanTermVariations.remove(v));
+
         return interestRate;
     }
 

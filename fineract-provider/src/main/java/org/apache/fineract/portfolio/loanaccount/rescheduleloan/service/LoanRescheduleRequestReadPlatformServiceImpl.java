@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -96,6 +97,8 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             sqlBuilder.append("tv.id as termId,");
             sqlBuilder.append("tv.term_type as termType,");
             sqlBuilder.append("tv.applicable_date as variationApplicableFrom, ");
+            sqlBuilder.append("tv.end_date as endDate, ");
+            sqlBuilder.append("tv.created_date as createdDate, ");
             sqlBuilder.append("tv.decimal_value as decimalValue, ");
             sqlBuilder.append("tv.date_value as dateValue, ");
             sqlBuilder.append("tv.is_specific_to_installment as isSpecificToInstallment ");
@@ -178,14 +181,16 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
         private LoanTermVariationsData fetchLoanTermVariation(final ResultSet rs) throws SQLException {
             final Long id = rs.getLong("termId");
             final LocalDate variationApplicableFrom = JdbcSupport.getLocalDate(rs, "variationApplicableFrom");
+            final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
+            final LocalDateTime createdDate = JdbcSupport.getLocalDateTime(rs, "createdDate").toLocalDateTime();
             final BigDecimal decimalValue = rs.getBigDecimal("decimalValue");
             final LocalDate dateValue = JdbcSupport.getLocalDate(rs, "dateValue");
             final boolean isSpecificToInstallment = rs.getBoolean("isSpecificToInstallment");
             final int termType = rs.getInt("termType");
 
             final LoanTermVariationsData loanTermVariationsData = new LoanTermVariationsData(id,
-                    LoanEnumerations.loanvariationType(termType), variationApplicableFrom, decimalValue, dateValue,
-                    isSpecificToInstallment);
+                    LoanEnumerations.loanvariationType(termType), variationApplicableFrom, decimalValue, dateValue, isSpecificToInstallment,
+                    endDate, createdDate);
             return loanTermVariationsData;
         }
 

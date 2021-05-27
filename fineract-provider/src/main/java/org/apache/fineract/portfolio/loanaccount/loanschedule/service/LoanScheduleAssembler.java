@@ -421,7 +421,8 @@ public class LoanScheduleAssembler {
 
             FloatingRateDTO floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, expectedDisbursementDate, interestRateDiff,
                     baseLendingRatePeriods);
-            Collection<FloatingRatePeriodData> applicableRates = loanProduct.fetchInterestRates(floatingRateDTO, minFloatingRateInterest);
+            Collection<FloatingRatePeriodData> applicableRates = loanProduct.fetchInterestRates(floatingRateDTO, minFloatingRateInterest,
+                    null, null);
 
             LocalDate interestRateStartDate = DateUtils.getLocalDateOfTenant();
             final LocalDate dateValue = null;
