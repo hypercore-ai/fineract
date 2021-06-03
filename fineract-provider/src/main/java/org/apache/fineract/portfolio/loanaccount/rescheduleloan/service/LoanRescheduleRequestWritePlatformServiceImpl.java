@@ -598,11 +598,21 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             if (rescheduleFromDate == null) {
                 rescheduleFromDate = loanRescheduleRequest.getRescheduleFromDate();
             }
-            List<LoanTermVariationsData> variationsDataFromRequest = new ArrayList<>();
+            List<LoanTermVariationsData> overrideInterestVariations = new ArrayList<>();
             for (LoanRescheduleRequestToTermVariationMapping mapping : loanRescheduleRequest
                     .getLoanRescheduleRequestToTermVariationMappings()) {
                 mapping.getLoanTermVariations().updateIsActive(true);
-                variationsDataFromRequest.add(mapping.getLoanTermVariations().toData());
+                if (mapping.getLoanTermVariations().getTermType().isOverrideInterestRate()) {
+                    overrideInterestVariations.add(mapping.getLoanTermVariations().toData());
+                }
+
+            }
+            if (activeLoanTermVariations != null) {
+                for (LoanTermVariations variation : activeLoanTermVariations) {
+                    if (variation.getTermType().isOverrideInterestRate()) {
+                        overrideInterestVariations.add(variation.toData());
+                    }
+                }
             }
             BigDecimal annualNominalInterestRate = null;
             List<LoanTermVariationsData> loanTermVariations = new ArrayList<>();
@@ -621,11 +631,11 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
              * loanTermVariation.setApplicableFromDate(adjustedDate); } } }
              */
 
-            List<LoanTermVariationsData> overrideInterestLoanTermVariationsData = variationsDataFromRequest.stream()
-                    .filter(v -> v.getTermVariationType().isOverrideInterestRate() && v.isDateContained(loan.getLoanStartingDate()))
+            List<LoanTermVariationsData> baseOverrideInterestVariations = overrideInterestVariations.stream()
+                    .filter(v -> v.isDateContained(loan.getLoanStartingDate()))
                     .sorted((v1, v2) -> v2.getCreatedDate().compareTo(v1.getCreatedDate())).collect(Collectors.toList());
-            if (!overrideInterestLoanTermVariationsData.isEmpty()) {
-                LoanTermVariationsData variation = overrideInterestLoanTermVariationsData.iterator().next();
+            if (!baseOverrideInterestVariations.isEmpty()) {
+                LoanTermVariationsData variation = baseOverrideInterestVariations.iterator().next();
                 loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
                 loanApplicationTerms.updateBasicInterestRate(variation.getDecimalValue());
             }

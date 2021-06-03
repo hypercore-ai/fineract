@@ -126,11 +126,11 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
         loanApplicationTerms.getLoanTermVariations().updateLoanTermVariationsData(loanTermVariationsData);
 
         // We need to set annualNominalInterestRate new override interest rate was added before loan start date
-        List<LoanTermVariationsData> overrideInterestLoanTermVariationsData = loanTermVariationsData.stream()
+        List<LoanTermVariationsData> baseOverrideInterestVariations = loanTermVariationsData.stream()
                 .filter(v -> v.getTermVariationType().isOverrideInterestRate() && v.isDateContained(loan.getLoanStartingDate()))
                 .sorted((v1, v2) -> v2.getCreatedDate().compareTo(v1.getCreatedDate())).collect(Collectors.toList());
-        if (!overrideInterestLoanTermVariationsData.isEmpty()) {
-            LoanTermVariationsData variation = overrideInterestLoanTermVariationsData.iterator().next();
+        if (!baseOverrideInterestVariations.isEmpty()) {
+            LoanTermVariationsData variation = baseOverrideInterestVariations.iterator().next();
             loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
             loanApplicationTerms.updateBasicInterestRate(variation.getDecimalValue());
         }
