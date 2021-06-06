@@ -22,6 +22,7 @@ public class Installment {
   private String[] transactionsId;
   private boolean obligationMet;
   private LocalDate obligationMetOnDate;
+  private double disbursementFees;
 
   public double getOutstandingPrincipalBalance() {
     return outstandingPrincipalBalance;
@@ -181,6 +182,14 @@ public class Installment {
     this.type = type;
   }
 
+  public double getDisbursementFees() {
+    return disbursementFees;
+  }
+
+  public void setDisbursementFees(double disbursementFees) {
+    this.disbursementFees = disbursementFees;
+  }
+
   @Override
   public String toString() {
     return "Installment{" +
@@ -202,7 +211,9 @@ public class Installment {
             ", transactionsId=" + Arrays.toString(transactionsId) +
             ", obligationMet=" + obligationMet +
             ", obligationMetOnDate=" + obligationMetOnDate +
+            ", disbursementFees=" + disbursementFees +
             ", outstandingPrincipalBalance=" + outstandingPrincipalBalance +
             '}';
   }
+
 }
