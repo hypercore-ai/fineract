@@ -41,4 +41,10 @@ public class InstallmentComponent {
   public void setPrincipal(double principal) {
     this.principal = principal;
   }
+
+  @Override
+  public String toString() {
+    return "{" + " principal='" + getPrincipal() + "'" + ", interest='" + getInterest() + "'" + ", fee='" + getFee()
+        + "'" + ", penalty='" + getPenalty() + "'" + "}";
+  }
 }
