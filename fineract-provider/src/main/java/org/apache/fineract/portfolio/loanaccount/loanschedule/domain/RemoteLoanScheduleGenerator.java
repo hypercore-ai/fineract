@@ -96,7 +96,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
                 Money feeChargesDue = Money.of(currency, BigDecimal.valueOf(installment.getDue().getFee()));
                 Money penaltyChargesDue = Money.of(currency, BigDecimal.valueOf(installment.getDue().getPenalty()));
                 Money totalDue = principalDue.plus(interestDue).plus(feeChargesDue).plus(penaltyChargesDue);
-                boolean recalculatedInterestComponent = false; // TODO validate what it does
+                boolean recalculatedInterestComponent = false; // TODO validate (seems it is related to compelete payment)
 
                 return LoanScheduleModelRepaymentPeriod.repayment(installment.getPeriod(), installment.getStartDate(), installment.getDueDate(), principalDue, outstandingLoanBalance,
                         interestDue, feeChargesDue, penaltyChargesDue, totalDue, recalculatedInterestComponent);
