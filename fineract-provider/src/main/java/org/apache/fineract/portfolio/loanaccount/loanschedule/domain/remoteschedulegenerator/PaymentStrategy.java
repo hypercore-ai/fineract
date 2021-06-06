@@ -6,9 +6,8 @@ public class PaymentStrategy {
 
   private LocalDate fromDate;
   private Strategy[] strategy;
-  
+
   public PaymentStrategy() {
-    super();
   }
 
   public LocalDate getFromDate() {

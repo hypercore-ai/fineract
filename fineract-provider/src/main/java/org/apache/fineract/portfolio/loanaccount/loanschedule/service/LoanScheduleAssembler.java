@@ -87,7 +87,7 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-// import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
@@ -644,35 +644,17 @@ public class LoanScheduleAssembler {
             final List<Holiday> holidays, final WorkingDays workingDays, final JsonElement element,
             List<LoanDisbursementDetails> disbursementDetails) {
 
-        // final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element, disbursementDetails);
+        final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element, disbursementDetails);
 
-        // final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
-        // final MathContext mc = new MathContext(8, roundingMode);
-        // HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
+        final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
+        final MathContext mc = new MathContext(8, roundingMode);
+        HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
 
-        // boolean activeNotDisbursed = loanApplicationTerms.isActivatedOnApproval() && loanApplicationTerms.isMultiDisburseLoan()
-        //         && disbursementDetails.stream().anyMatch(disbursement -> disbursement.actualDisbursementDate() != null);
+        boolean activeNotDisbursed = loanApplicationTerms.isActivatedOnApproval() && loanApplicationTerms.isMultiDisburseLoan()
+                && disbursementDetails.stream().anyMatch(disbursement -> disbursement.actualDisbursementDate() != null);
 
-        // LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
-        // if (loanApplicationTerms.isEqualAmortization()) {
-        //     if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
-        //         final LoanScheduleGenerator decliningLoanScheduleGenerator = this.loanScheduleFactory
-        //                 .create(InterestMethod.DECLINING_BALANCE);
-        //         LoanScheduleModel loanSchedule = decliningLoanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO,
-        //                 activeNotDisbursed);
-
-        //         loanApplicationTerms
-        //                 .updateTotalInterestDue(Money.of(loanApplicationTerms.getCurrency(), loanSchedule.getTotalInterestCharged()));
-
-        //     }
-        //     loanScheduleGenerator = this.loanScheduleFactory.create(InterestMethod.FLAT);
-        // } else {
-        //     loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
-        // }
-
-        // return loanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO, activeNotDisbursed);
         LoanScheduleGenerator loanScheduleGenerator = new RemoteLoanScheduleGenerator();
-        return loanScheduleGenerator.generate(null, null, null, null, false);
+        return loanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO, activeNotDisbursed);
     }
 
     public LoanScheduleModel assembleForInterestRecalculation(final LoanApplicationTerms loanApplicationTerms, final Long officeId,

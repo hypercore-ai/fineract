@@ -18,9 +18,13 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum AmortizationMethod {
 
+    @JsonProperty("EqualPrincipal")
     EQUAL_PRINCIPAL(0, "amortizationType.equal.principal"), //
+    @JsonProperty("EqualInstallment")
     EQUAL_INSTALLMENTS(1, "amortizationType.equal.installments"), //
     INVALID(2, "amortizationType.invalid");
 
