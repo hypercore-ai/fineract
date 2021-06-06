@@ -6,7 +6,7 @@ import java.util.Arrays;
 public class Installment {
   private InstallmentType type;
   private LocalDate date;
-  private float amount;
+  private double amount;
   private int period;
   private LocalDate startDate;
   private LocalDate dueDate;
@@ -151,11 +151,11 @@ public class Installment {
     this.period = period;
   }
 
-  public float getAmount() {
+  public double getAmount() {
     return amount;
   }
 
-  public void setAmount(float amount) {
+  public void setAmount(double amount) {
     this.amount = amount;
   }
 

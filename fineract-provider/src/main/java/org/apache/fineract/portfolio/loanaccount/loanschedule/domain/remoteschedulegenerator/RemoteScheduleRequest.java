@@ -10,7 +10,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RemoteScheduleRequest {
   private LocalDate startDate;
-  private float approvedAmount;
+  private double approvedAmount;
   private AmortizationMethod amortization;
   private Installment[] disbursements;
   private Frequency principalRepaymentFrequency;
@@ -154,11 +154,11 @@ public class RemoteScheduleRequest {
     this.amortization = amortization;
   }
 
-  public float getApprovedAmount() {
+  public double getApprovedAmount() {
     return approvedAmount;
   }
 
-  public void setApprovedAmount(float approvedAmount) {
+  public void setApprovedAmount(double approvedAmount) {
     this.approvedAmount = approvedAmount;
   }
 

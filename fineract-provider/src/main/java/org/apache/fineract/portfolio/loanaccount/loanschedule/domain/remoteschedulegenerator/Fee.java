@@ -5,7 +5,7 @@ public class Fee {
   private FeeTiming timing;
   private Frequency timingFrequency;
   private FeeCalculation calculationType;
-  private float value;
+  private double value;
   private boolean isPenalty;
 
   public Fee() {
@@ -23,11 +23,11 @@ public class Fee {
     this.isPenalty = isPenalty;
   }
 
-  public float getValue() {
+  public double getValue() {
     return value;
   }
 
-  public void setValue(float value) {
+  public void setValue(double value) {
     this.value = value;
   }
 

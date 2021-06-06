@@ -2,8 +2,8 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 
 public class FeeBreakdown {
   private String externalId;
-  private float amountDue;
-  private float amountPaid;
+  private double amountDue;
+  private double amountPaid;
   
   public FeeBreakdown() {
     super();
@@ -13,19 +13,19 @@ public class FeeBreakdown {
     return externalId;
   }
 
-  public float getAmountPaid() {
+  public double getAmountPaid() {
     return amountPaid;
   }
 
-  public void setAmountPaid(float amountPaid) {
+  public void setAmountPaid(double amountPaid) {
     this.amountPaid = amountPaid;
   }
 
-  public float getAmountDue() {
+  public double getAmountDue() {
     return amountDue;
   }
 
-  public void setAmountDue(float amountDue) {
+  public void setAmountDue(double amountDue) {
     this.amountDue = amountDue;
   }
 

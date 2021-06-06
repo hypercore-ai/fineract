@@ -18,11 +18,14 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Set;
 
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -65,6 +68,21 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
       LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  private LoanScheduleModel parseRemoteSchedule(RemoteScheduleResponse remoteSchedule, LoanApplicationTerms loanApplicationTerms) {
+    Collection<LoanScheduleModelPeriod> periods = null;
+    int loanTermInDays = 0;
+    Money principalDisbursed = Money.of(loanApplicationTerms.getCurrency(), BigDecimal.valueOf(remoteSchedule.getTotalPrincipalDisbursed()));
+    BigDecimal totalPrincipalExpected = null;
+    BigDecimal totalPrincipalPaid = null;
+    BigDecimal totalInterestCharged = null;
+    BigDecimal totalFeeChargesCharged = null;
+    BigDecimal totalPenaltyChargesCharged = null;
+    BigDecimal totalRepaymentExpected = null;
+    BigDecimal totalOutstanding = null;
+    return LoanScheduleModel.from(periods, loanApplicationTerms.getApplicationCurrency(), loanTermInDays, principalDisbursed,totalPrincipalExpected,totalPrincipalPaid,totalInterestCharged, totalFeeChargesCharged,totalPenaltyChargesCharged, totalRepaymentExpected, totalOutstanding);
+
   }
 
 }

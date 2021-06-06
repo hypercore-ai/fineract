@@ -5,7 +5,7 @@ import java.time.LocalDate;
 public class Transaction {
   private String id;
   private LocalDate date;
-  private float amount;
+  private double amount;
   private TransactionType type;
   private InstallmentComponent distribution;
   private boolean canceled;
@@ -60,11 +60,11 @@ public class Transaction {
     this.type = type;
   }
 
-  public float getAmount() {
+  public double getAmount() {
     return amount;
   }
 
-  public void setAmount(float amount) {
+  public void setAmount(double amount) {
     this.amount = amount;
   }
 

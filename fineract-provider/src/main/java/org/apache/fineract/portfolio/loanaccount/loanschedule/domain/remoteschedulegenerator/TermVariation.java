@@ -8,7 +8,7 @@ public class TermVariation {
   private String startDate;
   private String endDate;
   private LocalDate createdTimestamp;
-  private float newValue;
+  private double newValue;
 
   public TermVariation() {
   }
@@ -17,11 +17,11 @@ public class TermVariation {
     return id;
   }
 
-  public float getNewValue() {
+  public double getNewValue() {
     return newValue;
   }
 
-  public void setNewValue(float newValue) {
+  public void setNewValue(double newValue) {
     this.newValue = newValue;
   }
 

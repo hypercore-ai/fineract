@@ -6,9 +6,9 @@ public class InterestBreakdown {
   private int subPeriod;
   private LocalDate startDate;
   private LocalDate endDate;
-  private float principalBalance;
-  private float interestDue;
-  private float interestPercentage;
+  private double principalBalance;
+  private double interestDue;
+  private double interestPercentage;
 
   public InterestBreakdown() {
     super();
@@ -18,27 +18,27 @@ public class InterestBreakdown {
     return subPeriod;
   }
 
-  public float getInterestPercentage() {
+  public double getInterestPercentage() {
     return interestPercentage;
   }
 
-  public void setInterestPercentage(float interestPercentage) {
+  public void setInterestPercentage(double interestPercentage) {
     this.interestPercentage = interestPercentage;
   }
 
-  public float getInterestDue() {
+  public double getInterestDue() {
     return interestDue;
   }
 
-  public void setInterestDue(float interestDue) {
+  public void setInterestDue(double interestDue) {
     this.interestDue = interestDue;
   }
 
-  public float getPrincipalBalance() {
+  public double getPrincipalBalance() {
     return principalBalance;
   }
 
-  public void setPrincipalBalance(float principalBalance) {
+  public void setPrincipalBalance(double principalBalance) {
     this.principalBalance = principalBalance;
   }
 

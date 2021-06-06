@@ -2,7 +2,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 
 public class PrincipalChange {
   private PrincipalChangeType type;
-  private float balanceChange;
+  private double balanceChange;
   private boolean isActual;
 
   public PrincipalChange() {
@@ -20,11 +20,11 @@ public class PrincipalChange {
     this.isActual = isActual;
   }
 
-  public float getBalanceChange() {
+  public double getBalanceChange() {
     return balanceChange;
   }
 
-  public void setBalanceChange(float balanceChange) {
+  public void setBalanceChange(double balanceChange) {
     this.balanceChange = balanceChange;
   }
 

@@ -8,14 +8,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class RemoteScheduleResponse {
   private Installment[] installments;
   private Transaction[] transactions;
-  private float totalPrincipalDisbursed;
-  private float totalPrincipalExpected;
-  private float totalPrincipalPaid;
-  private float totalInterestCharged;
-  private float totalFeeChargesCharged;
-  private float totalPenaltyChargesCharged;
-  private float totalRepaymentExpected;
-  private float totalOutstanding;
+  private double totalPrincipalDisbursed;
+  private double totalPrincipalExpected;
+  private double totalPrincipalPaid;
+  private double totalInterestCharged;
+  private double totalFeeChargesCharged;
+  private double totalPenaltyChargesCharged;
+  private double totalRepaymentExpected;
+  private double totalOutstanding;
 
   @Override
   public String toString() {
@@ -33,67 +33,67 @@ public class RemoteScheduleResponse {
       "}";
   }
 
-  public float getTotalOutstanding() {
+  public double getTotalOutstanding() {
     return totalOutstanding;
   }
 
-  public void setTotalOutstanding(float totalOutstanding) {
+  public void setTotalOutstanding(double totalOutstanding) {
     this.totalOutstanding = totalOutstanding;
   }
 
-  public float getTotalRepaymentExpected() {
+  public double getTotalRepaymentExpected() {
     return totalRepaymentExpected;
   }
 
-  public void setTotalRepaymentExpected(float totalRepaymentExpected) {
+  public void setTotalRepaymentExpected(double totalRepaymentExpected) {
     this.totalRepaymentExpected = totalRepaymentExpected;
   }
 
-  public float getTotalPenaltyChargesCharged() {
+  public double getTotalPenaltyChargesCharged() {
     return totalPenaltyChargesCharged;
   }
 
-  public void setTotalPenaltyChargesCharged(float totalPenaltyChargesCharged) {
+  public void setTotalPenaltyChargesCharged(double totalPenaltyChargesCharged) {
     this.totalPenaltyChargesCharged = totalPenaltyChargesCharged;
   }
 
-  public float getTotalFeeChargesCharged() {
+  public double getTotalFeeChargesCharged() {
     return totalFeeChargesCharged;
   }
 
-  public void setTotalFeeChargesCharged(float totalFeeChargesCharged) {
+  public void setTotalFeeChargesCharged(double totalFeeChargesCharged) {
     this.totalFeeChargesCharged = totalFeeChargesCharged;
   }
 
-  public float getTotalInterestCharged() {
+  public double getTotalInterestCharged() {
     return totalInterestCharged;
   }
 
-  public void setTotalInterestCharged(float totalInterestCharged) {
+  public void setTotalInterestCharged(double totalInterestCharged) {
     this.totalInterestCharged = totalInterestCharged;
   }
 
-  public float getTotalPrincipalPaid() {
+  public double getTotalPrincipalPaid() {
     return totalPrincipalPaid;
   }
 
-  public void setTotalPrincipalPaid(float totalPrincipalPaid) {
+  public void setTotalPrincipalPaid(double totalPrincipalPaid) {
     this.totalPrincipalPaid = totalPrincipalPaid;
   }
 
-  public float getTotalPrincipalExpected() {
+  public double getTotalPrincipalExpected() {
     return totalPrincipalExpected;
   }
 
-  public void setTotalPrincipalExpected(float totalPrincipalExpected) {
+  public void setTotalPrincipalExpected(double totalPrincipalExpected) {
     this.totalPrincipalExpected = totalPrincipalExpected;
   }
 
-  public float getTotalPrincipalDisbursed() {
+  public double getTotalPrincipalDisbursed() {
     return totalPrincipalDisbursed;
   }
 
-  public void setTotalPrincipalDisbursed(float totalPrincipalDisbursed) {
+  public void setTotalPrincipalDisbursed(double totalPrincipalDisbursed) {
     this.totalPrincipalDisbursed = totalPrincipalDisbursed;
   }
 

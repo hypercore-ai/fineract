@@ -2,7 +2,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 
 public class Rate {
   private String date;
-  private float value;
+  private double value;
 
   public Rate() {
     super();
@@ -12,11 +12,11 @@ public class Rate {
     return date;
   }
 
-  public float getValue() {
+  public double getValue() {
     return value;
   }
 
-  public void setValue(float value) {
+  public void setValue(double value) {
     this.value = value;
   }
 
