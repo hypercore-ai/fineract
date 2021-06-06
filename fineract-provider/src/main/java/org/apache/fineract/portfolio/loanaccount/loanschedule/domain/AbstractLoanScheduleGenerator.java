@@ -683,37 +683,41 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     // unprocessed(early payment ) amounts
                     Money unprocessed = loanRepaymentScheduleTransactionProcessor.handleRepaymentSchedule(currentTransactions, currency,
                             scheduleParams.getInstallments());
-
                     if (unprocessed.isGreaterThanZero()) {
-                        scheduleParams.reduceOutstandingBalance(unprocessed);
-                        // pre closure check and processing
-                        modifiedInstallment = handlePrepaymentOfLoan(mc, loanApplicationTerms, holidayDetailDTO, scheduleParams,
-                                totalInterestChargedForFullLoanTerm, scheduledDueDate, periodStartDateApplicableForInterest,
-                                currentPeriodParams.getInterestCalculationGraceOnRepaymentPeriodFraction(), currentPeriodParams,
-                                lastTotalOutstandingInterestPaymentDueToGrace, transactionDate, modifiedInstallment, loanCharges);
 
-                        Money addToPrinciapal = Money.zero(currency);
-                        if (scheduleParams.getOutstandingBalance().isLessThanZero()) {
-                            addToPrinciapal = addToPrinciapal.plus(scheduleParams.getOutstandingBalance());
-                            scheduleParams.setOutstandingBalance(Money.zero(currency));
+                        LoanTransaction currentTransaction = detail.getTransaction();
+                        Money unprocessedPrincipal = currentTransaction.isManualRepayment() ? currentTransaction.getManualPrincipalPortion(currency).minus(currentTransaction.getPrincipalPortion(currency)) : unprocessed;
+
+                        if (unprocessedPrincipal.isGreaterThanZero()) {
+                            scheduleParams.reduceOutstandingBalance(unprocessedPrincipal);
+                            // pre closure check and processing
+                            modifiedInstallment = handlePrepaymentOfLoan(mc, loanApplicationTerms, holidayDetailDTO, scheduleParams,
+                                    totalInterestChargedForFullLoanTerm, scheduledDueDate, periodStartDateApplicableForInterest,
+                                    currentPeriodParams.getInterestCalculationGraceOnRepaymentPeriodFraction(), currentPeriodParams,
+                                    lastTotalOutstandingInterestPaymentDueToGrace, transactionDate, modifiedInstallment, loanCharges);
+
+                            Money addToPrinciapal = Money.zero(currency);
+                            if (scheduleParams.getOutstandingBalance().isLessThanZero()) {
+                                addToPrinciapal = addToPrinciapal.plus(scheduleParams.getOutstandingBalance());
+                                scheduleParams.setOutstandingBalance(Money.zero(currency));
+                            }
+                            updateAmountsBasedOnEarlyPayment(loanApplicationTerms, holidayDetailDTO, scheduleParams, modifiedInstallment,
+                                    detail, unprocessedPrincipal, addToPrinciapal);
+
+                            scheduleParams.addReducePrincipal(unprocessedPrincipal);
+                            currentPeriodParams.plusPrincipalForThisPeriod(unprocessedPrincipal.plus(addToPrinciapal));
+                            principalProcessed = principalProcessed.plus(unprocessedPrincipal.plus(addToPrinciapal));
+                            BigDecimal fixedEmiAmount = loanApplicationTerms.getFixedEmiAmount();
+                            scheduleParams
+                                    .setReducePrincipal(applyEarlyPaymentStrategy(loanApplicationTerms, scheduleParams.getReducePrincipal(),
+                                            scheduleParams.getTotalCumulativePrincipal()
+                                                    .plus(currentPeriodParams.getPrincipalForThisPeriod().minus(principalProcessed)),
+                                            scheduleParams.getPeriodNumber() + 1, mc));
+                            if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment() && fixedEmiAmount != null
+                                    && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
+                                currentPeriodParams.setEmiAmountChanged(true);
+                            }
                         }
-                        updateAmountsBasedOnEarlyPayment(loanApplicationTerms, holidayDetailDTO, scheduleParams, modifiedInstallment,
-                                detail, unprocessed, addToPrinciapal);
-
-                        scheduleParams.addReducePrincipal(unprocessed);
-                        currentPeriodParams.plusPrincipalForThisPeriod(unprocessed.plus(addToPrinciapal));
-                        principalProcessed = principalProcessed.plus(unprocessed.plus(addToPrinciapal));
-                        BigDecimal fixedEmiAmount = loanApplicationTerms.getFixedEmiAmount();
-                        scheduleParams
-                                .setReducePrincipal(applyEarlyPaymentStrategy(loanApplicationTerms, scheduleParams.getReducePrincipal(),
-                                        scheduleParams.getTotalCumulativePrincipal()
-                                                .plus(currentPeriodParams.getPrincipalForThisPeriod().minus(principalProcessed)),
-                                        scheduleParams.getPeriodNumber() + 1, mc));
-                        if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment() && fixedEmiAmount != null
-                                && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
-                            currentPeriodParams.setEmiAmountChanged(true);
-                        }
-
                     }
                     adjustCompoundedAmountWithPaidDetail(scheduleParams, lastRestDate, currentTransactions, loanApplicationTerms,
                             holidayDetailDTO);
@@ -989,33 +993,38 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 .handleRepaymentSchedule(currentTransactions, currency, scheduleParams.getInstallments());
                         if (unprocessed.isGreaterThanZero()) {
 
-                            if (loanApplicationTerms.getPreClosureInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
-                                LocalDate applicableDate = getNextRestScheduleDate(transactionDate.minusDays(1), loanApplicationTerms,
-                                        holidayDetailDTO);
-                                checkForOutstanding = transactionDate.isEqual(applicableDate);
+                            LoanTransaction currentTransaction = detail.getTransaction();
+                            Money unprocessedPrincipal = currentTransaction.isManualRepayment() ? currentTransaction.getManualPrincipalPortion(currency).minus(currentTransaction.getPrincipalPortion(currency)) : unprocessed;
 
-                            }
-                            // reduces actual outstanding balance
-                            scheduleParams.reduceOutstandingBalance(unprocessed);
-                            // if outstanding balance becomes less than zero
-                            // then adjusts the princiapal
-                            Money addToPrinciapal = Money.zero(currency);
-                            if (!scheduleParams.getOutstandingBalance().isGreaterThanZero()) {
-                                addToPrinciapal = addToPrinciapal.plus(scheduleParams.getOutstandingBalance());
-                                scheduleParams.setOutstandingBalance(Money.zero(currency));
-                                currentPeriodParams.setLastInstallment(installment);
-                            }
-                            // updates principal portion map with the early
-                            // payment amounts and applicable date as per
-                            // rest
-                            updateAmountsBasedOnEarlyPayment(loanApplicationTerms, holidayDetailDTO, scheduleParams, installment, detail,
-                                    unprocessed, addToPrinciapal);
+                            if (unprocessedPrincipal.isGreaterThanZero()) {
+                                if (loanApplicationTerms.getPreClosureInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
+                                    LocalDate applicableDate = getNextRestScheduleDate(transactionDate.minusDays(1), loanApplicationTerms,
+                                            holidayDetailDTO);
+                                    checkForOutstanding = transactionDate.isEqual(applicableDate);
 
-                            // method applies early payment strategy
-                            scheduleParams.addReducePrincipal(unprocessed);
-                            scheduleParams
-                                    .setReducePrincipal(applyEarlyPaymentStrategy(loanApplicationTerms, scheduleParams.getReducePrincipal(),
-                                            scheduleParams.getTotalCumulativePrincipal(), scheduleParams.getPeriodNumber(), mc));
+                                }
+                                // reduces actual outstanding balance
+                                scheduleParams.reduceOutstandingBalance(unprocessedPrincipal);
+                                // if outstanding balance becomes less than zero
+                                // then adjusts the princiapal
+                                Money addToPrinciapal = Money.zero(currency);
+                                if (!scheduleParams.getOutstandingBalance().isGreaterThanZero()) {
+                                    addToPrinciapal = addToPrinciapal.plus(scheduleParams.getOutstandingBalance());
+                                    scheduleParams.setOutstandingBalance(Money.zero(currency));
+                                    currentPeriodParams.setLastInstallment(installment);
+                                }
+                                // updates principal portion map with the early
+                                // payment amounts and applicable date as per
+                                // rest
+                                updateAmountsBasedOnEarlyPayment(loanApplicationTerms, holidayDetailDTO, scheduleParams, installment, detail,
+                                        unprocessedPrincipal, addToPrinciapal);
+
+                                // method applies early payment strategy
+                                scheduleParams.addReducePrincipal(unprocessedPrincipal);
+                                scheduleParams
+                                        .setReducePrincipal(applyEarlyPaymentStrategy(loanApplicationTerms, scheduleParams.getReducePrincipal(),
+                                                scheduleParams.getTotalCumulativePrincipal(), scheduleParams.getPeriodNumber(), mc));
+                            }
                         }
                         // identify late payments and add compounding
                         // details to
