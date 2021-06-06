@@ -167,7 +167,9 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
 
     request.setFees(loanCharges.stream().filter(charge -> !charge.isPenaltyCharge()).map(charge -> {
       Fee fee = new Fee();
-      fee.setId(charge.getId().toString());
+      if (charge.getId() != null) {
+        fee.setId(charge.getId().toString());
+      }
       fee.setPenalty(false);
       fee.setCalculationType(this.chargeCalculationTypeToFeeCalculation(charge.getChargeCalculation()));
       fee.setValue(charge.amount().doubleValue());
