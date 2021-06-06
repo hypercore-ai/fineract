@@ -120,6 +120,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
       return null;
     }).collect(Collectors.toList());
     int loanTermInDays = periods.stream()
+        .filter(period -> period instanceof LoanScheduleModelRepaymentPeriod)
         .mapToInt(period -> Math.toIntExact(ChronoUnit.DAYS.between(period.periodFromDate(), period.periodDueDate())))
         .sum();
 
