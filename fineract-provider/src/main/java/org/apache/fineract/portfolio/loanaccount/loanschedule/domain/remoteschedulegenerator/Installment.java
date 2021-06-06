@@ -23,6 +23,16 @@ public class Installment {
   private boolean obligationMet;
   private LocalDate obligationMetOnDate;
 
+  public double getOutstandingPrincipalBalance() {
+    return outstandingPrincipalBalance;
+  }
+
+  public void setOutstandingPrincipalBalance(double outstandingPrincipalBalance) {
+    this.outstandingPrincipalBalance = outstandingPrincipalBalance;
+  }
+
+  private  double outstandingPrincipalBalance;
+
   public Installment() {
     super();
   }
@@ -173,14 +183,26 @@ public class Installment {
 
   @Override
   public String toString() {
-    return "{" + " type='" + getType() + "'" + ", date='" + getDate() + "'" + ", amount='" + getAmount() + "'"
-        + ", period='" + getPeriod() + "'" + ", startDate='" + getStartDate() + "'" + ", dueDate='" + getDueDate() + "'"
-        + ", breakdown='" + Arrays.toString(getBreakdown()) + "'" + ", due='" + getDue() + "'" + ", paid='" + getPaid()
-        + "'" + ", waived='" + getWaived() + "'" + ", writtenOff='" + getWrittenOff() + "'" + ", early='" + getEarly()
-        + "'" + ", late='" + getLate() + "'" + ", feesBreakdown='" + Arrays.toString(getFeesBreakdown()) + "'"
-        + ", penaltyBreakdown='" + Arrays.toString(getPenaltyBreakdown()) + "'" + ", transactionsId='"
-        + Arrays.toString(getTransactionsId()) + "'" + ", obligationMet='" + isObligationMet() + "'"
-        + ", obligationMetOnDate='" + getObligationMetOnDate() + "'" + "}";
+    return "Installment{" +
+            "type=" + type +
+            ", date=" + date +
+            ", amount=" + amount +
+            ", period=" + period +
+            ", startDate=" + startDate +
+            ", dueDate=" + dueDate +
+            ", breakdown=" + Arrays.toString(breakdown) +
+            ", due=" + due +
+            ", paid=" + paid +
+            ", waived=" + waived +
+            ", writtenOff=" + writtenOff +
+            ", early=" + early +
+            ", late=" + late +
+            ", feesBreakdown=" + Arrays.toString(feesBreakdown) +
+            ", penaltyBreakdown=" + Arrays.toString(penaltyBreakdown) +
+            ", transactionsId=" + Arrays.toString(transactionsId) +
+            ", obligationMet=" + obligationMet +
+            ", obligationMetOnDate=" + obligationMetOnDate +
+            ", outstandingPrincipalBalance=" + outstandingPrincipalBalance +
+            '}';
   }
-
 }
