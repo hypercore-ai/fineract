@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -39,6 +40,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Fee;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.FeeCalculation;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Frequency;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Installment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InstallmentType;
@@ -163,7 +165,14 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
         ? InterestCalculationMethod.DecliningBalance
         : InterestCalculationMethod.Flat);
 
-    request.setFees(loanCharges.stream().filter(charge -> !charge.isPenaltyCharge()).toArray(Fee[]::new));
+    request.setFees(loanCharges.stream().filter(charge -> !charge.isPenaltyCharge()).map(charge -> {
+      Fee fee = new Fee();
+      fee.setId(charge.getId().toString());
+      fee.setPenalty(false);
+      fee.setCalculationType(this.chargeCalculationTypeToFeeCalculation(charge.getChargeCalculation()));
+      fee.setValue(charge.amount().doubleValue());
+      return fee;
+    }).toArray(Fee[]::new));
 
     return request;
   }
@@ -196,6 +205,23 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
         return "year";
       default:
         return "";
+    }
+  }
+
+  private FeeCalculation chargeCalculationTypeToFeeCalculation(ChargeCalculationType calcType) {
+    switch (calcType) {
+      case FLAT:
+        return FeeCalculation.Flat;
+      case PERCENT_OF_AMOUNT:
+        return FeeCalculation.PercentageOfApprovedAmount;
+      case PERCENT_OF_INTEREST:
+        return FeeCalculation.PercentageOfInstallmentInterest;
+      case PERCENT_OF_AMOUNT_AND_INTEREST:
+        return FeeCalculation.PercentageOfInstallmentPrincipalAndInterest;
+      case PERCENT_OF_UNUTILIZED_AMOUNT:
+        return FeeCalculation.AnnualPercentageOfUnutilizedAmount;
+      default:
+        return null;
     }
   }
 }
