@@ -1,0 +1,82 @@
+package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
+
+import java.time.LocalDate;
+
+public class Transaction {
+  private String id;
+  private LocalDate date;
+  private float amount;
+  private TransactionType type;
+  private InstallmentComponent distribution;
+  private boolean canceled;
+  private boolean isWaive;
+  private FeeBreakdown[] feesBreakdown;
+
+  public Transaction() {
+    super();
+  }
+
+  public FeeBreakdown[] getFeesBreakdown() {
+    return feesBreakdown;
+  }
+
+  public void setFeesBreakdown(FeeBreakdown[] feesBreakdown) {
+    this.feesBreakdown = feesBreakdown;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public boolean isWaive() {
+    return isWaive;
+  }
+
+  public void setWaive(boolean isWaive) {
+    this.isWaive = isWaive;
+  }
+
+  public boolean isCanceled() {
+    return canceled;
+  }
+
+  public void setCanceled(boolean canceled) {
+    this.canceled = canceled;
+  }
+
+  public InstallmentComponent getDistribution() {
+    return distribution;
+  }
+
+  public void setDistribution(InstallmentComponent distribution) {
+    this.distribution = distribution;
+  }
+
+  public TransactionType getType() {
+    return type;
+  }
+
+  public void setType(TransactionType type) {
+    this.type = type;
+  }
+
+  public float getAmount() {
+    return amount;
+  }
+
+  public void setAmount(float amount) {
+    this.amount = amount;
+  }
+
+  public LocalDate getDate() {
+    return date;
+  }
+
+  public void setDate(LocalDate date) {
+    this.date = date;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+}
