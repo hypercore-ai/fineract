@@ -2,12 +2,14 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 
 import java.time.LocalDate;
 
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+
 public class Transaction {
 
     private String id;
     private LocalDate date;
     private double amount;
-    private TransactionType type;
+    private LoanTransactionType type;
     private InstallmentComponent distribution;
     private boolean canceled;
     private boolean isWaive;
@@ -53,11 +55,11 @@ public class Transaction {
         this.distribution = distribution;
     }
 
-    public TransactionType getType() {
+    public LoanTransactionType getType() {
         return type;
     }
 
-    public void setType(TransactionType type) {
+    public void setType(LoanTransactionType type) {
         this.type = type;
     }
 

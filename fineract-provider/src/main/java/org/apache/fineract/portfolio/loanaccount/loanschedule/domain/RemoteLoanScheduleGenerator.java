@@ -38,11 +38,13 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesched
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Frequency;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.GracePeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Installment;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InstallmentComponent;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InstallmentType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InterestCalculationMethod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Rate;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleResponse;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Transaction;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,8 +75,35 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
       Loan loan, HolidayDetailDTO holidayDetailDTO,
       LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, LocalDate rescheduleFrom) {
     LOG.info("Calling");
+    RemoteScheduleRequest request = createRequest(loanApplicationTerms, loan.charges());
+
+    request.setTransactions(loan.getLoanTransactions().stream().map(transaction -> {
+      Transaction requestTransaction = new Transaction();
+
+      requestTransaction.setId(transaction.getId().toString());
+      requestTransaction.setType(transaction.getTypeOf());
+      requestTransaction.setDate(transaction.getDateOf().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+      requestTransaction.setAmount(transaction.getAmount(loanApplicationTerms.getCurrency()).getAmount().doubleValue());
+      requestTransaction.setCanceled(transaction.isReversed());
+
+      if (transaction.isManualRepayment()) {
+        InstallmentComponent distribution = new InstallmentComponent();
+        distribution.setPrincipal(transaction.getPrincipalPortion().doubleValue());
+        distribution
+            .setInterest(transaction.getInterestPortion(loanApplicationTerms.getCurrency()).getAmount().doubleValue());
+        distribution
+            .setFee(transaction.getFeeChargesPortion(loanApplicationTerms.getCurrency()).getAmount().doubleValue());
+        distribution.setPenalty(
+            transaction.getPenaltyChargesPortion(loanApplicationTerms.getCurrency()).getAmount().doubleValue());
+        requestTransaction.setDistribution(distribution);
+      }
+
+      requestTransaction.setWaive(transaction.isWaiver());
+      return requestTransaction;
+    }).toArray(Transaction[]::new));
+
     RemoteScheduleResponse response = this.builder.build().postForObject("http://localhost:5000/generateSchedule",
-        createRequest(loanApplicationTerms, loan.charges()), RemoteScheduleResponse.class);
+        request, RemoteScheduleResponse.class);
 
     if (response != null) {
       LOG.info("Got remote generate response: " + response);
