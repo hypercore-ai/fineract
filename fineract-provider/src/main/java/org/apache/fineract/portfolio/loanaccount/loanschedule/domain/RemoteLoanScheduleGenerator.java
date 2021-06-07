@@ -62,12 +62,12 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
     RestTemplateBuilder builder = new RestTemplateBuilder();
     LOG.info("Calling");
     RemoteScheduleResponse response = builder.build().postForObject(
-        "https://testep.free.beeceptor.com/generate-schedule", createRequest(loanApplicationTerms, loanCharges),
+        "http://localhost:5000/generateSchedule", createRequest(loanApplicationTerms, loanCharges),
         RemoteScheduleResponse.class);
 
     if (response != null) {
       LOG.info("Got remote generate response: " + response);
-      return this.parseRemoteSchedule(response, loanApplicationTerms);
+      return RemoteGeneratorResultParser.parseRemoteSchedule(response, loanApplicationTerms);
     } else {
       LOG.error("Error getting remote generate response");
       return null;
@@ -90,53 +90,6 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
     return null;
   }
 
-  private LoanScheduleModel parseRemoteSchedule(RemoteScheduleResponse remoteSchedule,
-      LoanApplicationTerms loanApplicationTerms) {
-    MonetaryCurrency currency = loanApplicationTerms.getCurrency();
-
-    Collection<LoanScheduleModelPeriod> periods = Arrays.stream(remoteSchedule.getInstallments()).map(installment -> {
-      if (installment.getType() == InstallmentType.DISBURSEMENT) {
-        Money principalDisbursed = Money.of(currency, BigDecimal.valueOf(installment.getAmount()));
-        BigDecimal disbursementFees = BigDecimal.valueOf(installment.getDisbursementFees());
-
-        return LoanScheduleModelDisbursementPeriod.disbursement(installment.getDate(), principalDisbursed,
-            disbursementFees);
-
-      } else if (installment.getType() == InstallmentType.INSTALLMENT) {
-        Money outstandingLoanBalance = Money.of(currency,
-            BigDecimal.valueOf(installment.getOutstandingPrincipalBalance()));
-        Money principalDue = Money.of(currency, BigDecimal.valueOf(installment.getDue().getPrincipal()));
-        Money interestDue = Money.of(currency, BigDecimal.valueOf(installment.getDue().getInterest()));
-        Money feeChargesDue = Money.of(currency, BigDecimal.valueOf(installment.getDue().getFee()));
-        Money penaltyChargesDue = Money.of(currency, BigDecimal.valueOf(installment.getDue().getPenalty()));
-        Money totalDue = principalDue.plus(interestDue).plus(feeChargesDue).plus(penaltyChargesDue);
-        boolean recalculatedInterestComponent = false; // TODO validate (seems it is related to compelete payment)
-
-        return LoanScheduleModelRepaymentPeriod.repayment(installment.getPeriod(), installment.getStartDate(),
-            installment.getDueDate(), principalDue, outstandingLoanBalance, interestDue, feeChargesDue,
-            penaltyChargesDue, totalDue, recalculatedInterestComponent);
-      }
-
-      return null;
-    }).collect(Collectors.toList());
-    int loanTermInDays = periods.stream()
-        .filter(period -> period instanceof LoanScheduleModelRepaymentPeriod)
-        .mapToInt(period -> Math.toIntExact(ChronoUnit.DAYS.between(period.periodFromDate(), period.periodDueDate())))
-        .sum();
-
-    Money principalDisbursed = Money.of(currency, BigDecimal.valueOf(remoteSchedule.getTotalPrincipalDisbursed()));
-    BigDecimal totalPrincipalExpected = BigDecimal.valueOf(remoteSchedule.getTotalPrincipalExpected());
-    BigDecimal totalPrincipalPaid = BigDecimal.valueOf(remoteSchedule.getTotalPrincipalPaid());
-    BigDecimal totalInterestCharged = BigDecimal.valueOf(remoteSchedule.getTotalInterestCharged());
-    BigDecimal totalFeeChargesCharged = BigDecimal.valueOf(remoteSchedule.getTotalFeeChargesCharged());
-    BigDecimal totalPenaltyChargesCharged = BigDecimal.valueOf(remoteSchedule.getTotalPenaltyChargesCharged());
-    BigDecimal totalRepaymentExpected = BigDecimal.valueOf(remoteSchedule.getTotalRepaymentExpected());
-    BigDecimal totalOutstanding = BigDecimal.valueOf(remoteSchedule.getTotalOutstanding());
-    return LoanScheduleModel.from(periods, loanApplicationTerms.getApplicationCurrency(), loanTermInDays,
-        principalDisbursed, totalPrincipalExpected, totalPrincipalPaid, totalInterestCharged, totalFeeChargesCharged,
-        totalPenaltyChargesCharged, totalRepaymentExpected, totalOutstanding);
-
-  }
 
   private RemoteScheduleRequest createRequest(LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges) {
     RemoteScheduleRequest request = new RemoteScheduleRequest();
