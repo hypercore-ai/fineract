@@ -61,7 +61,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
 
         if (response != null) {
             LOG.info("Got remote generate response: " + response);
-            return RemoteGeneratorResultConverter.parseRemoteSchedule(response, loanApplicationTerms);
+            return RemoteGeneratorResultConverter.remoteToScheduleModel(response, loanApplicationTerms);
         } else {
             LOG.error("Error getting remote generate response");
             return null;

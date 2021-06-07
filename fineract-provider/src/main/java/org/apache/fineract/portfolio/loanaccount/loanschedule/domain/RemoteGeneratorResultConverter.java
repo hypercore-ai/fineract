@@ -24,10 +24,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InstallmentType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InterestBreakdown;
@@ -39,7 +42,7 @@ public class RemoteGeneratorResultConverter {
         return Money.of(currency, BigDecimal.valueOf(amount));
     }
 
-    public static LoanScheduleModel parseRemoteSchedule(RemoteScheduleResponse remoteSchedule, LoanApplicationTerms loanApplicationTerms) {
+    public static LoanScheduleModel remoteToScheduleModel(RemoteScheduleResponse remoteSchedule, LoanApplicationTerms loanApplicationTerms) {
         MonetaryCurrency currency = loanApplicationTerms.getCurrency();
         Collection<LoanScheduleModelPeriod> periods = new ArrayList<>();
 
@@ -58,7 +61,7 @@ public class RemoteGeneratorResultConverter {
                 Money penaltyChargesDue = money(currency, installment.getDue().getPenalty());
                 Money totalDue = principalDue.plus(interestDue).plus(feeChargesDue).plus(penaltyChargesDue);
                 boolean recalculatedInterestComponent = false; // TODO validate (seems it is related to compelete
-                                                               // payment)
+                // payment)
 
                 periods.add(LoanScheduleModelRepaymentPeriod.repayment(installment.getPeriod(), installment.getStartDate(),
                         installment.getDueDate(), principalDue, outstandingLoanBalance, interestDue, feeChargesDue, penaltyChargesDue,
@@ -69,7 +72,7 @@ public class RemoteGeneratorResultConverter {
                         .mapToObj(interestIndex -> {
                             InterestBreakdown interestBreakdown = interestBreakdowns[interestIndex];
                             double outstandingBalance = interestBreakdown.getPrincipalBalance(); // TODO validate with
-                                                                                                 // tomer;
+                            // tomer;
                             return LoanScheduleModelRepaymentSubPeriod.repayment(installment.getPeriod(), interestIndex + 1,
                                     interestBreakdown.getStartDate(), interestBreakdown.getEndDate(), money(currency, outstandingBalance),
                                     money(currency, interestBreakdown.getInterestDue()));
@@ -103,6 +106,17 @@ public class RemoteGeneratorResultConverter {
     }
 
     public static LoanScheduleDTO remoteToLoanSchedule(RemoteScheduleResponse response, LoanApplicationTerms loanApplicationTerms) {
-        return null;
+        LoanScheduleModel loanScheduleModel = remoteToScheduleModel(response, loanApplicationTerms);
+        final List<LoanRepaymentScheduleInstallment> installments = loanScheduleModel.getPeriods().stream()
+                .filter(LoanScheduleModelPeriod::isRepaymentPeriod)
+                .map(period -> new LoanRepaymentScheduleInstallment(null, period.periodNumber(),
+                        period.subPeriodNumber(), period.periodFromDate(),
+                        period.periodDueDate(), period.principalDue(),
+                        period.interestDue(), period.feeChargesDue(),
+                        period.penaltyChargesDue(), period.isRecalculatedInterestComponent(),
+                        period.getLoanCompoundingDetails(), period.rescheduleInterestPortion())).collect(Collectors.toList());
+
+
+        return LoanScheduleDTO.from(installments, loanScheduleModel);
     }
 }
