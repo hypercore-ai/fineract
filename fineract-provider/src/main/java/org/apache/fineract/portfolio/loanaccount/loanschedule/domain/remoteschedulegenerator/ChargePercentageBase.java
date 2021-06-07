@@ -3,22 +3,23 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum ChargePercentageBase {
-  Flat("Flat"), ApprovedAmount("ApprovedAmount"), Interest("Interest"),
-  UnutilizedPrincipalAmount("UnutilizedPrincipalAmount"), OverDueTotalAmount("OverDueTotalAmount");
 
-  private final String value;
+    Flat("Flat"), ApprovedAmount("ApprovedAmount"), Interest("Interest"), UnutilizedPrincipalAmount(
+            "UnutilizedPrincipalAmount"), OverDueTotalAmount("OverDueTotalAmount");
 
-  private ChargePercentageBase(String value) {
-    this.value = value;
-  }
+    private final String value;
 
-  @JsonValue
-  public String getValue() {
-    return value;
-  }
+    private ChargePercentageBase(String value) {
+        this.value = value;
+    }
 
-  @Override
-  public String toString() {
-    return this.value;
-  }
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return this.value;
+    }
 }

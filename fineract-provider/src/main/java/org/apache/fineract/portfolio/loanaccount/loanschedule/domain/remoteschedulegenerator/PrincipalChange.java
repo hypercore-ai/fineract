@@ -1,34 +1,34 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
 public class PrincipalChange {
-  private PrincipalChangeType type;
-  private double balanceChange;
-  private boolean isActual;
 
-  public PrincipalChange() {
-  }
+    private PrincipalChangeType type;
+    private double balanceChange;
+    private boolean isActual;
 
-  public PrincipalChangeType getType() {
-    return type;
-  }
+    public PrincipalChange() {}
 
-  public boolean isActual() {
-    return isActual;
-  }
+    public PrincipalChangeType getType() {
+        return type;
+    }
 
-  public void setActual(boolean isActual) {
-    this.isActual = isActual;
-  }
+    public boolean isActual() {
+        return isActual;
+    }
 
-  public double getBalanceChange() {
-    return balanceChange;
-  }
+    public void setActual(boolean isActual) {
+        this.isActual = isActual;
+    }
 
-  public void setBalanceChange(double balanceChange) {
-    this.balanceChange = balanceChange;
-  }
+    public double getBalanceChange() {
+        return balanceChange;
+    }
 
-  public void setType(PrincipalChangeType type) {
-    this.type = type;
-  }
+    public void setBalanceChange(double balanceChange) {
+        this.balanceChange = balanceChange;
+    }
+
+    public void setType(PrincipalChangeType type) {
+        this.type = type;
+    }
 }

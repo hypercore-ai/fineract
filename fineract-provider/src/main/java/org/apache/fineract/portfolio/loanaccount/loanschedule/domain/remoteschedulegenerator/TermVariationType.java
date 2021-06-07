@@ -1,21 +1,22 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
 public enum TermVariationType {
-  UpdateInterest("UpdateInterest"), AddGrace("AddGrace"), SetTotalInstallment("SetTotalInstallment");
 
-  private final String value;
+    UpdateInterest("UpdateInterest"), AddGrace("AddGrace"), SetTotalInstallment("SetTotalInstallment");
 
-  private TermVariationType(String value) {
-    this.value = value;
-  }
+    private final String value;
 
-  public String getValue() {
-    return value;
-  }
+    private TermVariationType(String value) {
+        this.value = value;
+    }
 
-  @Override
-  public String toString() {
-    return this.value;
-  }
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return this.value;
+    }
 
 }

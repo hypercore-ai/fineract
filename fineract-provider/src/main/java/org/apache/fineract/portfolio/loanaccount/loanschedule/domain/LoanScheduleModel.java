@@ -125,7 +125,7 @@ public final class LoanScheduleModel {
     }
 
     @Override
-    public String toString() { 
+    public String toString() {
         return "LoanScheduleModel";
     }
 }

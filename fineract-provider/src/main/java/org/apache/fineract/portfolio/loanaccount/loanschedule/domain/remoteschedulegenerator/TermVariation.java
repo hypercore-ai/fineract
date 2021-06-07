@@ -3,61 +3,61 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 import java.time.LocalDate;
 
 public class TermVariation {
-  private String id;
-  private TermVariationType type;
-  private String startDate;
-  private String endDate;
-  private LocalDate createdTimestamp;
-  private double newValue;
 
-  public TermVariation() {
-  }
+    private String id;
+    private TermVariationType type;
+    private String startDate;
+    private String endDate;
+    private LocalDate createdTimestamp;
+    private double newValue;
 
-  public String getId() {
-    return id;
-  }
+    public TermVariation() {}
 
-  public double getNewValue() {
-    return newValue;
-  }
+    public String getId() {
+        return id;
+    }
 
-  public void setNewValue(double newValue) {
-    this.newValue = newValue;
-  }
+    public double getNewValue() {
+        return newValue;
+    }
 
-  public LocalDate getCreatedTimestamp() {
-    return createdTimestamp;
-  }
+    public void setNewValue(double newValue) {
+        this.newValue = newValue;
+    }
 
-  public void setCreatedTimestamp(LocalDate createdTimestamp) {
-    this.createdTimestamp = createdTimestamp;
-  }
+    public LocalDate getCreatedTimestamp() {
+        return createdTimestamp;
+    }
 
-  public String getEndDate() {
-    return endDate;
-  }
+    public void setCreatedTimestamp(LocalDate createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
+    }
 
-  public void setEndDate(String endDate) {
-    this.endDate = endDate;
-  }
+    public String getEndDate() {
+        return endDate;
+    }
 
-  public String getStartDate() {
-    return startDate;
-  }
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
 
-  public void setStartDate(String startDate) {
-    this.startDate = startDate;
-  }
+    public String getStartDate() {
+        return startDate;
+    }
 
-  public TermVariationType getType() {
-    return type;
-  }
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
 
-  public void setType(TermVariationType type) {
-    this.type = type;
-  }
+    public TermVariationType getType() {
+        return type;
+    }
 
-  public void setId(String id) {
-    this.id = id;
-  }
+    public void setType(TermVariationType type) {
+        this.type = type;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

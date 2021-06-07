@@ -3,80 +3,81 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 import java.time.LocalDate;
 
 public class Transaction {
-  private String id;
-  private LocalDate date;
-  private double amount;
-  private TransactionType type;
-  private InstallmentComponent distribution;
-  private boolean canceled;
-  private boolean isWaive;
-  private FeeBreakdown[] feesBreakdown;
 
-  public Transaction() {
-    super();
-  }
+    private String id;
+    private LocalDate date;
+    private double amount;
+    private TransactionType type;
+    private InstallmentComponent distribution;
+    private boolean canceled;
+    private boolean isWaive;
+    private FeeBreakdown[] feesBreakdown;
 
-  public FeeBreakdown[] getFeesBreakdown() {
-    return feesBreakdown;
-  }
+    public Transaction() {
+        super();
+    }
 
-  public void setFeesBreakdown(FeeBreakdown[] feesBreakdown) {
-    this.feesBreakdown = feesBreakdown;
-  }
+    public FeeBreakdown[] getFeesBreakdown() {
+        return feesBreakdown;
+    }
 
-  public String getId() {
-    return id;
-  }
+    public void setFeesBreakdown(FeeBreakdown[] feesBreakdown) {
+        this.feesBreakdown = feesBreakdown;
+    }
 
-  public boolean isWaive() {
-    return isWaive;
-  }
+    public String getId() {
+        return id;
+    }
 
-  public void setWaive(boolean isWaive) {
-    this.isWaive = isWaive;
-  }
+    public boolean isWaive() {
+        return isWaive;
+    }
 
-  public boolean isCanceled() {
-    return canceled;
-  }
+    public void setWaive(boolean isWaive) {
+        this.isWaive = isWaive;
+    }
 
-  public void setCanceled(boolean canceled) {
-    this.canceled = canceled;
-  }
+    public boolean isCanceled() {
+        return canceled;
+    }
 
-  public InstallmentComponent getDistribution() {
-    return distribution;
-  }
+    public void setCanceled(boolean canceled) {
+        this.canceled = canceled;
+    }
 
-  public void setDistribution(InstallmentComponent distribution) {
-    this.distribution = distribution;
-  }
+    public InstallmentComponent getDistribution() {
+        return distribution;
+    }
 
-  public TransactionType getType() {
-    return type;
-  }
+    public void setDistribution(InstallmentComponent distribution) {
+        this.distribution = distribution;
+    }
 
-  public void setType(TransactionType type) {
-    this.type = type;
-  }
+    public TransactionType getType() {
+        return type;
+    }
 
-  public double getAmount() {
-    return amount;
-  }
+    public void setType(TransactionType type) {
+        this.type = type;
+    }
 
-  public void setAmount(double amount) {
-    this.amount = amount;
-  }
+    public double getAmount() {
+        return amount;
+    }
 
-  public LocalDate getDate() {
-    return date;
-  }
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
 
-  public void setDate(LocalDate date) {
-    this.date = date;
-  }
+    public LocalDate getDate() {
+        return date;
+    }
 
-  public void setId(String id) {
-    this.id = id;
-  }
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

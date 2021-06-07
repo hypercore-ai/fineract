@@ -3,26 +3,27 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 import java.time.LocalDate;
 
 public class Rate {
-  private LocalDate date;
-  private double value;
 
-  public Rate() {
-    super();
-  }
+    private LocalDate date;
+    private double value;
 
-  public LocalDate getDate() {
-    return date;
-  }
+    public Rate() {
+        super();
+    }
 
-  public double getValue() {
-    return value;
-  }
+    public LocalDate getDate() {
+        return date;
+    }
 
-  public void setValue(double value) {
-    this.value = value;
-  }
+    public double getValue() {
+        return value;
+    }
 
-  public void setDate(LocalDate date) {
-    this.date = date;
-  }
+    public void setValue(double value) {
+        this.value = value;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 }

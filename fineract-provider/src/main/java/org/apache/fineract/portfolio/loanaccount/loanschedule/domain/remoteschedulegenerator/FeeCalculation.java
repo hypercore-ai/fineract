@@ -3,26 +3,27 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum FeeCalculation {
-  Flat("Flat"), PercentageOfApprovedAmount("PercentageOfApprovedAmount"),
-  PercentageOfInstallmentPrincipal("PercentageOfInstallmentPrincipal"),
-  PercentageOfInstallmentInterest("PercentageOfInstallmentInterest"),
-  PercentageOfInstallmentPrincipalAndInterest("PercentageOfInstallmentPrincipalAndInterest"),
-  AnnualPercentageOfUnutilizedAmount("AnnualPercentageOfUnutilizedAmount"), PercentageOfOverdue("PercentageOfOverdue");
 
-  private final String value;
+    Flat("Flat"), PercentageOfApprovedAmount("PercentageOfApprovedAmount"), PercentageOfInstallmentPrincipal(
+            "PercentageOfInstallmentPrincipal"), PercentageOfInstallmentInterest(
+                    "PercentageOfInstallmentInterest"), PercentageOfInstallmentPrincipalAndInterest(
+                            "PercentageOfInstallmentPrincipalAndInterest"), AnnualPercentageOfUnutilizedAmount(
+                                    "AnnualPercentageOfUnutilizedAmount"), PercentageOfOverdue("PercentageOfOverdue");
 
-  private FeeCalculation(String value) {
-    this.value = value;
-  }
+    private final String value;
 
-  @JsonValue
-  public String getValue() {
-    return value;
-  }
+    private FeeCalculation(String value) {
+        this.value = value;
+    }
 
-  @Override
-  public String toString() {
-    return this.value;
-  }
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return this.value;
+    }
 
 }

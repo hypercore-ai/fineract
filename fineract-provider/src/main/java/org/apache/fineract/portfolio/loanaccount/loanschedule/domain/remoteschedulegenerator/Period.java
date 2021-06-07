@@ -3,26 +3,27 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 import java.time.LocalDate;
 
 public class Period {
-  private LocalDate startDate;
-  private LocalDate endDate;
 
-  public Period() {
-    super();
-  }
+    private LocalDate startDate;
+    private LocalDate endDate;
 
-  public LocalDate getStartDate() {
-    return startDate;
-  }
+    public Period() {
+        super();
+    }
 
-  public LocalDate getEndDate() {
-    return endDate;
-  }
+    public LocalDate getStartDate() {
+        return startDate;
+    }
 
-  public void setEndDate(LocalDate endDate) {
-    this.endDate = endDate;
-  }
+    public LocalDate getEndDate() {
+        return endDate;
+    }
 
-  public void setStartDate(LocalDate startDate) {
-    this.startDate = startDate;
-  }
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 }

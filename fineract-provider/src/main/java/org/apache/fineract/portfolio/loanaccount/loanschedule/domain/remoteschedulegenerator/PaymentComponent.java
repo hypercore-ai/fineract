@@ -3,21 +3,22 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum PaymentComponent {
-  Penalty("Penalty"), Fee("Fee"), Interest("Interest"), Principal("Principal");
 
-  private final String value;
+    Penalty("Penalty"), Fee("Fee"), Interest("Interest"), Principal("Principal");
 
-  private PaymentComponent(String value) {
-    this.value = value;
-  }
+    private final String value;
 
-  @JsonValue
-  public String getValue() {
-    return value;
-  }
+    private PaymentComponent(String value) {
+        this.value = value;
+    }
 
-  @Override
-  public String toString() {
-    return this.value;
-  }
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return this.value;
+    }
 }

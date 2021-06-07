@@ -4,216 +4,201 @@ import java.time.LocalDate;
 import java.util.Arrays;
 
 public class Installment {
-  private InstallmentType type;
-  private LocalDate date;
-  private double amount;
-  private int period;
-  private LocalDate startDate;
-  private LocalDate dueDate;
-  private InterestBreakdown[] breakdown;
-  private InstallmentComponent due;
-  private InstallmentComponent paid;
-  private InstallmentComponent waived;
-  private InstallmentComponent writtenOff;
-  private InstallmentComponent early;
-  private InstallmentComponent late;
-  private FeeBreakdown[] feesBreakdown;
-  private FeeBreakdown[] penaltyBreakdown;
-  private String[] transactionsId;
-  private boolean obligationMet;
-  private LocalDate obligationMetOnDate;
-  private double disbursementFees;
 
-  public double getOutstandingPrincipalBalance() {
-    return outstandingPrincipalBalance;
-  }
+    private InstallmentType type;
+    private LocalDate date;
+    private double amount;
+    private int period;
+    private LocalDate startDate;
+    private LocalDate dueDate;
+    private InterestBreakdown[] breakdown;
+    private InstallmentComponent due;
+    private InstallmentComponent paid;
+    private InstallmentComponent waived;
+    private InstallmentComponent writtenOff;
+    private InstallmentComponent early;
+    private InstallmentComponent late;
+    private FeeBreakdown[] feesBreakdown;
+    private FeeBreakdown[] penaltyBreakdown;
+    private String[] transactionsId;
+    private boolean obligationMet;
+    private LocalDate obligationMetOnDate;
+    private double disbursementFees;
 
-  public void setOutstandingPrincipalBalance(double outstandingPrincipalBalance) {
-    this.outstandingPrincipalBalance = outstandingPrincipalBalance;
-  }
+    public double getOutstandingPrincipalBalance() {
+        return outstandingPrincipalBalance;
+    }
 
-  private  double outstandingPrincipalBalance;
+    public void setOutstandingPrincipalBalance(double outstandingPrincipalBalance) {
+        this.outstandingPrincipalBalance = outstandingPrincipalBalance;
+    }
 
-  public Installment() {
-    super();
-  }
+    private double outstandingPrincipalBalance;
 
-  public InstallmentType getType() {
-    return type;
-  }
+    public Installment() {
+        super();
+    }
 
-  public LocalDate getObligationMetOnDate() {
-    return obligationMetOnDate;
-  }
+    public InstallmentType getType() {
+        return type;
+    }
 
-  public void setObligationMetOnDate(LocalDate obligationMetOnDate) {
-    this.obligationMetOnDate = obligationMetOnDate;
-  }
+    public LocalDate getObligationMetOnDate() {
+        return obligationMetOnDate;
+    }
 
-  public boolean isObligationMet() {
-    return obligationMet;
-  }
+    public void setObligationMetOnDate(LocalDate obligationMetOnDate) {
+        this.obligationMetOnDate = obligationMetOnDate;
+    }
 
-  public void setObligationMet(boolean obligationMet) {
-    this.obligationMet = obligationMet;
-  }
+    public boolean isObligationMet() {
+        return obligationMet;
+    }
 
-  public String[] getTransactionsId() {
-    return transactionsId;
-  }
+    public void setObligationMet(boolean obligationMet) {
+        this.obligationMet = obligationMet;
+    }
 
-  public void setTransactionsId(String[] transactionsId) {
-    this.transactionsId = transactionsId;
-  }
+    public String[] getTransactionsId() {
+        return transactionsId;
+    }
 
-  public FeeBreakdown[] getPenaltyBreakdown() {
-    return penaltyBreakdown;
-  }
+    public void setTransactionsId(String[] transactionsId) {
+        this.transactionsId = transactionsId;
+    }
 
-  public void setPenaltyBreakdown(FeeBreakdown[] penaltyBreakdown) {
-    this.penaltyBreakdown = penaltyBreakdown;
-  }
+    public FeeBreakdown[] getPenaltyBreakdown() {
+        return penaltyBreakdown;
+    }
 
-  public FeeBreakdown[] getFeesBreakdown() {
-    return feesBreakdown;
-  }
+    public void setPenaltyBreakdown(FeeBreakdown[] penaltyBreakdown) {
+        this.penaltyBreakdown = penaltyBreakdown;
+    }
 
-  public void setFeesBreakdown(FeeBreakdown[] feesBreakdown) {
-    this.feesBreakdown = feesBreakdown;
-  }
+    public FeeBreakdown[] getFeesBreakdown() {
+        return feesBreakdown;
+    }
 
-  public InstallmentComponent getLate() {
-    return late;
-  }
+    public void setFeesBreakdown(FeeBreakdown[] feesBreakdown) {
+        this.feesBreakdown = feesBreakdown;
+    }
 
-  public void setLate(InstallmentComponent late) {
-    this.late = late;
-  }
+    public InstallmentComponent getLate() {
+        return late;
+    }
 
-  public InstallmentComponent getEarly() {
-    return early;
-  }
+    public void setLate(InstallmentComponent late) {
+        this.late = late;
+    }
 
-  public void setEarly(InstallmentComponent early) {
-    this.early = early;
-  }
+    public InstallmentComponent getEarly() {
+        return early;
+    }
 
-  public InstallmentComponent getWrittenOff() {
-    return writtenOff;
-  }
+    public void setEarly(InstallmentComponent early) {
+        this.early = early;
+    }
 
-  public void setWrittenOff(InstallmentComponent writtenOff) {
-    this.writtenOff = writtenOff;
-  }
+    public InstallmentComponent getWrittenOff() {
+        return writtenOff;
+    }
 
-  public InstallmentComponent getWaived() {
-    return waived;
-  }
+    public void setWrittenOff(InstallmentComponent writtenOff) {
+        this.writtenOff = writtenOff;
+    }
 
-  public void setWaived(InstallmentComponent waived) {
-    this.waived = waived;
-  }
+    public InstallmentComponent getWaived() {
+        return waived;
+    }
 
-  public InstallmentComponent getPaid() {
-    return paid;
-  }
+    public void setWaived(InstallmentComponent waived) {
+        this.waived = waived;
+    }
 
-  public void setPaid(InstallmentComponent paid) {
-    this.paid = paid;
-  }
+    public InstallmentComponent getPaid() {
+        return paid;
+    }
 
-  public InstallmentComponent getDue() {
-    return due;
-  }
+    public void setPaid(InstallmentComponent paid) {
+        this.paid = paid;
+    }
 
-  public void setDue(InstallmentComponent due) {
-    this.due = due;
-  }
+    public InstallmentComponent getDue() {
+        return due;
+    }
 
-  public InterestBreakdown[] getBreakdown() {
-    return breakdown;
-  }
+    public void setDue(InstallmentComponent due) {
+        this.due = due;
+    }
 
-  public void setBreakdown(InterestBreakdown[] breakdown) {
-    this.breakdown = breakdown;
-  }
+    public InterestBreakdown[] getBreakdown() {
+        return breakdown;
+    }
 
-  public LocalDate getDueDate() {
-    return dueDate;
-  }
+    public void setBreakdown(InterestBreakdown[] breakdown) {
+        this.breakdown = breakdown;
+    }
 
-  public void setDueDate(LocalDate dueDate) {
-    this.dueDate = dueDate;
-  }
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
 
-  public LocalDate getStartDate() {
-    return startDate;
-  }
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+    }
 
-  public void setStartDate(LocalDate startDate) {
-    this.startDate = startDate;
-  }
+    public LocalDate getStartDate() {
+        return startDate;
+    }
 
-  public int getPeriod() {
-    return period;
-  }
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 
-  public void setPeriod(int period) {
-    this.period = period;
-  }
+    public int getPeriod() {
+        return period;
+    }
 
-  public double getAmount() {
-    return amount;
-  }
+    public void setPeriod(int period) {
+        this.period = period;
+    }
 
-  public void setAmount(double amount) {
-    this.amount = amount;
-  }
+    public double getAmount() {
+        return amount;
+    }
 
-  public LocalDate getDate() {
-    return date;
-  }
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
 
-  public void setDate(LocalDate date) {
-    this.date = date;
-  }
+    public LocalDate getDate() {
+        return date;
+    }
 
-  public void setType(InstallmentType type) {
-    this.type = type;
-  }
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 
-  public double getDisbursementFees() {
-    return disbursementFees;
-  }
+    public void setType(InstallmentType type) {
+        this.type = type;
+    }
 
-  public void setDisbursementFees(double disbursementFees) {
-    this.disbursementFees = disbursementFees;
-  }
+    public double getDisbursementFees() {
+        return disbursementFees;
+    }
 
-  @Override
-  public String toString() {
-    return "Installment{" +
-            "type=" + type +
-            ", date=" + date +
-            ", amount=" + amount +
-            ", period=" + period +
-            ", startDate=" + startDate +
-            ", dueDate=" + dueDate +
-            ", breakdown=" + Arrays.toString(breakdown) +
-            ", due=" + due +
-            ", paid=" + paid +
-            ", waived=" + waived +
-            ", writtenOff=" + writtenOff +
-            ", early=" + early +
-            ", late=" + late +
-            ", feesBreakdown=" + Arrays.toString(feesBreakdown) +
-            ", penaltyBreakdown=" + Arrays.toString(penaltyBreakdown) +
-            ", transactionsId=" + Arrays.toString(transactionsId) +
-            ", obligationMet=" + obligationMet +
-            ", obligationMetOnDate=" + obligationMetOnDate +
-            ", disbursementFees=" + disbursementFees +
-            ", outstandingPrincipalBalance=" + outstandingPrincipalBalance +
-            '}';
-  }
+    public void setDisbursementFees(double disbursementFees) {
+        this.disbursementFees = disbursementFees;
+    }
+
+    @Override
+    public String toString() {
+        return "Installment{" + "type=" + type + ", date=" + date + ", amount=" + amount + ", period=" + period + ", startDate=" + startDate
+                + ", dueDate=" + dueDate + ", breakdown=" + Arrays.toString(breakdown) + ", due=" + due + ", paid=" + paid + ", waived="
+                + waived + ", writtenOff=" + writtenOff + ", early=" + early + ", late=" + late + ", feesBreakdown="
+                + Arrays.toString(feesBreakdown) + ", penaltyBreakdown=" + Arrays.toString(penaltyBreakdown) + ", transactionsId="
+                + Arrays.toString(transactionsId) + ", obligationMet=" + obligationMet + ", obligationMetOnDate=" + obligationMetOnDate
+                + ", disbursementFees=" + disbursementFees + ", outstandingPrincipalBalance=" + outstandingPrincipalBalance + '}';
+    }
 
 }

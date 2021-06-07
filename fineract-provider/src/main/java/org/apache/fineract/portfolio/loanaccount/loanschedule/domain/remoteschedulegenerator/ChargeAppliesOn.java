@@ -1,20 +1,21 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
 public enum ChargeAppliesOn {
-  Disbursement("Disbursement"), Overdue("Overdue"), RevolvingPeriodInstallment("RevolvingPeriodInstallment");
 
-  private final String value;
+    Disbursement("Disbursement"), Overdue("Overdue"), RevolvingPeriodInstallment("RevolvingPeriodInstallment");
 
-  private ChargeAppliesOn(String value) {
-    this.value = value;
-  }
+    private final String value;
 
-  public String getValue() {
-    return value;
-  }
+    private ChargeAppliesOn(String value) {
+        this.value = value;
+    }
 
-  @Override
-  public String toString() {
-    return this.value;
-  }
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return this.value;
+    }
 }

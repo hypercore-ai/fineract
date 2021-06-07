@@ -3,62 +3,63 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 import java.time.LocalDate;
 
 public class InterestBreakdown {
-  private int subPeriod;
-  private LocalDate startDate;
-  private LocalDate endDate;
-  private double principalBalance;
-  private double interestDue;
-  private double interestPercentage;
 
-  public InterestBreakdown() {
-    super();
-  }
+    private int subPeriod;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private double principalBalance;
+    private double interestDue;
+    private double interestPercentage;
 
-  public int getSubPeriod() {
-    return subPeriod;
-  }
+    public InterestBreakdown() {
+        super();
+    }
 
-  public double getInterestPercentage() {
-    return interestPercentage;
-  }
+    public int getSubPeriod() {
+        return subPeriod;
+    }
 
-  public void setInterestPercentage(double interestPercentage) {
-    this.interestPercentage = interestPercentage;
-  }
+    public double getInterestPercentage() {
+        return interestPercentage;
+    }
 
-  public double getInterestDue() {
-    return interestDue;
-  }
+    public void setInterestPercentage(double interestPercentage) {
+        this.interestPercentage = interestPercentage;
+    }
 
-  public void setInterestDue(double interestDue) {
-    this.interestDue = interestDue;
-  }
+    public double getInterestDue() {
+        return interestDue;
+    }
 
-  public double getPrincipalBalance() {
-    return principalBalance;
-  }
+    public void setInterestDue(double interestDue) {
+        this.interestDue = interestDue;
+    }
 
-  public void setPrincipalBalance(double principalBalance) {
-    this.principalBalance = principalBalance;
-  }
+    public double getPrincipalBalance() {
+        return principalBalance;
+    }
 
-  public LocalDate getEndDate() {
-    return endDate;
-  }
+    public void setPrincipalBalance(double principalBalance) {
+        this.principalBalance = principalBalance;
+    }
 
-  public void setEndDate(LocalDate endDate) {
-    this.endDate = endDate;
-  }
+    public LocalDate getEndDate() {
+        return endDate;
+    }
 
-  public LocalDate getStartDate() {
-    return startDate;
-  }
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 
-  public void setStartDate(LocalDate startDate) {
-    this.startDate = startDate;
-  }
+    public LocalDate getStartDate() {
+        return startDate;
+    }
 
-  public void setSubPeriod(int subPeriod) {
-    this.subPeriod = subPeriod;
-  }
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public void setSubPeriod(int subPeriod) {
+        this.subPeriod = subPeriod;
+    }
 }

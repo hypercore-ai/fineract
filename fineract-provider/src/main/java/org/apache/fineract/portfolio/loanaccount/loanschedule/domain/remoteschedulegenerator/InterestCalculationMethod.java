@@ -3,21 +3,22 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum InterestCalculationMethod {
-  DecliningBalance("DecliningBalance"), Flat("Flat");
 
-  private final String value;
+    DecliningBalance("DecliningBalance"), Flat("Flat");
 
-  private InterestCalculationMethod(String value) {
-    this.value = value;
-  }
+    private final String value;
 
-  @JsonValue
-  public String getValue() {
-    return value;
-  }
+    private InterestCalculationMethod(String value) {
+        this.value = value;
+    }
 
-  @Override
-  public String toString() {
-    return this.value;
-  }
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return this.value;
+    }
 }

@@ -1,62 +1,62 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
 public class Fee {
-  private String id;
-  private FeeTiming timing;
-  private Frequency timingFrequency;
-  private FeeCalculation calculationType;
-  private double value;
-  private boolean isPenalty;
 
-  public Fee() {
-  }
+    private String id;
+    private FeeTiming timing;
+    private Frequency timingFrequency;
+    private FeeCalculation calculationType;
+    private double value;
+    private boolean isPenalty;
 
-  public String getId() {
-    return id;
-  }
+    public Fee() {}
 
-  public boolean isPenalty() {
-    return isPenalty;
-  }
+    public String getId() {
+        return id;
+    }
 
-  public void setPenalty(boolean isPenalty) {
-    this.isPenalty = isPenalty;
-  }
+    public boolean isPenalty() {
+        return isPenalty;
+    }
 
-  public double getValue() {
-    return value;
-  }
+    public void setPenalty(boolean isPenalty) {
+        this.isPenalty = isPenalty;
+    }
 
-  public void setValue(double value) {
-    this.value = value;
-  }
+    public double getValue() {
+        return value;
+    }
 
-  public FeeCalculation getCalculationType() {
-    return calculationType;
-  }
+    public void setValue(double value) {
+        this.value = value;
+    }
 
-  public void setCalculationType(FeeCalculation calculationType) {
-    this.calculationType = calculationType;
-  }
+    public FeeCalculation getCalculationType() {
+        return calculationType;
+    }
 
-  public Frequency getTimingFrequency() {
-    return timingFrequency;
-  }
+    public void setCalculationType(FeeCalculation calculationType) {
+        this.calculationType = calculationType;
+    }
 
-  public void setTimingFrequency(Frequency timingFrequency) {
-    this.timingFrequency = timingFrequency;
-  }
+    public Frequency getTimingFrequency() {
+        return timingFrequency;
+    }
 
-  public FeeTiming getTiming() {
-    return timing;
-  }
+    public void setTimingFrequency(Frequency timingFrequency) {
+        this.timingFrequency = timingFrequency;
+    }
 
-  public void setTiming(FeeTiming timing) {
-    this.timing = timing;
-  }
+    public FeeTiming getTiming() {
+        return timing;
+    }
 
-  public void setId(String id) {
-    this.id = id;
-  }
+    public void setTiming(FeeTiming timing) {
+        this.timing = timing;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
 }

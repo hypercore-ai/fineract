@@ -3,62 +3,62 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 import java.time.LocalDate;
 
 public class Frequency {
-  private LocalDate startDate;
-  private LocalDate endDate;
-  private String every;
-  private int everyMultiplier;
-  private String daysInEvery;
-  private int repetitions;
 
-  public Frequency() {
-  }
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String every;
+    private int everyMultiplier;
+    private String daysInEvery;
+    private int repetitions;
 
-  public LocalDate getStartDate() {
-    return startDate;
-  }
+    public Frequency() {}
 
-  public int getRepetitions() {
-    return repetitions;
-  }
+    public LocalDate getStartDate() {
+        return startDate;
+    }
 
-  public void setRepetitions(int repetitions) {
-    this.repetitions = repetitions;
-  }
+    public int getRepetitions() {
+        return repetitions;
+    }
 
-  public String getDaysInEvery() {
-    return daysInEvery;
-  }
+    public void setRepetitions(int repetitions) {
+        this.repetitions = repetitions;
+    }
 
-  public void setDaysInEvery(String daysInEvery) {
-    this.daysInEvery = daysInEvery;
-  }
+    public String getDaysInEvery() {
+        return daysInEvery;
+    }
 
-  public int getEveryMultiplier() {
-    return everyMultiplier;
-  }
+    public void setDaysInEvery(String daysInEvery) {
+        this.daysInEvery = daysInEvery;
+    }
 
-  public void setEveryMultiplier(int everyMultiplier) {
-    this.everyMultiplier = everyMultiplier;
-  }
+    public int getEveryMultiplier() {
+        return everyMultiplier;
+    }
 
-  public String getEvery() {
-    return every;
-  }
+    public void setEveryMultiplier(int everyMultiplier) {
+        this.everyMultiplier = everyMultiplier;
+    }
 
-  public void setEvery(String every) {
-    this.every = every;
-  }
+    public String getEvery() {
+        return every;
+    }
 
-  public LocalDate getEndDate() {
-    return endDate;
-  }
+    public void setEvery(String every) {
+        this.every = every;
+    }
 
-  public void setEndDate(LocalDate endDate) {
-    this.endDate = endDate;
-  }
+    public LocalDate getEndDate() {
+        return endDate;
+    }
 
-  public void setStartDate(LocalDate startDate) {
-    this.startDate = startDate;
-  }
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 
 }

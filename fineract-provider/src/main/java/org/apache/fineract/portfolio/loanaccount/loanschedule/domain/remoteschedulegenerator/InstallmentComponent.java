@@ -1,50 +1,51 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
 public class InstallmentComponent {
-  private double principal;
-  private double interest;
-  private double fee;
-  private double penalty;
 
-  public InstallmentComponent() {
-    super();
-  }
+    private double principal;
+    private double interest;
+    private double fee;
+    private double penalty;
 
-  public double getPrincipal() {
-    return principal;
-  }
+    public InstallmentComponent() {
+        super();
+    }
 
-  public double getPenalty() {
-    return penalty;
-  }
+    public double getPrincipal() {
+        return principal;
+    }
 
-  public void setPenalty(double penalty) {
-    this.penalty = penalty;
-  }
+    public double getPenalty() {
+        return penalty;
+    }
 
-  public double getFee() {
-    return fee;
-  }
+    public void setPenalty(double penalty) {
+        this.penalty = penalty;
+    }
 
-  public void setFee(double fee) {
-    this.fee = fee;
-  }
+    public double getFee() {
+        return fee;
+    }
 
-  public double getInterest() {
-    return interest;
-  }
+    public void setFee(double fee) {
+        this.fee = fee;
+    }
 
-  public void setInterest(double interest) {
-    this.interest = interest;
-  }
+    public double getInterest() {
+        return interest;
+    }
 
-  public void setPrincipal(double principal) {
-    this.principal = principal;
-  }
+    public void setInterest(double interest) {
+        this.interest = interest;
+    }
 
-  @Override
-  public String toString() {
-    return "{" + " principal='" + getPrincipal() + "'" + ", interest='" + getInterest() + "'" + ", fee='" + getFee()
-        + "'" + ", penalty='" + getPenalty() + "'" + "}";
-  }
+    public void setPrincipal(double principal) {
+        this.principal = principal;
+    }
+
+    @Override
+    public String toString() {
+        return "{" + " principal='" + getPrincipal() + "'" + ", interest='" + getInterest() + "'" + ", fee='" + getFee() + "'"
+                + ", penalty='" + getPenalty() + "'" + "}";
+    }
 }

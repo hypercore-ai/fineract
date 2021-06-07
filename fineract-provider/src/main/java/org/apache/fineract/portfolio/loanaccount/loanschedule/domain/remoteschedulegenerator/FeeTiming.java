@@ -3,22 +3,23 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum FeeTiming {
-  Frequency("Frequency"), OnDisbursement("OnDisbursement"), OnInstallment("OnInstallment"),
-  OnRevolvingPeriodInstallment("OnRevolvingPeriodInstallment");
 
-  private final String value;
+    Frequency("Frequency"), OnDisbursement("OnDisbursement"), OnInstallment("OnInstallment"), OnRevolvingPeriodInstallment(
+            "OnRevolvingPeriodInstallment");
 
-  private FeeTiming(String value) {
-    this.value = value;
-  }
+    private final String value;
 
-  @JsonValue
-  public String getValue() {
-    return value;
-  }
+    private FeeTiming(String value) {
+        this.value = value;
+    }
 
-  @Override
-  public String toString() {
-    return this.value;
-  }
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return this.value;
+    }
 }
