@@ -1,3 +1,22 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -51,8 +70,8 @@ public class RemoteGeneratorResultParser {
                         .mapToObj(interestIndex -> {
                                 InterestBreakdown interestBreakdown = interestBreakdowns[interestIndex];
                             double outstandingBalance = interestBreakdown.getPrincipalBalance(); // TODO validate with tomer;
-                            return LoanScheduleModelRepaymentSubPeriod.repayment(installment.getPeriod(), interestIndex + 1,interestBreakdown.getStartDate(),
-                                    interestBreakdown.getEndDate(), money(currency,outstandingBalance),money(currency, interestBreakdown.getInterestDue()));
+                            return LoanScheduleModelRepaymentSubPeriod.repayment(installment.getPeriod(), interestIndex + 1, interestBreakdown.getStartDate(),
+                                    interestBreakdown.getEndDate(), money(currency, outstandingBalance), money(currency, interestBreakdown.getInterestDue()));
                 }).collect(Collectors.toList());
 
                 // TODO validate - this code is in Abstract Generator
