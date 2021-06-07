@@ -1,14 +1,16 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
+import java.time.LocalDate;
+
 public class Rate {
-  private String date;
+  private LocalDate date;
   private double value;
 
   public Rate() {
     super();
   }
 
-  public String getDate() {
+  public LocalDate getDate() {
     return date;
   }
 
@@ -20,7 +22,7 @@ public class Rate {
     this.value = value;
   }
 
-  public void setDate(String date) {
+  public void setDate(LocalDate date) {
     this.date = date;
   }
 }

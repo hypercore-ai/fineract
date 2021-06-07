@@ -17,7 +17,7 @@ public class RemoteScheduleRequest {
   private Frequency interestRepaymentFrequency;
   private Period[] principalGracePeriods;
   private Period[] interestGracePeriods;
-  private Rate[] annualInterestRate;
+  private Rate[] interestRates;
   private String daysInYear;
   private String daysInMonth;
   private InterestCalculationMethod interestCalculationMethod;
@@ -98,12 +98,12 @@ public class RemoteScheduleRequest {
     this.daysInYear = daysInYear;
   }
 
-  public Rate[] getAnnualInterestRate() {
-    return annualInterestRate;
+  public Rate[] getInterestRates() {
+    return interestRates;
   }
 
-  public void setAnnualInterestRate(Rate[] annualInterestRate) {
-    this.annualInterestRate = annualInterestRate;
+  public void setInterestRates(Rate[] interestRates) {
+    this.interestRates = interestRates;
   }
 
   public Period[] getInterestGracePeriods() {

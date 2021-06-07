@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesched
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Installment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InstallmentType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InterestCalculationMethod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Rate;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleResponse;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
@@ -61,9 +62,8 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
     // TODO Auto-generated method stub
     RestTemplateBuilder builder = new RestTemplateBuilder();
     LOG.info("Calling");
-    RemoteScheduleResponse response = builder.build().postForObject(
-        "https://testep.free.beeceptor.com/generate-schedule", createRequest(loanApplicationTerms, loanCharges),
-        RemoteScheduleResponse.class);
+    RemoteScheduleResponse response = builder.build().postForObject("http://localhost:5000/generateSchedule",
+        createRequest(loanApplicationTerms, loanCharges), RemoteScheduleResponse.class);
 
     if (response != null) {
       LOG.info("Got remote generate response: " + response);
@@ -119,8 +119,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
 
       return null;
     }).collect(Collectors.toList());
-    int loanTermInDays = periods.stream()
-        .filter(period -> period instanceof LoanScheduleModelRepaymentPeriod)
+    int loanTermInDays = periods.stream().filter(period -> period instanceof LoanScheduleModelRepaymentPeriod)
         .mapToInt(period -> Math.toIntExact(ChronoUnit.DAYS.between(period.periodFromDate(), period.periodDueDate())))
         .sum();
 
@@ -157,7 +156,13 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
     request.setPrincipalRepaymentFrequency(repaymentFrequency);
     request.setInterestRepaymentFrequency(repaymentFrequency);
 
-    // request.setAnnualInterestRate(loanApplicationTerms.getIntere);
+    request.setInterestRates(
+        loanApplicationTerms.getLoanTermVariations().getInterestRateChanges().stream().map(change -> {
+          Rate rate = new Rate();
+          rate.setDate(change.getTermApplicableFrom());
+          rate.setValue(change.getDecimalValue().doubleValue());
+          return rate;
+        }).toArray(Rate[]::new));
     Integer daysInYear = loanApplicationTerms.getDaysInYearType().getValue();
     request.setDaysInYear(daysInYear == 1 ? "actual" : Integer.toString(daysInYear));
     request.setDaysInMonth("30"); // TODO: Get days in the month from loan product
@@ -192,7 +197,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
       repaymentFrequency.setDaysInEvery(Integer
           .toString(repaymentStartDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().getDayOfMonth()));
     }
-    repaymentFrequency.setRepetitions(1);
+    repaymentFrequency.setRepetitions(loanApplicationTerms.getActualNoOfRepaymnets());
     return repaymentFrequency;
   }
 
