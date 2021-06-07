@@ -151,18 +151,18 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
       return fee;
     }).toArray(Fee[]::new));
 
-    if (loanApplicationTerms.getPrincipalGrace() != null) {
+    if (loanApplicationTerms.getPrincipalGrace() != null && loanApplicationTerms.getPrincipalGrace() != 0) {
       GracePeriod principalGrace = new GracePeriod();
-      principalGrace.setStartPeriod(1);
-      principalGrace.setEndPeriod(loanApplicationTerms.getPrincipalGrace());
+      principalGrace.setFirstPeriod(1);
+      principalGrace.setLastPeriod(loanApplicationTerms.getPrincipalGrace());
       request.setPrincipalGracePeriods(new GracePeriod[] { principalGrace });
     }
 
-    if (loanApplicationTerms.getInterestPaymentGrace() != null) {
+    if (loanApplicationTerms.getInterestPaymentGrace() != null && loanApplicationTerms.getInterestPaymentGrace() != 0) {
       GracePeriod interestGrace = new GracePeriod();
-      interestGrace.setStartPeriod(1);
-      interestGrace.setEndPeriod(loanApplicationTerms.getInterestPaymentGrace());
-      request.setPrincipalGracePeriods(new GracePeriod[] { interestGrace });
+      interestGrace.setFirstPeriod(1);
+      interestGrace.setLastPeriod(loanApplicationTerms.getInterestPaymentGrace());
+      request.setInterestGracePeriods(new GracePeriod[] { interestGrace });
     }
 
     return request;

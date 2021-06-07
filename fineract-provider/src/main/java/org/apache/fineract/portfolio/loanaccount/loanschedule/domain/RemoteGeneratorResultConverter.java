@@ -68,22 +68,24 @@ public class RemoteGeneratorResultConverter {
                         totalDue, recalculatedInterestComponent));
 
                 InterestBreakdown[] interestBreakdowns = installment.getBreakdown();
-                Collection<LoanScheduleModelPeriod> interestSubPeriods = IntStream.range(0, interestBreakdowns.length)
-                        .mapToObj(interestIndex -> {
-                            InterestBreakdown interestBreakdown = interestBreakdowns[interestIndex];
-                            double outstandingBalance = interestBreakdown.getPrincipalBalance(); // TODO validate with
-                            // tomer;
-                            return LoanScheduleModelRepaymentSubPeriod.repayment(installment.getPeriod(), interestIndex + 1,
-                                    interestBreakdown.getStartDate(), interestBreakdown.getEndDate(), money(currency, outstandingBalance),
-                                    money(currency, interestBreakdown.getInterestDue()));
-                        }).collect(Collectors.toList());
+                if (interestBreakdowns != null) {
+                    Collection<LoanScheduleModelPeriod> interestSubPeriods = IntStream.range(0, interestBreakdowns.length)
+                            .mapToObj(interestIndex -> {
+                                InterestBreakdown interestBreakdown = interestBreakdowns[interestIndex];
+                                double outstandingBalance = interestBreakdown.getPrincipalBalance(); // TODO validate with
+                                // tomer;
+                                return LoanScheduleModelRepaymentSubPeriod.repayment(installment.getPeriod(), interestIndex + 1,
+                                        interestBreakdown.getStartDate(), interestBreakdown.getEndDate(), money(currency, outstandingBalance),
+                                        money(currency, interestBreakdown.getInterestDue()));
+                            }).collect(Collectors.toList());
 
-                // TODO validate - this code is in Abstract Generator
-                // for (LoanScheduleModelPeriod variationSubPeriod : variationSubPeriods) {
-                // addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), variationSubPeriod);
-                // }
+                    // TODO validate - this code is in Abstract Generator
+                    // for (LoanScheduleModelPeriod variationSubPeriod : variationSubPeriods) {
+                    // addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), variationSubPeriod);
+                    // }
+                    periods.addAll(interestSubPeriods);
+                }
 
-                periods.addAll(interestSubPeriods);
             }
         });
 
