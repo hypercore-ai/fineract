@@ -91,13 +91,25 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
     request.setStartDate(startDate);
     request.setApprovedAmount(loanApplicationTerms.getApprovedPrincipal().getAmount().doubleValue());
     request.setAmortization(loanApplicationTerms.getAmortizationMethod());
-    request.setDisbursements(loanApplicationTerms.getDisbursementDatas().stream().map(datum -> {
+    
+    if (loanApplicationTerms.isMultiDisburseLoan()) {
+      request.setDisbursements(loanApplicationTerms.getDisbursementDatas().stream().map(datum -> {
+        Installment disbursement = new Installment();
+        disbursement.setType(InstallmentType.DISBURSEMENT);
+        disbursement.setAmount(datum.amount().doubleValue());
+        disbursement.setDate(datum.getExpectedDisbursementDate());
+        return disbursement;
+      }).toArray(Installment[]::new));
+    } else {
       Installment disbursement = new Installment();
       disbursement.setType(InstallmentType.DISBURSEMENT);
-      disbursement.setAmount(datum.amount().doubleValue());
-      disbursement.setDate(datum.getExpectedDisbursementDate());
-      return disbursement;
-    }).toArray(Installment[]::new));
+      Money principal = loanApplicationTerms.getApprovedPrincipal() != null
+          ? loanApplicationTerms.getApprovedPrincipal()
+          : loanApplicationTerms.getPrincipal();
+      disbursement.setAmount(principal.getAmount().doubleValue());
+      disbursement.setDate(loanApplicationTerms.getExpectedDisbursementDate());
+      request.setDisbursements(new Installment[] { disbursement });
+    }
 
     Frequency repaymentFrequency = createRepaymentFrequency(loanApplicationTerms, startDate);
     request.setPrincipalRepaymentFrequency(repaymentFrequency);
