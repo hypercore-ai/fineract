@@ -13,8 +13,8 @@ public class RemoteScheduleRequest {
     private Installment[] disbursements;
     private Frequency principalRepaymentFrequency;
     private Frequency interestRepaymentFrequency;
-    private Period[] principalGracePeriods;
-    private Period[] interestGracePeriods;
+    private GracePeriod[] principalGracePeriods;
+    private GracePeriod[] interestGracePeriods;
     private Rate[] interestRates;
     private String daysInYear;
     private String daysInMonth;
@@ -103,19 +103,19 @@ public class RemoteScheduleRequest {
         this.interestRates = interestRates;
     }
 
-    public Period[] getInterestGracePeriods() {
+    public GracePeriod[] getInterestGracePeriods() {
         return interestGracePeriods;
     }
 
-    public void setInterestGracePeriods(Period[] interestGracePeriods) {
+    public void setInterestGracePeriods(GracePeriod[] interestGracePeriods) {
         this.interestGracePeriods = interestGracePeriods;
     }
 
-    public Period[] getPrincipalGracePeriods() {
+    public GracePeriod[] getPrincipalGracePeriods() {
         return principalGracePeriods;
     }
 
-    public void setPrincipalGracePeriods(Period[] principalGracePeriods) {
+    public void setPrincipalGracePeriods(GracePeriod[] principalGracePeriods) {
         this.principalGracePeriods = principalGracePeriods;
     }
 

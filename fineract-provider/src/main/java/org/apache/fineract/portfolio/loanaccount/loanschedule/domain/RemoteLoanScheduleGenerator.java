@@ -36,6 +36,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Fee;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.FeeCalculation;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Frequency;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.GracePeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Installment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InstallmentType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InterestCalculationMethod;
@@ -149,6 +150,20 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
       fee.setValue(charge.amount().doubleValue());
       return fee;
     }).toArray(Fee[]::new));
+
+    if (loanApplicationTerms.getPrincipalGrace() != null) {
+      GracePeriod principalGrace = new GracePeriod();
+      principalGrace.setStartPeriod(1);
+      principalGrace.setEndPeriod(loanApplicationTerms.getPrincipalGrace());
+      request.setPrincipalGracePeriods(new GracePeriod[] { principalGrace });
+    }
+
+    if (loanApplicationTerms.getInterestPaymentGrace() != null) {
+      GracePeriod interestGrace = new GracePeriod();
+      interestGrace.setStartPeriod(1);
+      interestGrace.setEndPeriod(loanApplicationTerms.getInterestPaymentGrace());
+      request.setPrincipalGracePeriods(new GracePeriod[] { interestGrace });
+    }
 
     return request;
   }
