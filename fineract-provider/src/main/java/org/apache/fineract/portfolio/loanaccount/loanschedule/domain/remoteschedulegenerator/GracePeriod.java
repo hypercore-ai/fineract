@@ -1,25 +1,25 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
 public class GracePeriod {
-  private int firstPeriod; // Starts from 1
-  private int lastPeriod; // Starts from 1
 
-  public GracePeriod() {
-  }
+    private int firstPeriod; // Starts from 1
+    private int lastPeriod; // Starts from 1
 
-  public int getFirstPeriod() {
-    return firstPeriod;
-  }
+    public GracePeriod() {}
 
-  public int getLastPeriod() {
-    return lastPeriod;
-  }
+    public int getFirstPeriod() {
+        return firstPeriod;
+    }
 
-  public void setLastPeriod(int lastPeriod) {
-    this.lastPeriod = lastPeriod;
-  }
+    public int getLastPeriod() {
+        return lastPeriod;
+    }
 
-  public void setFirstPeriod(int firstPeriod) {
-    this.firstPeriod = firstPeriod;
-  }
+    public void setLastPeriod(int lastPeriod) {
+        this.lastPeriod = lastPeriod;
+    }
+
+    public void setFirstPeriod(int firstPeriod) {
+        this.firstPeriod = firstPeriod;
+    }
 }

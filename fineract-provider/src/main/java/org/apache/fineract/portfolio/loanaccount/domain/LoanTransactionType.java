@@ -50,7 +50,7 @@ public enum LoanTransactionType {
      **/
     @JsonProperty("Accrual")
     ACCRUAL(10, "loanTransactionType.accrual"), //
-    
+
     /***
      * A Loan Transfer involves two steps, first a "initiate" Loan transfer transaction done by the Source branch
      * followed by a "complete" loan transaction initiated by the destination branch

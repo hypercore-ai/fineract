@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -42,7 +41,8 @@ public class RemoteGeneratorResultConverter {
         return Money.of(currency, BigDecimal.valueOf(amount));
     }
 
-    public static LoanScheduleModel remoteToScheduleModel(RemoteScheduleResponse remoteSchedule, LoanApplicationTerms loanApplicationTerms) {
+    public static LoanScheduleModel remoteToScheduleModel(RemoteScheduleResponse remoteSchedule,
+            LoanApplicationTerms loanApplicationTerms) {
         MonetaryCurrency currency = loanApplicationTerms.getCurrency();
         Collection<LoanScheduleModelPeriod> periods = new ArrayList<>();
 
@@ -72,11 +72,12 @@ public class RemoteGeneratorResultConverter {
                     Collection<LoanScheduleModelPeriod> interestSubPeriods = IntStream.range(0, interestBreakdowns.length)
                             .mapToObj(interestIndex -> {
                                 InterestBreakdown interestBreakdown = interestBreakdowns[interestIndex];
-                                double outstandingBalance = interestBreakdown.getPrincipalBalance(); // TODO validate with
+                                double outstandingBalance = interestBreakdown.getPrincipalBalance(); // TODO validate
+                                                                                                     // with
                                 // tomer;
                                 return LoanScheduleModelRepaymentSubPeriod.repayment(installment.getPeriod(), interestIndex + 1,
-                                        interestBreakdown.getStartDate(), interestBreakdown.getEndDate(), money(currency, outstandingBalance),
-                                        money(currency, interestBreakdown.getInterestDue()));
+                                        interestBreakdown.getStartDate(), interestBreakdown.getEndDate(),
+                                        money(currency, outstandingBalance), money(currency, interestBreakdown.getInterestDue()));
                             }).collect(Collectors.toList());
 
                     // TODO validate - this code is in Abstract Generator
@@ -111,13 +112,11 @@ public class RemoteGeneratorResultConverter {
         LoanScheduleModel loanScheduleModel = remoteToScheduleModel(response, loanApplicationTerms);
         final List<LoanRepaymentScheduleInstallment> installments = loanScheduleModel.getPeriods().stream()
                 .filter(LoanScheduleModelPeriod::isRepaymentPeriod)
-                .map(period -> new LoanRepaymentScheduleInstallment(null, period.periodNumber(),
-                        period.subPeriodNumber(), period.periodFromDate(),
-                        period.periodDueDate(), period.principalDue(),
-                        period.interestDue(), period.feeChargesDue(),
-                        period.penaltyChargesDue(), period.isRecalculatedInterestComponent(),
-                        period.getLoanCompoundingDetails(), period.rescheduleInterestPortion())).collect(Collectors.toList());
-
+                .map(period -> new LoanRepaymentScheduleInstallment(null, period.periodNumber(), period.subPeriodNumber(),
+                        period.periodFromDate(), period.periodDueDate(), period.principalDue(), period.interestDue(),
+                        period.feeChargesDue(), period.penaltyChargesDue(), period.isRecalculatedInterestComponent(),
+                        period.getLoanCompoundingDetails(), period.rescheduleInterestPortion()))
+                .collect(Collectors.toList());
 
         return LoanScheduleDTO.from(installments, loanScheduleModel);
     }

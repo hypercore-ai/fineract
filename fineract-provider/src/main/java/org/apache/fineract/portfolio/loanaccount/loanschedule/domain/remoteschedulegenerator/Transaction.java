@@ -1,7 +1,6 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
 import java.time.LocalDate;
-
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
 public class Transaction {
