@@ -572,7 +572,7 @@ public class LoansApiResource {
             if (associationParameters.contains("emiAmountVariations") || associationParameters.contains("repaymentSchedule")) {
                 mandatoryResponseParameters.add("emiAmountVariations");
                 emiAmountVariations = this.loanReadPlatformService.retrieveLoanTermVariations(loanId,
-                        LoanTermVariationType.EMI_AMOUNT.getValue());
+                        LoanTermVariationType.OVERRIDE_INTEREST_RATE.getValue());
             }
 
             if (associationParameters.contains("repaymentSchedule")) {
