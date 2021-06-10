@@ -1,13 +1,14 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
 import java.time.LocalDate;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 
 public class TermVariation {
 
     private String id;
-    private TermVariationType type;
-    private String startDate;
-    private String endDate;
+    private LoanTermVariationType type;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private LocalDate createdTimestamp;
     private double newValue;
 
@@ -33,27 +34,27 @@ public class TermVariation {
         this.createdTimestamp = createdTimestamp;
     }
 
-    public String getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(String endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
-    public String getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(String startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public TermVariationType getType() {
+    public LoanTermVariationType getType() {
         return type;
     }
 
-    public void setType(TermVariationType type) {
+    public void setType(LoanTermVariationType type) {
         this.type = type;
     }
 

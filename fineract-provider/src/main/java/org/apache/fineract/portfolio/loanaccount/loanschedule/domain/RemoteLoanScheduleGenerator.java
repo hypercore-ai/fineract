@@ -21,12 +21,16 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -43,6 +47,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesched
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Rate;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleResponse;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.TermVariation;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Transaction;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.slf4j.Logger;
@@ -98,6 +103,15 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
             requestTransaction.setWaive(transaction.isWaiver());
             return requestTransaction;
         }).toArray(Transaction[]::new));
+
+        if (loan.getLoanTermVariations().size() > 0) {
+            Stream<TermVariation> currentTermVariations = Arrays
+                    .stream(request.getTermVariations() == null ? request.getTermVariations() : new TermVariation[] {});
+            Stream<TermVariation> additionalTermVariations = loan.getLoanTermVariations().stream()
+                    .map(termVariation -> termVariation.toData()).map(this::loanTermVariationDataToTermVariation);
+
+            request.setTermVariations(Stream.concat(additionalTermVariations, currentTermVariations).toArray(TermVariation[]::new));
+        }
 
         RemoteScheduleResponse response = this.builder.build().postForObject("http://localhost:5000/generateSchedule", request,
                 RemoteScheduleResponse.class);
@@ -189,6 +203,12 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
             request.setInterestGracePeriods(new GracePeriod[] { interestGrace });
         }
 
+        Iterable<LoanTermVariationsData> iterable = () -> loanApplicationTerms.getLoanTermVariations().getExceptionData().iterator();
+        Stream<LoanTermVariationsData> stream = StreamSupport.stream(iterable.spliterator(), false);
+        if (stream.count() > 0) {
+            request.setTermVariations(stream.map(this::loanTermVariationDataToTermVariation).toArray(TermVariation[]::new));
+        }
+
         return request;
     }
 
@@ -204,6 +224,16 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
         }
         repaymentFrequency.setRepetitions(loanApplicationTerms.getActualNoOfRepaymnets());
         return repaymentFrequency;
+    }
+
+    private TermVariation loanTermVariationDataToTermVariation(LoanTermVariationsData termVariation) {
+        TermVariation requestVariation = new TermVariation();
+
+        requestVariation.setType(termVariation.getTermVariationType());
+        requestVariation.setStartDate(termVariation.getTermApplicableFrom());
+        requestVariation.setEndDate(termVariation.getEndDate());
+        requestVariation.setNewValue(termVariation.getDecimalValue().doubleValue());
+        return requestVariation;
     }
 
     private String frequencyEveryFromPeriodFrequencyType(PeriodFrequencyType frequencyType) {

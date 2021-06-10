@@ -653,7 +653,7 @@ public class LoanScheduleAssembler {
         boolean activeNotDisbursed = loanApplicationTerms.isActivatedOnApproval() && loanApplicationTerms.isMultiDisburseLoan()
                 && disbursementDetails.stream().anyMatch(disbursement -> disbursement.actualDisbursementDate() != null);
 
-        LoanScheduleGenerator loanScheduleGenerator = new RemoteLoanScheduleGenerator();
+        LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
         return loanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO, activeNotDisbursed);
     }
 
