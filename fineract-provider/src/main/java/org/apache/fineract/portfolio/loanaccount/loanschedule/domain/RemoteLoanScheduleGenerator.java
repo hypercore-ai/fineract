@@ -85,7 +85,9 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
         request.setTransactions(loan.getLoanTransactions().stream().map(transaction -> {
             Transaction requestTransaction = new Transaction();
 
-            requestTransaction.setId(transaction.getId().toString());
+            if (transaction.getId() != null) {
+                requestTransaction.setId(transaction.getId().toString());
+            }
             requestTransaction.setType(transaction.getTypeOf());
             requestTransaction.setDate(transaction.getDateOf().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
             requestTransaction.setAmount(transaction.getAmount(loanApplicationTerms.getCurrency()).getAmount().doubleValue());
