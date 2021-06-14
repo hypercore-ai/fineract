@@ -22,9 +22,9 @@ import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
@@ -95,10 +95,10 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
 
             if (transaction.isManualRepayment()) {
                 InstallmentComponent distribution = new InstallmentComponent();
-                distribution.setPrincipal(transaction.getPrincipalPortion().doubleValue());
-                distribution.setInterest(transaction.getInterestPortion(loanApplicationTerms.getCurrency()).getAmount().doubleValue());
-                distribution.setFee(transaction.getFeeChargesPortion(loanApplicationTerms.getCurrency()).getAmount().doubleValue());
-                distribution.setPenalty(transaction.getPenaltyChargesPortion(loanApplicationTerms.getCurrency()).getAmount().doubleValue());
+                distribution.setPrincipal(transaction.getManualPrincipalPortion().doubleValue());
+                distribution.setInterest(transaction.getManualInterestPortion().doubleValue());
+                distribution.setFee(transaction.getManualFeeChargesPortion().doubleValue());
+                distribution.setPenalty(transaction.getManualPenaltyChargesPortion().doubleValue());
                 requestTransaction.setDistribution(distribution);
             }
 
@@ -205,10 +205,9 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
             request.setInterestGracePeriods(new GracePeriod[] { interestGrace });
         }
 
-        Iterable<LoanTermVariationsData> iterable = () -> loanApplicationTerms.getLoanTermVariations().getExceptionData().iterator();
-        Stream<LoanTermVariationsData> stream = StreamSupport.stream(iterable.spliterator(), false);
-        if (stream.count() > 0) {
-            request.setTermVariations(stream.map(this::loanTermVariationDataToTermVariation).toArray(TermVariation[]::new));
+        List<LoanTermVariationsData> exceptionData = loanApplicationTerms.getLoanTermVariations().getExceptionData();
+        if (exceptionData.size() > 0) {
+            request.setTermVariations(exceptionData.stream().map(this::loanTermVariationDataToTermVariation).toArray(TermVariation[]::new));
         }
 
         return request;
