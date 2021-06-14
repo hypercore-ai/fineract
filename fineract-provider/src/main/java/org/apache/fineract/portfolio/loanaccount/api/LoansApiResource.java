@@ -535,6 +535,7 @@ public class LoansApiResource {
         PortfolioAccountData linkedAccount = null;
         Collection<DisbursementData> disbursementData = null;
         Collection<LoanTermVariationsData> emiAmountVariations = null;
+        Collection<LoanTermVariationsData> overrideInterestAmountVariations = null;
 
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -572,6 +573,12 @@ public class LoansApiResource {
             if (associationParameters.contains("emiAmountVariations") || associationParameters.contains("repaymentSchedule")) {
                 mandatoryResponseParameters.add("emiAmountVariations");
                 emiAmountVariations = this.loanReadPlatformService.retrieveLoanTermVariations(loanId,
+                        LoanTermVariationType.EMI_AMOUNT.getValue());
+            }
+
+            if (associationParameters.contains("overrideInterestVariations") || associationParameters.contains("repaymentSchedule")) {
+                mandatoryResponseParameters.add("overrideInterestVariations");
+                overrideInterestAmountVariations = this.loanReadPlatformService.retrieveLoanTermVariations(loanId,
                         LoanTermVariationType.OVERRIDE_INTEREST_RATE.getValue());
             }
 
@@ -739,7 +746,7 @@ public class LoansApiResource {
                 interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
                 fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions, loanCollateralOptions, calendarOptions,
                 notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations, overdueCharges, paidInAdvanceTemplate,
-                interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled);
+                interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled, overrideInterestAmountVariations);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
