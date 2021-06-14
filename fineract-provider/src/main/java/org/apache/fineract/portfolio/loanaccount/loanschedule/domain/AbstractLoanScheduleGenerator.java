@@ -686,7 +686,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     if (unprocessed.isGreaterThanZero()) {
 
                         LoanTransaction currentTransaction = detail.getTransaction();
-                        Money unprocessedPrincipal = currentTransaction.isManualRepayment() ? currentTransaction.getManualPrincipalPortion(currency).minus(currentTransaction.getPrincipalPortion(currency)) : unprocessed;
+                        Money unprocessedPrincipal = currentTransaction.isManualRepayment() ? currentTransaction
+                                .getManualPrincipalPortion(currency).minus(currentTransaction.getPrincipalPortion(currency)) : unprocessed;
 
                         if (unprocessedPrincipal.isGreaterThanZero()) {
                             scheduleParams.reduceOutstandingBalance(unprocessedPrincipal);
@@ -994,7 +995,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         if (unprocessed.isGreaterThanZero()) {
 
                             LoanTransaction currentTransaction = detail.getTransaction();
-                            Money unprocessedPrincipal = currentTransaction.isManualRepayment() ? currentTransaction.getManualPrincipalPortion(currency).minus(currentTransaction.getPrincipalPortion(currency)) : unprocessed;
+                            Money unprocessedPrincipal = currentTransaction.isManualRepayment()
+                                    ? currentTransaction.getManualPrincipalPortion(currency)
+                                            .minus(currentTransaction.getPrincipalPortion(currency))
+                                    : unprocessed;
 
                             if (unprocessedPrincipal.isGreaterThanZero()) {
                                 if (loanApplicationTerms.getPreClosureInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
@@ -1016,13 +1020,13 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 // updates principal portion map with the early
                                 // payment amounts and applicable date as per
                                 // rest
-                                updateAmountsBasedOnEarlyPayment(loanApplicationTerms, holidayDetailDTO, scheduleParams, installment, detail,
-                                        unprocessedPrincipal, addToPrinciapal);
+                                updateAmountsBasedOnEarlyPayment(loanApplicationTerms, holidayDetailDTO, scheduleParams, installment,
+                                        detail, unprocessedPrincipal, addToPrinciapal);
 
                                 // method applies early payment strategy
                                 scheduleParams.addReducePrincipal(unprocessedPrincipal);
-                                scheduleParams
-                                        .setReducePrincipal(applyEarlyPaymentStrategy(loanApplicationTerms, scheduleParams.getReducePrincipal(),
+                                scheduleParams.setReducePrincipal(
+                                        applyEarlyPaymentStrategy(loanApplicationTerms, scheduleParams.getReducePrincipal(),
                                                 scheduleParams.getTotalCumulativePrincipal(), scheduleParams.getPeriodNumber(), mc));
                             }
                         }

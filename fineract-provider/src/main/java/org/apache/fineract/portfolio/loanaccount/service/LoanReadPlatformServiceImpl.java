@@ -1596,7 +1596,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private static final class LoanTermVariationsMapper implements RowMapper<LoanTermVariationsData> {
 
         public String schema() {
-            return "tv.id as id,tv.applicable_date as variationApplicableFrom,tv.end_date as endDate,tv.created_date as createdDate,tv.decimal_value as decimalValue, tv.date_value as dateValue, tv.is_specific_to_installment as isSpecificToInstallment "
+            return "tv.id as id,tv.term_type termType ,tv.applicable_date as variationApplicableFrom,tv.end_date as endDate,tv.created_date as createdDate,tv.decimal_value as decimalValue, tv.date_value as dateValue, tv.is_specific_to_installment as isSpecificToInstallment "
                     + "from m_loan_term_variations tv";
         }
 
@@ -1609,10 +1609,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal decimalValue = rs.getBigDecimal("decimalValue");
             final LocalDate dateValue = JdbcSupport.getLocalDate(rs, "dateValue");
             final boolean isSpecificToInstallment = rs.getBoolean("isSpecificToInstallment");
+            final Integer termType = rs.getInt("termType");
 
             final LoanTermVariationsData loanTermVariationsData = new LoanTermVariationsData(id,
-                    LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT), variationApplicableFrom, decimalValue, dateValue,
-                    isSpecificToInstallment, endDate, createdDate);
+                    LoanEnumerations.loanvariationType(LoanTermVariationType.fromInt(termType)), variationApplicableFrom, decimalValue,
+                    dateValue, isSpecificToInstallment, endDate, createdDate);
             return loanTermVariationsData;
         }
 
