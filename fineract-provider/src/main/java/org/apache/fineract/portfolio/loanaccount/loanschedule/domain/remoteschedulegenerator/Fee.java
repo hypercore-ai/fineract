@@ -7,9 +7,18 @@ public class Fee {
     private Frequency timingFrequency;
     private FeeCalculation calculationType;
     private double value;
+    private Period period;
     private boolean isPenalty;
 
     public Fee() {}
+
+    public Period getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(Period period) {
+        this.period = period;
+    }
 
     public String getId() {
         return id;

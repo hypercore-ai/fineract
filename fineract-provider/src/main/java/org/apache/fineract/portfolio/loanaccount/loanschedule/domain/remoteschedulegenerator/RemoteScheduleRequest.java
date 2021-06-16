@@ -23,21 +23,12 @@ public class RemoteScheduleRequest {
     private PaymentStrategy[] paymentStrategies;
     private Transaction[] transactions;
     private TermVariation[] termVariations;
-    private Charge[] charges;
 
     public LocalDate getStartDate() {
         return startDate;
     }
 
     public RemoteScheduleRequest() {}
-
-    public Charge[] getCharges() {
-        return charges;
-    }
-
-    public void setCharges(Charge[] charges) {
-        this.charges = charges;
-    }
 
     public TermVariation[] getTermVariations() {
         return termVariations;

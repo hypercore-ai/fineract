@@ -2,11 +2,14 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 
 import java.time.LocalDate;
 
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+
+
 public class Frequency {
 
     private LocalDate startDate;
     private LocalDate endDate;
-    private String every;
+    private PeriodFrequencyType every;
     private int everyMultiplier;
     private String daysInEvery;
     private int repetitions;
@@ -41,11 +44,11 @@ public class Frequency {
         this.everyMultiplier = everyMultiplier;
     }
 
-    public String getEvery() {
+    public PeriodFrequencyType getEvery() {
         return every;
     }
 
-    public void setEvery(String every) {
+    public void setEvery(PeriodFrequencyType every) {
         this.every = every;
     }
 

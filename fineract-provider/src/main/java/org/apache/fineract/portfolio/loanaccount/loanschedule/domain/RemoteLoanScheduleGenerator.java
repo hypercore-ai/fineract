@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
+import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
@@ -38,12 +39,14 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Fee;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.FeeCalculation;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.FeeTiming;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Frequency;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.GracePeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Installment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InstallmentComponent;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InstallmentType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InterestCalculationMethod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Period;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Rate;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleResponse;
@@ -108,7 +111,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
 
         if (loan.getLoanTermVariations().size() > 0) {
             Stream<TermVariation> currentTermVariations = Arrays
-                    .stream(request.getTermVariations() == null ? request.getTermVariations() : new TermVariation[] {});
+                    .stream(request.getTermVariations() != null ? request.getTermVariations() : new TermVariation[] {});
             Stream<TermVariation> additionalTermVariations = loan.getLoanTermVariations().stream()
                     .map(termVariation -> termVariation.toData()).map(this::loanTermVariationDataToTermVariation);
 
@@ -188,6 +191,34 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
             fee.setPenalty(false);
             fee.setCalculationType(this.chargeCalculationTypeToFeeCalculation(charge.getChargeCalculation()));
             fee.setValue(charge.amount().doubleValue());
+
+            ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(charge.getCharge().getChargeTimeType());
+            FeeTiming timing = chargeTimeTypeToFeeTiming(chargeTimeType);
+            fee.setTiming(timing);
+
+            // TODO: handle other frequencies
+
+            if (timing == FeeTiming.Frequency) {
+                if (chargeTimeType == ChargeTimeType.SPECIFIED_DUE_DATE) {
+                    Frequency frequency = new Frequency();
+                    frequency.setStartDate(charge.getDueLocalDate());
+                    frequency.setEvery(PeriodFrequencyType.DAYS);
+                    frequency.setRepetitions(1);
+                    fee.setTimingFrequency(frequency);
+                }
+            }
+
+            if (charge.getChargeCalculation() == ChargeCalculationType.PERCENT_OF_UNUTILIZED_AMOUNT) {
+                Period period = new Period();
+                LocalDate revolvingPeriodStartDate = loanApplicationTerms.getRevolvingPeriodStartDate();
+                if (revolvingPeriodStartDate == null) {
+                    period.setStartDate(loanApplicationTerms.getSeedDate());
+                } else {
+                    period.setStartDate(revolvingPeriodStartDate);
+                    period.setEndDate(loanApplicationTerms.getRevolvingPeriodEndDate());
+                }
+            }
+
             return fee;
         }).toArray(Fee[]::new));
 
@@ -216,7 +247,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
     private Frequency createRepaymentFrequency(LoanApplicationTerms loanApplicationTerms, LocalDate startDate) {
         Frequency repaymentFrequency = new Frequency();
         repaymentFrequency.setStartDate(startDate);
-        repaymentFrequency.setEvery(this.frequencyEveryFromPeriodFrequencyType(loanApplicationTerms.getRepaymentPeriodFrequencyType()));
+        repaymentFrequency.setEvery(loanApplicationTerms.getRepaymentPeriodFrequencyType());
         repaymentFrequency.setEveryMultiplier(loanApplicationTerms.getRepaymentEvery());
 
         LocalDate repaymentStartDate = loanApplicationTerms.getRepaymentsStartingFromLocalDate();
@@ -237,21 +268,6 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
         return requestVariation;
     }
 
-    private String frequencyEveryFromPeriodFrequencyType(PeriodFrequencyType frequencyType) {
-        switch (frequencyType) {
-            case DAYS:
-                return "day";
-            case WEEKS:
-                return "week";
-            case MONTHS:
-                return "month";
-            case YEARS:
-                return "year";
-            default:
-                return "";
-        }
-    }
-
     private FeeCalculation chargeCalculationTypeToFeeCalculation(ChargeCalculationType calcType) {
         switch (calcType) {
             case FLAT:
@@ -264,6 +280,19 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
                 return FeeCalculation.PercentageOfInstallmentPrincipalAndInterest;
             case PERCENT_OF_UNUTILIZED_AMOUNT:
                 return FeeCalculation.AnnualPercentageOfUnutilizedAmount;
+            default:
+                return null;
+        }
+    }
+
+    private FeeTiming chargeTimeTypeToFeeTiming(ChargeTimeType chargeTimeType) {
+        switch (chargeTimeType) {
+            case DISBURSEMENT:
+                return FeeTiming.OnDisbursement;
+            case INSTALMENT_FEE:
+                return FeeTiming.OnInstallment;
+            case SPECIFIED_DUE_DATE:
+                return FeeTiming.Frequency;
             default:
                 return null;
         }
