@@ -29,7 +29,6 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -143,7 +142,9 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
 
         LocalDate startDate = loanApplicationTerms.getExpectedDisbursementDate();
         request.setStartDate(startDate);
-        request.setApprovedAmount(loanApplicationTerms.getApprovedPrincipal().getAmount().doubleValue());
+        Money approvedPrincipal = loanApplicationTerms.getApprovedPrincipal().isZero() ? loanApplicationTerms.getOriginalProposedPrincipal()
+                : loanApplicationTerms.getApprovedPrincipal();
+        request.setApprovedAmount(approvedPrincipal.getAmount().doubleValue());
         request.setAmortization(loanApplicationTerms.getAmortizationMethod());
 
         if (loanApplicationTerms.isMultiDisburseLoan()) {
@@ -188,9 +189,10 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
             if (charge.getId() != null) {
                 fee.setId(charge.getId().toString());
             }
-            fee.setPenalty(false);
+
+            fee.setPenalty(charge.isPenaltyCharge());
             fee.setCalculationType(this.chargeCalculationTypeToFeeCalculation(charge.getChargeCalculation()));
-            fee.setValue(charge.amount().doubleValue());
+            fee.setValue(charge.amountOrPercentage().doubleValue());
 
             ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(charge.getCharge().getChargeTimeType());
             FeeTiming timing = chargeTimeTypeToFeeTiming(chargeTimeType);
@@ -198,14 +200,8 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
 
             // TODO: handle other frequencies
 
-            if (timing == FeeTiming.Frequency) {
-                if (chargeTimeType == ChargeTimeType.SPECIFIED_DUE_DATE) {
-                    Frequency frequency = new Frequency();
-                    frequency.setStartDate(charge.getDueLocalDate());
-                    frequency.setEvery(PeriodFrequencyType.DAYS);
-                    frequency.setRepetitions(1);
-                    fee.setTimingFrequency(frequency);
-                }
+            if (timing == FeeTiming.SpecificDate) {
+                fee.setDate(charge.getDueLocalDate());
             }
 
             if (charge.getChargeCalculation() == ChargeCalculationType.PERCENT_OF_UNUTILIZED_AMOUNT) {
@@ -217,6 +213,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
                     period.setStartDate(revolvingPeriodStartDate);
                     period.setEndDate(loanApplicationTerms.getRevolvingPeriodEndDate());
                 }
+                fee.setPeriod(period);
             }
 
             return fee;
@@ -288,11 +285,14 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
     private FeeTiming chargeTimeTypeToFeeTiming(ChargeTimeType chargeTimeType) {
         switch (chargeTimeType) {
             case DISBURSEMENT:
-                return FeeTiming.OnDisbursement;
+                return FeeTiming.OnFirstDisbursement;
+            case TRANCHE_DISBURSEMENT:
+                return FeeTiming.OnEveryDisbursement;
             case INSTALMENT_FEE:
+            case REVOLVING_PERIOD_INSTALLMENT_FEE:
                 return FeeTiming.OnInstallment;
             case SPECIFIED_DUE_DATE:
-                return FeeTiming.Frequency;
+                return FeeTiming.SpecificDate;
             default:
                 return null;
         }

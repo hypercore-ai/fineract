@@ -20,17 +20,21 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Installment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InstallmentType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InterestBreakdown;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleResponse;
@@ -46,10 +50,25 @@ public class RemoteGeneratorResultConverter {
         MonetaryCurrency currency = loanApplicationTerms.getCurrency();
         Collection<LoanScheduleModelPeriod> periods = new ArrayList<>();
 
+        List<List<Installment>> lists = new ArrayList<>(Arrays.stream(remoteSchedule.getInstallments())
+                .collect(Collectors.partitioningBy(installment -> installment.getType() == InstallmentType.DISBURSEMENT)).values());
+
+        List<Installment> installments = lists.get(0);
+        List<Installment> disbursements = lists.get(1);
+
+        Map<LocalDate, Installment> installmentsOnDisbursements = installments.stream().filter(
+                installment -> disbursements.stream().anyMatch(disbursement -> disbursement.getDate().isEqual(installment.getDueDate())))
+                .collect(Collectors.toMap(Installment::getDueDate, Function.identity()));
+
         Arrays.stream(remoteSchedule.getInstallments()).forEach((installment) -> {
             if (installment.getType() == InstallmentType.DISBURSEMENT) {
                 Money principalDisbursed = Money.of(currency, BigDecimal.valueOf(installment.getAmount()));
                 BigDecimal disbursementFees = BigDecimal.valueOf(installment.getDisbursementFees());
+
+                Installment installmentOnDate = installmentsOnDisbursements.get(installment.getDate());
+                if (installmentOnDate != null) {
+                    disbursementFees = BigDecimal.valueOf(installmentOnDate.getDue().getFee());
+                }
 
                 periods.add(LoanScheduleModelDisbursementPeriod.disbursement(installment.getDate(), principalDisbursed, disbursementFees));
 
@@ -63,30 +82,32 @@ public class RemoteGeneratorResultConverter {
                 boolean recalculatedInterestComponent = false; // TODO validate (seems it is related to compelete
                 // payment)
 
-                periods.add(LoanScheduleModelRepaymentPeriod.repayment(installment.getPeriod(), installment.getStartDate(),
-                        installment.getDueDate(), principalDue, outstandingLoanBalance, interestDue, feeChargesDue, penaltyChargesDue,
-                        totalDue, recalculatedInterestComponent));
+                if (!installmentsOnDisbursements.containsKey(installment.getDueDate())) {
+                    LoanScheduleModelRepaymentPeriod repayment = LoanScheduleModelRepaymentPeriod.repayment(installment.getPeriod(),
+                            installment.getStartDate(), installment.getDueDate(), principalDue, outstandingLoanBalance, interestDue,
+                            feeChargesDue, penaltyChargesDue, totalDue, recalculatedInterestComponent);
 
-                InterestBreakdown[] interestBreakdowns = installment.getBreakdown();
-                if (interestBreakdowns != null) {
-                    Collection<LoanScheduleModelPeriod> interestSubPeriods = IntStream.range(0, interestBreakdowns.length)
-                            .mapToObj(interestIndex -> {
-                                InterestBreakdown interestBreakdown = interestBreakdowns[interestIndex];
-                                double outstandingBalance = interestBreakdown.getPrincipalBalance(); // TODO validate
-                                                                                                     // with
-                                // tomer;
-                                return LoanScheduleModelRepaymentSubPeriod.repayment(installment.getPeriod(), interestIndex + 1,
-                                        interestBreakdown.getStartDate(), interestBreakdown.getEndDate(),
-                                        money(currency, outstandingBalance), money(currency, interestBreakdown.getInterestDue()));
-                            }).collect(Collectors.toList());
+                    periods.add(repayment);
 
-                    // TODO validate - this code is in Abstract Generator
-                    // for (LoanScheduleModelPeriod variationSubPeriod : variationSubPeriods) {
-                    // addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), variationSubPeriod);
-                    // }
-                    periods.addAll(interestSubPeriods);
+                    InterestBreakdown[] interestBreakdowns = installment.getBreakdown();
+                    if (interestBreakdowns != null) {
+                        Collection<LoanScheduleModelPeriod> interestSubPeriods = IntStream.range(0, interestBreakdowns.length)
+                                .mapToObj(interestIndex -> {
+                                    InterestBreakdown interestBreakdown = interestBreakdowns[interestIndex];
+                                    // TODO validate with tomer
+                                    double outstandingBalance = interestBreakdown.getPrincipalBalance();
+                                    return LoanScheduleModelRepaymentSubPeriod.repayment(installment.getPeriod(), interestIndex + 1,
+                                            interestBreakdown.getStartDate(), interestBreakdown.getEndDate(),
+                                            money(currency, outstandingBalance), money(currency, interestBreakdown.getInterestDue()));
+                                }).collect(Collectors.toList());
+
+                        // TODO validate - this code is in Abstract Generator
+                        // for (LoanScheduleModelPeriod variationSubPeriod : variationSubPeriods) {
+                        // addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), variationSubPeriod);
+                        // }
+                        periods.addAll(interestSubPeriods);
+                    }
                 }
-
             }
         });
 

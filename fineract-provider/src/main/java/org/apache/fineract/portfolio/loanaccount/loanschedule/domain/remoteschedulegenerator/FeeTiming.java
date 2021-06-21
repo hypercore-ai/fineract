@@ -4,8 +4,11 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum FeeTiming {
 
-    Frequency("Frequency"), OnDisbursement("OnDisbursement"), OnInstallment("OnInstallment"), OnRevolvingPeriodInstallment(
-            "OnRevolvingPeriodInstallment");
+    Frequency("Frequency"), //
+    OnFirstDisbursement("OnFirstDisbursement"), //
+    OnEveryDisbursement("OnEveryDisbursement"), //
+    OnInstallment("OnInstallment"), //
+    SpecificDate("SpecificDate");
 
     private final String value;
 

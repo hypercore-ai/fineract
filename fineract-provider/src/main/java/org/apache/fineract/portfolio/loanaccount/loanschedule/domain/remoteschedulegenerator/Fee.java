@@ -1,16 +1,27 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
+import java.time.LocalDate;
+
 public class Fee {
 
     private String id;
     private FeeTiming timing;
-    private Frequency timingFrequency;
+    private Frequency frequency;
+    private LocalDate date;
     private FeeCalculation calculationType;
     private double value;
     private Period period;
     private boolean isPenalty;
 
     public Fee() {}
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 
     public Period getPeriod() {
         return period;
@@ -48,12 +59,12 @@ public class Fee {
         this.calculationType = calculationType;
     }
 
-    public Frequency getTimingFrequency() {
-        return timingFrequency;
+    public Frequency getFrequency() {
+        return frequency;
     }
 
-    public void setTimingFrequency(Frequency timingFrequency) {
-        this.timingFrequency = timingFrequency;
+    public void setFrequency(Frequency timingFrequency) {
+        this.frequency = timingFrequency;
     }
 
     public FeeTiming getTiming() {
