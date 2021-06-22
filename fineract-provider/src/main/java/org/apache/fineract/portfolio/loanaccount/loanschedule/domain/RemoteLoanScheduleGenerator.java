@@ -60,12 +60,18 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteLoanScheduleGenerator.class);
     private final RestTemplateBuilder builder = new RestTemplateBuilder();
+    private String remoteEngineGenerateScheduleEndpoint;
+
+    RemoteLoanScheduleGenerator() {
+        this.remoteEngineGenerateScheduleEndpoint = getEnvVar("REMOTE_ENGINE_GENERATE_SCHEDULE_ENDPOINT",
+                "http://localhost:5000/dev/generateSchedule");
+    }
 
     @Override
     public LoanScheduleModel generate(MathContext mc, LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges,
             HolidayDetailDTO holidayDetailDTO, boolean scheduleWithNoDisbursements) {
         LOG.info("Calling");
-        RemoteScheduleResponse response = this.builder.build().postForObject("http://localhost:5000/generateSchedule",
+        RemoteScheduleResponse response = this.builder.build().postForObject(this.remoteEngineGenerateScheduleEndpoint,
                 createRequest(loanApplicationTerms, loanCharges), RemoteScheduleResponse.class);
 
         if (response != null) {
@@ -117,7 +123,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
             request.setTermVariations(Stream.concat(additionalTermVariations, currentTermVariations).toArray(TermVariation[]::new));
         }
 
-        RemoteScheduleResponse response = this.builder.build().postForObject("http://localhost:5000/generateSchedule", request,
+        RemoteScheduleResponse response = this.builder.build().postForObject(remoteEngineGenerateScheduleEndpoint, request,
                 RemoteScheduleResponse.class);
 
         if (response != null) {
@@ -135,6 +141,14 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
             LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    private String getEnvVar(String name, String defaultValue) {
+        String value = System.getenv(name);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
     }
 
     private RemoteScheduleRequest createRequest(LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges) {
