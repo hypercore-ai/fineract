@@ -1,5 +1,6 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 
@@ -7,8 +8,11 @@ public class TermVariation {
 
     private String id;
     private LoanTermVariationType type;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate createdTimestamp;
     private double newValue;
 

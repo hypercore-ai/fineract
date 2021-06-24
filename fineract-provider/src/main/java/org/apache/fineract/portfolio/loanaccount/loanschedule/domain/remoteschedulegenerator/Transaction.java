@@ -1,11 +1,13 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
 public class Transaction {
 
     private String id;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
     private double amount;
     private LoanTransactionType type;

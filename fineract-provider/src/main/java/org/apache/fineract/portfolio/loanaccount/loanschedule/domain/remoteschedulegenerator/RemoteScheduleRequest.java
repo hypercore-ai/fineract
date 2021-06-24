@@ -1,5 +1,6 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDate;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
@@ -7,6 +8,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RemoteScheduleRequest {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDate;
     private double approvedAmount;
     private AmortizationMethod amortization;

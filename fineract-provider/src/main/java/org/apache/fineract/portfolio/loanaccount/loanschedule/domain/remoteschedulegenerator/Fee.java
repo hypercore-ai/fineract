@@ -1,5 +1,6 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 
 public class Fee {
@@ -7,6 +8,7 @@ public class Fee {
     private String id;
     private FeeTiming timing;
     private Frequency frequency;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
     private FeeCalculation calculationType;
     private double value;

@@ -1,15 +1,19 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.util.Arrays;
 
 public class Installment {
 
     private InstallmentType type;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
     private double amount;
     private int period;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dueDate;
     private InterestBreakdown[] breakdown;
     private InstallmentComponent due;
@@ -22,6 +26,7 @@ public class Installment {
     private FeeBreakdown[] penaltyBreakdown;
     private String[] transactionsId;
     private boolean obligationMet;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate obligationMetOnDate;
     private double disbursementFees;
 
