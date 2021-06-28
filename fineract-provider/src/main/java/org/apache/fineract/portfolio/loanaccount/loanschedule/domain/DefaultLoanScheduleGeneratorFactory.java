@@ -27,18 +27,18 @@ public class DefaultLoanScheduleGeneratorFactory implements LoanScheduleGenerato
     @Override
     public LoanScheduleGenerator create(final InterestMethod interestMethod) {
 
-        LoanScheduleGenerator loanScheduleGenerator = null;
+        LoanScheduleGenerator loanScheduleGenerator = new RemoteLoanScheduleGenerator();
 
-        switch (interestMethod) {
-            case FLAT:
-                loanScheduleGenerator = new FlatInterestLoanScheduleGenerator();
-            break;
-            case DECLINING_BALANCE:
-                loanScheduleGenerator = new DecliningBalanceInterestLoanScheduleGenerator();
-            break;
-            case INVALID:
-            break;
-        }
+        // switch (interestMethod) {
+        // case FLAT:
+        // loanScheduleGenerator = new FlatInterestLoanScheduleGenerator();
+        // break;
+        // case DECLINING_BALANCE:
+        // loanScheduleGenerator = new DecliningBalanceInterestLoanScheduleGenerator();
+        // break;
+        // case INVALID:
+        // break;
+        // }
 
         return loanScheduleGenerator;
     }

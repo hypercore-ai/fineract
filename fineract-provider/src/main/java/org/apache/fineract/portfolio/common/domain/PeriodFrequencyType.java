@@ -18,14 +18,19 @@
  */
 package org.apache.fineract.portfolio.common.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
 public enum PeriodFrequencyType {
 
+    @JsonProperty("day")
     DAYS(0, "periodFrequencyType.days"), //
+    @JsonProperty("week")
     WEEKS(1, "periodFrequencyType.weeks"), //
+    @JsonProperty("month")
     MONTHS(2, "periodFrequencyType.months"), //
+    @JsonProperty("year")
     YEARS(3, "periodFrequencyType.years"), //
     WHOLE_TERM(4, "periodFrequencyType.whole_term"), //
     INVALID(5, "periodFrequencyType.invalid");

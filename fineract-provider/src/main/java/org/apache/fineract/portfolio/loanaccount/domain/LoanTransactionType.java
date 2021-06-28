@@ -18,38 +18,58 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum LoanTransactionType {
 
     INVALID(0, "loanTransactionType.invalid"), //
+    @JsonProperty("Disbursement")
     DISBURSEMENT(1, "loanTransactionType.disbursement"), //
+    @JsonProperty("Repayment")
     REPAYMENT(2, "loanTransactionType.repayment"), //
+    @JsonProperty("Contra")
     CONTRA(3, "loanTransactionType.contra"), //
+    @JsonProperty("Waiver")
     WAIVE_INTEREST(4, "loanTransactionType.waiver"), //
+    @JsonProperty("RepaymentAtDisbursement")
     REPAYMENT_AT_DISBURSEMENT(5, "loanTransactionType.repaymentAtDisbursement"), //
+    @JsonProperty("WriteOff")
     WRITEOFF(6, "loanTransactionType.writeOff"), //
+    @JsonProperty("Rescheduling")
     MARKED_FOR_RESCHEDULING(7, "loanTransactionType.marked.for.rescheduling"), //
     /**
      * This type of transactions is allowed on written-off loans where mfi still attempts to recover payments from
      * applicant after writing-off.
      */
+    @JsonProperty("RecoveryRepayment")
     RECOVERY_REPAYMENT(8, "loanTransactionType.recoveryRepayment"), //
+    @JsonProperty("WaiveCharges")
     WAIVE_CHARGES(9, "loanTransactionType.waiveCharges"), //
     /**
      * Transaction represents an Accrual (For either interest, charge or a penalty
      **/
+    @JsonProperty("Accrual")
     ACCRUAL(10, "loanTransactionType.accrual"), //
 
     /***
      * A Loan Transfer involves two steps, first a "initiate" Loan transfer transaction done by the Source branch
      * followed by a "complete" loan transaction initiated by the destination branch
      **/
+    @JsonProperty("InitiateTransfer")
     INITIATE_TRANSFER(12, "loanTransactionType.initiateTransfer"), //
+    @JsonProperty("ApproveTransfer")
     APPROVE_TRANSFER(13, "loanTransactionType.approveTransfer"), //
+    @JsonProperty("WithdrawTransfer")
     WITHDRAW_TRANSFER(14, "loanTransactionType.withdrawTransfer"), //
+    @JsonProperty("RejcetTransfer")
     REJECT_TRANSFER(15, "loanTransactionType.rejectTransfer"), //
+    @JsonProperty("Refund")
     REFUND(16, "loanTransactionType.refund"), //
+    @JsonProperty("ChargePayment")
     CHARGE_PAYMENT(17, "loanTransactionType.chargePayment"), //
+    @JsonProperty("RefundForActiveLoan")
     REFUND_FOR_ACTIVE_LOAN(18, "loanTransactionType.refund"), //
+    @JsonProperty("IncomePosting")
     INCOME_POSTING(19, "loanTransactionType.incomePosting");
 
     private final Integer value;

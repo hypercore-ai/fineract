@@ -1155,18 +1155,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                             if (!excludePastUndisbursed || (excludePastUndisbursed
                                     && (data.isDisbursed() || !data.disbursementDate().isBefore(LocalDate.now(ZoneId.systemDefault()))))) {
                                 principal = principal.add(data.amount());
-                                LoanSchedulePeriodData periodData = null;
-                                if (data.getChargeAmount() == null) {
-                                    periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
-                                            BigDecimal.ZERO, data.isDisbursed());
-                                } else {
-                                    periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
-                                            data.getChargeAmount(), data.isDisbursed());
-                                }
-                                if (periodData != null) {
-                                    periods.add(periodData);
-                                }
                                 this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
+                                BigDecimal charge = data.getChargeAmount() == null ? BigDecimal.ZERO : data.getChargeAmount();
+                                LoanSchedulePeriodData periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(),
+                                        data.amount(), charge, data.isDisbursed());
+                                periods.add(periodData);
                             }
                         }
                     }

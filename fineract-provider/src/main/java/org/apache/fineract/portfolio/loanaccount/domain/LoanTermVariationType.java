@@ -18,18 +18,33 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum LoanTermVariationType {
 
     INVALID(0, "loanTermType.invalid"), //
+    @JsonProperty("EMIAmount")
     EMI_AMOUNT(1, "loanTermType.emiAmount"), //
+    @JsonProperty("InterestRate")
     INTEREST_RATE(2, "loanTermType.interestRate"), //
+    @JsonProperty("Principal")
     PRINCIPAL_AMOUNT(3, "loanTermType.principalAmount"), //
+    @JsonProperty("DueDate")
     DUE_DATE(4, "loanTermType.dueDate"), //
+    @JsonProperty("InsertInstallment")
     INSERT_INSTALLMENT(5, "loanTermType.insertInstallment"), //
-    DELETE_INSTALLMENT(6, "loanTermType.deleteInstallment"), GRACE_ON_INTEREST(7, "loanTermType.graceOnInterest"), GRACE_ON_PRINCIPAL(8,
-            "loanTermType.graceOnPrincipal"), EXTEND_REPAYMENT_PERIOD(9,
-                    "loanTermType.extendRepaymentPeriod"), INTEREST_RATE_FROM_INSTALLMENT(10,
-                            "loanTermType.interestRateFromInstallment"), OVERRIDE_INTEREST_RATE(11, "loanTermType.overrideInterestRate");
+    @JsonProperty("DeleteInstallment")
+    DELETE_INSTALLMENT(6, "loanTermType.deleteInstallment"), //
+    @JsonProperty("GraceOnInterest")
+    GRACE_ON_INTEREST(7, "loanTermType.graceOnInterest"), //
+    @JsonProperty("GraceOnPrincipal")
+    GRACE_ON_PRINCIPAL(8, "loanTermType.graceOnPrincipal"), //
+    @JsonProperty("ExtendRepaymentPeriod")
+    EXTEND_REPAYMENT_PERIOD(9, "loanTermType.extendRepaymentPeriod"), //
+    @JsonProperty("InterestRateFromInstallment")
+    INTEREST_RATE_FROM_INSTALLMENT(10, "loanTermType.interestRateFromInstallment"), //
+    @JsonProperty("OverrideInterestRate")
+    OVERRIDE_INTEREST_RATE(11, "loanTermType.overrideInterestRate"); //
 
     private final Integer value;
     private final String code;

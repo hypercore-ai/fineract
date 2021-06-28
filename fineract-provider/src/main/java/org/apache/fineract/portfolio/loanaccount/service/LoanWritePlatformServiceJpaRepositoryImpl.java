@@ -1450,11 +1450,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         boolean reprocessRequired = true;
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
-            if (isAppliedOnBackDate && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
-
-                runScheduleRecalculation(loan, recalculateFrom);
-                reprocessRequired = false;
-            }
+            runScheduleRecalculation(loan, recalculateFrom);
+            reprocessRequired = false;
             updateOriginalSchedule(loan);
         }
         if (reprocessRequired) {

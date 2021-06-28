@@ -124,4 +124,8 @@ public final class LoanScheduleModel {
         return this.totalInterestCharged;
     }
 
+    @Override
+    public String toString() {
+        return "LoanScheduleModel";
+    }
 }

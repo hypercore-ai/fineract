@@ -653,22 +653,6 @@ public class LoanScheduleAssembler {
                 && disbursementDetails.stream().anyMatch(disbursement -> disbursement.actualDisbursementDate() != null);
 
         LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
-        if (loanApplicationTerms.isEqualAmortization()) {
-            if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
-                final LoanScheduleGenerator decliningLoanScheduleGenerator = this.loanScheduleFactory
-                        .create(InterestMethod.DECLINING_BALANCE);
-                LoanScheduleModel loanSchedule = decliningLoanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO,
-                        activeNotDisbursed);
-
-                loanApplicationTerms
-                        .updateTotalInterestDue(Money.of(loanApplicationTerms.getCurrency(), loanSchedule.getTotalInterestCharged()));
-
-            }
-            loanScheduleGenerator = this.loanScheduleFactory.create(InterestMethod.FLAT);
-        } else {
-            loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
-        }
-
         return loanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO, activeNotDisbursed);
     }
 
