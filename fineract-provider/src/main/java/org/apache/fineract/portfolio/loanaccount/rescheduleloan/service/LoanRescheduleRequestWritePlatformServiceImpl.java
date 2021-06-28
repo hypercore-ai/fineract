@@ -486,14 +486,17 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
         if (rescheduleFromDate != null && graceOnPrincipal != null) {
             final Integer termType = LoanTermVariationType.GRACE_ON_PRINCIPAL.getValue();
-            LoanTermVariations parent = null;
-            parent = createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings,
-                    isActive, isSpecificToInstallment, BigDecimal.valueOf(graceOnPrincipal), parent, null);
+            // LoanTermVariations parent = null;
+            // parent =
+            createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
+                    isSpecificToInstallment, BigDecimal.valueOf(graceOnPrincipal), null, null);
 
-            BigDecimal extraTermsBasedOnGracePeriods = BigDecimal.valueOf(graceOnPrincipal);
-            createLoanTermVariations(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue(), loan, rescheduleFromDate, dueDate,
-                    loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment, extraTermsBasedOnGracePeriods, parent,
-                    null);
+            // BigDecimal extraTermsBasedOnGracePeriods = BigDecimal.valueOf(graceOnPrincipal);
+            // createLoanTermVariations(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue(), loan,
+            // rescheduleFromDate, dueDate,
+            // loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment,
+            // extraTermsBasedOnGracePeriods, parent,
+            // null);
 
         }
 

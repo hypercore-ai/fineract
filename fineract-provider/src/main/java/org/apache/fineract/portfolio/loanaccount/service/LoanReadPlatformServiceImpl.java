@@ -1155,18 +1155,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                             if (!excludePastUndisbursed || (excludePastUndisbursed
                                     && (data.isDisbursed() || !data.disbursementDate().isBefore(LocalDate.now(ZoneId.systemDefault()))))) {
                                 principal = principal.add(data.amount());
-                                LoanSchedulePeriodData periodData = null;
-                                if (data.getChargeAmount() == null) {
-                                    periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
-                                            BigDecimal.ZERO, data.isDisbursed());
-                                } else {
-                                    periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
-                                            data.getChargeAmount(), data.isDisbursed());
-                                }
-                                if (periodData != null) {
-                                    periods.add(periodData);
-                                }
                                 this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
+                                BigDecimal charge = data.getChargeAmount() == null ? BigDecimal.ZERO : data.getChargeAmount();
+                                LoanSchedulePeriodData periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(),
+                                        data.amount(), charge, data.isDisbursed());
+                                periods.add(periodData);
                             }
                         }
                     }
@@ -1596,7 +1589,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private static final class LoanTermVariationsMapper implements RowMapper<LoanTermVariationsData> {
 
         public String schema() {
-            return "tv.id as id,tv.applicable_date as variationApplicableFrom,tv.end_date as endDate,tv.created_date as createdDate,tv.decimal_value as decimalValue, tv.date_value as dateValue, tv.is_specific_to_installment as isSpecificToInstallment "
+            return "tv.id as id,tv.term_type termType ,tv.applicable_date as variationApplicableFrom,tv.end_date as endDate,tv.created_date as createdDate,tv.decimal_value as decimalValue, tv.date_value as dateValue, tv.is_specific_to_installment as isSpecificToInstallment "
                     + "from m_loan_term_variations tv";
         }
 
@@ -1609,10 +1602,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal decimalValue = rs.getBigDecimal("decimalValue");
             final LocalDate dateValue = JdbcSupport.getLocalDate(rs, "dateValue");
             final boolean isSpecificToInstallment = rs.getBoolean("isSpecificToInstallment");
+            final Integer termType = rs.getInt("termType");
 
             final LoanTermVariationsData loanTermVariationsData = new LoanTermVariationsData(id,
-                    LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT), variationApplicableFrom, decimalValue, dateValue,
-                    isSpecificToInstallment, endDate, createdDate);
+                    LoanEnumerations.loanvariationType(LoanTermVariationType.fromInt(termType)), variationApplicableFrom, decimalValue,
+                    dateValue, isSpecificToInstallment, endDate, createdDate);
             return loanTermVariationsData;
         }
 

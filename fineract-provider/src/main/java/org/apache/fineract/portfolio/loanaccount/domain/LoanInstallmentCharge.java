@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -36,7 +37,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
     private LoanCharge loancharge;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "loan_schedule_id", nullable = false)
     private LoanRepaymentScheduleInstallment installment;
 

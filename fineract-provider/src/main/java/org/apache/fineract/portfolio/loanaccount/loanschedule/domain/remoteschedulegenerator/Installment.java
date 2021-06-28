@@ -29,19 +29,27 @@ public class Installment {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate obligationMetOnDate;
     private double disbursementFees;
+    private boolean isActual;
+    private double outstandingPrincipalBalance;
+
+    public Installment() {
+        super();
+    }
 
     public double getOutstandingPrincipalBalance() {
         return outstandingPrincipalBalance;
     }
 
-    public void setOutstandingPrincipalBalance(double outstandingPrincipalBalance) {
-        this.outstandingPrincipalBalance = outstandingPrincipalBalance;
+    public boolean getIsActual() {
+        return isActual;
     }
 
-    private double outstandingPrincipalBalance;
+    public void setIsActual(boolean isActual) {
+        this.isActual = isActual;
+    }
 
-    public Installment() {
-        super();
+    public void setOutstandingPrincipalBalance(double outstandingPrincipalBalance) {
+        this.outstandingPrincipalBalance = outstandingPrincipalBalance;
     }
 
     public InstallmentType getType() {

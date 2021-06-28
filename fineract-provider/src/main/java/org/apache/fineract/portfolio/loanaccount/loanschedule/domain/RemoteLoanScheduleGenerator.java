@@ -49,6 +49,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesched
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Rate;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleResponse;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.ScheduleGenerationMode;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.TermVariation;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Transaction;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
@@ -71,8 +72,10 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
     public LoanScheduleModel generate(MathContext mc, LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges,
             HolidayDetailDTO holidayDetailDTO, boolean scheduleWithNoDisbursements) {
         LOG.info("Calling");
-        RemoteScheduleResponse response = this.builder.build().postForObject(this.remoteEngineGenerateScheduleEndpoint,
-                createRequest(loanApplicationTerms, loanCharges), RemoteScheduleResponse.class);
+        RemoteScheduleRequest request = createRequest(loanApplicationTerms, loanCharges);
+        request.setMode(ScheduleGenerationMode.Expected);
+        RemoteScheduleResponse response = this.builder.build().postForObject(this.remoteEngineGenerateScheduleEndpoint, request,
+                RemoteScheduleResponse.class);
 
         if (response != null) {
             LOG.info("Got remote generate response: installments:" + response.getInstallments().length);
@@ -89,6 +92,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
             LocalDate rescheduleFrom) {
         LOG.info("Calling");
         RemoteScheduleRequest request = createRequest(loanApplicationTerms, loan.charges());
+        request.setMode(ScheduleGenerationMode.Actual);
 
         request.setTransactions(loan.getLoanTransactions().stream().map(transaction -> {
             Transaction requestTransaction = new Transaction();
@@ -166,7 +170,8 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
                 Installment disbursement = new Installment();
                 disbursement.setType(InstallmentType.DISBURSEMENT);
                 disbursement.setAmount(datum.amount().doubleValue());
-                disbursement.setDate(datum.getExpectedDisbursementDate());
+                disbursement.setIsActual(datum.isDisbursed());
+                disbursement.setDate(datum.isDisbursed() ? datum.getActualDisbursementDate() : datum.getExpectedDisbursementDate());
                 return disbursement;
             }).toArray(Installment[]::new));
         } else {
@@ -272,6 +277,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
     private TermVariation loanTermVariationDataToTermVariation(LoanTermVariationsData termVariation) {
         TermVariation requestVariation = new TermVariation();
 
+        requestVariation.setCreatedDate(termVariation.getCreatedDate());
         requestVariation.setType(termVariation.getTermVariationType());
         requestVariation.setStartDate(termVariation.getTermApplicableFrom());
         requestVariation.setEndDate(termVariation.getEndDate());

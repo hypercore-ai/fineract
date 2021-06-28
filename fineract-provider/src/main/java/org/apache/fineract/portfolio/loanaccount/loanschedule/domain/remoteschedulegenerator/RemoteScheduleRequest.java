@@ -8,6 +8,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RemoteScheduleRequest {
 
+    private ScheduleGenerationMode mode;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDate;
     private double approvedAmount;
@@ -26,11 +27,19 @@ public class RemoteScheduleRequest {
     private Transaction[] transactions;
     private TermVariation[] termVariations;
 
+    public RemoteScheduleRequest() {}
+
     public LocalDate getStartDate() {
         return startDate;
     }
 
-    public RemoteScheduleRequest() {}
+    public ScheduleGenerationMode getMode() {
+        return mode;
+    }
+
+    public void setMode(ScheduleGenerationMode mode) {
+        this.mode = mode;
+    }
 
     public TermVariation[] getTermVariations() {
         return termVariations;

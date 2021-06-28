@@ -2,6 +2,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesche
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 
 public class TermVariation {
@@ -12,8 +13,8 @@ public class TermVariation {
     private LocalDate startDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate createdTimestamp;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'")
+    private LocalDateTime createdDate;
     private double newValue;
 
     public TermVariation() {}
@@ -30,12 +31,12 @@ public class TermVariation {
         this.newValue = newValue;
     }
 
-    public LocalDate getCreatedTimestamp() {
-        return createdTimestamp;
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
     }
 
-    public void setCreatedTimestamp(LocalDate createdTimestamp) {
-        this.createdTimestamp = createdTimestamp;
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
     }
 
     public LocalDate getEndDate() {
