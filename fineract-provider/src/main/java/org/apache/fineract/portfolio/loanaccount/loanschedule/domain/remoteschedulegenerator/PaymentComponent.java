@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum PaymentComponent {
 
-    Penalty("Penalty"), Fee("Fee"), Interest("Interest"), Principal("Principal");
+    Penalty("penalty"), Fee("fee"), Interest("interest"), Principal("principal");
 
     private final String value;
 

@@ -1402,7 +1402,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.APPROVE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
-        if (!changes.isEmpty()) {
+        if (!changes.isEmpty() || loan.shouldActivateOnApproval()) {
 
             // If loan approved amount less than loan demanded amount, then need
             // to recompute the schedule
@@ -1439,7 +1439,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             if (loan.shouldActivateOnApproval()) {
                 ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null);
-                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
+                loan.regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
             }
 
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);

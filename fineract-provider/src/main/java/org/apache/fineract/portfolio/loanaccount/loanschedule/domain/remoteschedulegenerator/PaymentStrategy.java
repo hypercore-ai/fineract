@@ -25,20 +25,29 @@ public class PaymentStrategy {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate fromDate;
-    private Strategy[] strategy;
+    private boolean allowPrincipalRestructuring;
+    private PaymentComponent[] componentsOrder;
 
     public PaymentStrategy() {}
 
+    public PaymentComponent[] getComponentsOrder() {
+        return componentsOrder;
+    }
+
+    public void setComponentsOrder(PaymentComponent[] componentsOrder) {
+        this.componentsOrder = componentsOrder;
+    }
+
+    public boolean isAllowPrincipalRestructuring() {
+        return allowPrincipalRestructuring;
+    }
+
+    public void setAllowPrincipalRestructuring(boolean allowInterestRecalculation) {
+        this.allowPrincipalRestructuring = allowInterestRecalculation;
+    }
+
     public LocalDate getFromDate() {
         return fromDate;
-    }
-
-    public Strategy[] getStrategy() {
-        return strategy;
-    }
-
-    public void setStrategy(Strategy[] strategy) {
-        this.strategy = strategy;
     }
 
     public void setFromDate(LocalDate fromDate) {
