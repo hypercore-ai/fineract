@@ -45,6 +45,8 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remotesched
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InstallmentComponent;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InstallmentType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.InterestCalculationMethod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.PaymentComponent;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.PaymentStrategy;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Period;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.Rate;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.remoteschedulegenerator.RemoteScheduleRequest;
@@ -203,6 +205,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
                 loanApplicationTerms.getInterestMethod() == InterestMethod.DECLINING_BALANCE ? InterestCalculationMethod.DecliningBalance
                         : InterestCalculationMethod.Flat);
 
+        LocalDate revolvingPeriodStartDate = loanApplicationTerms.getRevolvingPeriodStartDate();
         request.setFees(loanCharges.stream().filter(charge -> !charge.isPenaltyCharge()).map(charge -> {
             Fee fee = new Fee();
             if (charge.getId() != null) {
@@ -225,7 +228,6 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
 
             if (charge.getChargeCalculation() == ChargeCalculationType.PERCENT_OF_UNUTILIZED_AMOUNT) {
                 Period period = new Period();
-                LocalDate revolvingPeriodStartDate = loanApplicationTerms.getRevolvingPeriodStartDate();
                 if (revolvingPeriodStartDate == null) {
                     period.setStartDate(loanApplicationTerms.getSeedDate());
                 } else {
@@ -255,6 +257,28 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
         List<LoanTermVariationsData> exceptionData = loanApplicationTerms.getLoanTermVariations().getExceptionData();
         if (exceptionData.size() > 0) {
             request.setTermVariations(exceptionData.stream().map(this::loanTermVariationDataToTermVariation).toArray(TermVariation[]::new));
+        }
+
+        if (revolvingPeriodStartDate != null) {
+            PaymentComponent[] defaultComponentsOrder = new PaymentComponent[] { PaymentComponent.Penalty, PaymentComponent.Fee,
+                    PaymentComponent.Interest, PaymentComponent.Principal };
+
+            PaymentStrategy revolvingStrategy = new PaymentStrategy();
+            revolvingStrategy.setFromDate(revolvingPeriodStartDate);
+            revolvingStrategy.setAllowPrincipalRestructuring(true);
+            revolvingStrategy.setComponentsOrder(defaultComponentsOrder);
+
+            if (loanApplicationTerms.getRevolvingPeriodEndDate() != null) {
+                PaymentStrategy defaultStrategy = new PaymentStrategy();
+                defaultStrategy.setFromDate(loanApplicationTerms.getRevolvingPeriodEndDate());
+                defaultStrategy.setAllowPrincipalRestructuring(false);
+                defaultStrategy.setComponentsOrder(defaultComponentsOrder);
+
+                request.setPaymentStrategies(new PaymentStrategy[] { revolvingStrategy, defaultStrategy });
+            } else {
+                request.setPaymentStrategies(new PaymentStrategy[] { revolvingStrategy });
+            }
+
         }
 
         return request;
