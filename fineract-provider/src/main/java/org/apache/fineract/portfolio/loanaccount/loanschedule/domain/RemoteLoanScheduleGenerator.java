@@ -93,7 +93,7 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
             HolidayDetailDTO holidayDetailDTO, LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
             LocalDate rescheduleFrom) {
         LOG.info("Calling");
-        RemoteScheduleRequest request = createRequest(loanApplicationTerms, loan.charges());
+        RemoteScheduleRequest request = createRequest(loanApplicationTerms, loan.charges(), loan);
         request.setMode(ScheduleGenerationMode.Actual);
 
         request.setTransactions(loan.getLoanTransactions().stream().map(transaction -> {
@@ -158,6 +158,10 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
     }
 
     private RemoteScheduleRequest createRequest(LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges) {
+        return this.createRequest(loanApplicationTerms, loanCharges, null);
+    }
+
+    private RemoteScheduleRequest createRequest(LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges, Loan loan) {
         RemoteScheduleRequest request = new RemoteScheduleRequest();
 
         LocalDate startDate = loanApplicationTerms.getExpectedDisbursementDate();
@@ -184,6 +188,12 @@ public class RemoteLoanScheduleGenerator implements LoanScheduleGenerator {
                             : loanApplicationTerms.getPrincipal();
             disbursement.setAmount(principal.getAmount().doubleValue());
             disbursement.setDate(loanApplicationTerms.getExpectedDisbursementDate());
+
+            if (loan != null) {
+                disbursement.setDate(loan.isDisbursed() ? loan.getDisbursementDate() : loanApplicationTerms.getExpectedDisbursementDate());
+                disbursement.setIsActual(loan.isDisbursed());
+            }
+
             request.setDisbursements(new Installment[] { disbursement });
         }
 
